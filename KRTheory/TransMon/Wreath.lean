@@ -108,5 +108,53 @@ example :
   simp only [WreathMonoid.natCard, Nat.card_eq_fintype_card]
   rfl
 
+/-- The wreath product of transformation monoids [DKS §2.2]: the cascade
+of `S` driven by `T`. `noncomputable` only because `Fintype` of the
+function component needs `DecidableEq T.X`, which `TransMon` deliberately
+does not carry (spec §4.1); the algebra itself is computable and `rfl`
+still evaluates actions and products. -/
+noncomputable def wreath (S T : TransMon) : TransMon where
+  X := S.X × T.X
+  M := WreathMonoid S T
+  fintypeM := Fintype.ofFinite _
+  act p w := (S.act p.1 (w.left p.2), T.act p.2 w.right)
+  act_one p := by simp
+  act_mul p w w' := by simp [TransMon.act_mul]
+
+@[inherit_doc]
+scoped infixr:60 " ≀ " => TransMon.wreath
+
+/-- The action of `S ≀ T` unfolds componentwise: `S` acts on its state via
+`w.left` evaluated at the *current* `T`-state `p.2`, while `T` acts on its
+own state via `w.right`. -/
+@[simp] theorem wreath_act {S T : TransMon} (p : (S ≀ T).X) (w : (S ≀ T).M) :
+    (S ≀ T).act p w = (S.act p.1 (w.left p.2), T.act p.2 w.right) := rfl
+
+/-- Iterated wreath product over a list, right fold with base `trivialTM`:
+`wreathList [T₁, T₂, T₃] = T₁ ≀ (T₂ ≀ (T₃ ≀ trivialTM))`. Fixing the
+association once avoids an associativity isomorphism in every statement
+(spec §3.3). -/
+noncomputable def wreathList : List TransMon → TransMon :=
+  fun L => L.foldr wreath trivialTM
+
+/-- Folding over the empty list yields the trivial transformation monoid. -/
+@[simp] theorem wreathList_nil : wreathList [] = trivialTM := rfl
+
+/-- Unfolding one step of the right fold: `S` wreathed over the iterated
+wreath product of the rest of the list. -/
+@[simp] theorem wreathList_cons (S : TransMon) (L : List TransMon) :
+    wreathList (S :: L) = S ≀ wreathList L := rfl
+
+-- Sanity checks (spec §6). Action evaluation stays rfl-checkable even
+-- though `wreath` is noncomputable (defeq is unaffected).
+-- Guard: w.left must be evaluated at the CURRENT back-state p.2 = 2,
+-- giving (1 * id 2, 2*2) = (2, 1). A wrong definition evaluating w.left
+-- at the UPDATED state p.2·w.right = 4 = 1 would give (1 * id 1, 1) =
+-- (1, 1) ≠ (2, 1): this example kills that transposition.
+example :
+    ((regular (ZMod 3)) ≀ (regular (ZMod 3))).act ((1, 2) : ZMod 3 × ZMod 3)
+        ⟨fun y => y, (2 : ZMod 3)⟩ =
+      ((2, 1) : ZMod 3 × ZMod 3) := rfl
+
 end TransMon
 end KRTheory
