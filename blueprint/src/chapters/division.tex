@@ -1,0 +1,58 @@
+\chapter{Division}\label{ch:division}
+
+Division is the ``is at most as complicated as'' preorder of the theory:
+the Krohn--Rhodes theorem is a statement about division into wreath
+products.
+
+\begin{definition}[Monoid division; DKS §2.3]\label{def:mdiv}
+  \lean{KRTheory.MonoidDivides}
+  For monoids $M, N$: $M \prec_{\mathrm m} N$ iff $M$ is a quotient of a
+  submonoid of $N$, i.e.\ there are a submonoid $N' \le N$ and a
+  surjective monoid morphism $\psi : N' \twoheadrightarrow M$.
+\end{definition}
+
+\begin{lemma}[Preorder]\label{lem:mdiv-preorder}
+  \lean{KRTheory.MonoidDivides.refl, KRTheory.MonoidDivides.trans}
+  \uses{def:mdiv}
+  $\prec_{\mathrm m}$ is reflexive and transitive.
+\end{lemma}
+\begin{proof}
+  Reflexivity: $N' = N$, $\psi = \mathrm{id}$. Transitivity: given
+  $\psi : N' \twoheadrightarrow M$ (with $N' \le N$) and
+  $\chi : P' \twoheadrightarrow N$ (with $P' \le P$), let
+  $Q = \chi^{-1}(N') \le P'$, a submonoid of $P$; then
+  $\psi \circ \chi|_Q : Q \twoheadrightarrow M$ (surjective because
+  $\chi$ is onto $N$, so onto $N'$ from $Q$).
+\end{proof}
+
+\begin{definition}[Strong division; DKS §2.3]\label{def:sdiv}
+  \lean{KRTheory.TransMon.StrongDivides, KRTheory.TransMon.Covering}
+  \uses{def:transmon}
+  For transformation monoids $S = (X, M)$ and $T = (Y, N)$:
+  $S \prec T$ iff there are a submonoid $N' \le N$, a surjection
+  $\varphi : Y \twoheadrightarrow X$, and a surjective monoid morphism
+  $\psi : N' \twoheadrightarrow M$ with
+  $\varphi(y) \cdot \psi(n) = \varphi(y \cdot n)$ for all $y \in Y$,
+  $n \in N'$. The witnessing triple is a \emph{covering}.
+\end{definition}
+
+\begin{lemma}[Preorder]\label{lem:sdiv-preorder}
+  \lean{KRTheory.TransMon.StrongDivides.refl,
+        KRTheory.TransMon.StrongDivides.trans}
+  \uses{def:sdiv}
+  $\prec$ is reflexive and transitive.
+\end{lemma}
+\begin{proof}
+  Reflexivity: identity covering. Transitivity: compose the state
+  surjections, and pull the monoid data back exactly as in
+  Lemma~\ref{lem:mdiv-preorder}; equivariance is a two-step chase.
+\end{proof}
+
+\begin{lemma}[Glue]\label{lem:sdiv-mdiv}
+  \lean{KRTheory.TransMon.StrongDivides.monoidDivides}
+  \uses{def:sdiv,def:mdiv}
+  $(X, M) \prec (Y, N)$ implies $M \prec_{\mathrm m} N$.
+\end{lemma}
+\begin{proof}
+  Read $\psi$ off the covering and forget the states.
+\end{proof}

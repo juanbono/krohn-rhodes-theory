@@ -1,0 +1,27 @@
+\documentclass[11pt]{report}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[colorlinks=true]{hyperref}
+
+% leanblueprint-compatible macros (print fallbacks)
+\newcommand{\lean}[1]{\marginpar{\tiny\texttt{#1}}}
+\newcommand{\leanok}{\marginpar{\tiny$\checkmark$}}
+\newcommand{\uses}[1]{}
+\newcommand{\notready}{}
+
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\title{The Krohn--Rhodes Theorem in Lean 4\\\large Blueprint}
+\author{Juan Bono}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\input{content}
+\end{document}

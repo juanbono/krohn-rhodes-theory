@@ -1,0 +1,36 @@
+\chapter{Transformation monoids}\label{ch:transmon}
+
+\begin{definition}[Transformation monoid; DKS §2.1]\label{def:transmon}
+  \lean{KRTheory.TransMon}
+  A \emph{finite transformation monoid} $T = (X, M)$ consists of a finite
+  set $X$ (the \emph{states}), a finite monoid $M$, and a right action
+  $X \times M \to X$, written $x \cdot m$, satisfying $x \cdot 1 = x$ and
+  $x \cdot (mn) = (x \cdot m) \cdot n$.
+  We do \emph{not} require the action to be faithful.
+\end{definition}
+
+\begin{definition}[Faithfulness]\label{def:faithful}
+  \lean{KRTheory.TransMon.Faithful}\uses{def:transmon}
+  $T = (X,M)$ is \emph{faithful} if $x \cdot m = x \cdot n$ for all
+  $x \in X$ implies $m = n$.
+\end{definition}
+
+\begin{definition}[Trivial transformation monoid]\label{def:trivialTM}
+  \lean{KRTheory.TransMon.trivialTM}\uses{def:transmon}
+  $\mathbf{1} = (\{*\}, \{1\})$: one state, trivial monoid. It is the base
+  of iterated wreath products.
+\end{definition}
+
+\begin{definition}[Regular representation]\label{def:regular}
+  \lean{KRTheory.TransMon.regular}\uses{def:transmon}
+  For a finite monoid $M$, the transformation monoid $(M, M)$ where $M$
+  acts on itself by right multiplication: $x \cdot m = xm$.
+\end{definition}
+
+\begin{lemma}\label{lem:regular-faithful}
+  \lean{KRTheory.TransMon.regular_faithful}\uses{def:regular,def:faithful}
+  The regular representation is faithful.
+\end{lemma}
+\begin{proof}
+  If $xm = xn$ for all $x$, take $x = 1$.
+\end{proof}
