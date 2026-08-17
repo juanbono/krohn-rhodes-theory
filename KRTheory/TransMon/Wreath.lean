@@ -28,6 +28,10 @@ namespace WreathMonoid
 
 variable {S T : TransMon}
 
+/-- The twisted wreath product monoid structure: multiplying `w * w'`
+twists `w'`'s `left` component by first letting `w.right` act on the
+state before evaluating, while `right` just multiplies in `T.M`; the
+identity is `⟨fun _ => 1, 1⟩`. -/
 instance : Monoid (WreathMonoid S T) where
   mul w w' := ⟨fun y => w.left y * w'.left (T.act y w.right), w.right * w'.right⟩
   one := ⟨fun _ => 1, 1⟩
@@ -51,23 +55,30 @@ instance : Monoid (WreathMonoid S T) where
     · show w.right * (1 : T.M) = w.right
       simp
 
+/-- The `left` component of a product: `w`'s value at `y`, times `w'`'s
+value at `y` after `w.right` acts on it. -/
 @[simp] theorem mul_left (w w' : WreathMonoid S T) (y : T.X) :
     (w * w').left y = w.left y * w'.left (T.act y w.right) := rfl
 
+/-- The `right` component of a product is just the product in `T.M`. -/
 @[simp] theorem mul_right (w w' : WreathMonoid S T) :
     (w * w').right = w.right * w'.right := rfl
 
+/-- The `left` component of the identity is constantly `1`. -/
 @[simp] theorem one_left (y : T.X) : (1 : WreathMonoid S T).left y = 1 := rfl
 
+/-- The `right` component of the identity is `1 : T.M`. -/
 @[simp] theorem one_right : (1 : WreathMonoid S T).right = (1 : T.M) := rfl
 
 /-- `WreathMonoid` is, as a type, the product `(T.X → S.M) × T.M`. -/
 def equivProd : WreathMonoid S T ≃ (T.X → S.M) × T.M where
   toFun w := (w.left, w.right)
   invFun p := ⟨p.1, p.2⟩
-  left_inv w := rfl
-  right_inv p := rfl
+  left_inv _ := rfl
+  right_inv _ := rfl
 
+/-- `WreathMonoid S T` is finite, via the equivalence `equivProd` with the
+finite product `(T.X → S.M) × T.M`. -/
 instance : Finite (WreathMonoid S T) := Finite.of_equiv _ equivProd.symm
 
 /-- `|S ≀ T| = |S.M| ^ |T.X| * |T.M|` at the monoid level. -/
