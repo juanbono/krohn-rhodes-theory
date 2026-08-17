@@ -1,4 +1,5 @@
 import Mathlib.Tactic
+import Mathlib.Data.ZMod.Basic
 
 /-!
 # Transformation monoids
@@ -51,6 +52,37 @@ example : Fintype.card trivialTM.X = 1 := rfl
 example : Fintype.card trivialTM.M = 1 := rfl
 example (x : trivialTM.X) (m : trivialTM.M) : trivialTM.act x m = x := by
   cases x; rfl
+
+/-- `T.Faithful`: the action distinguishes monoid elements. A `def`, not
+a class — bundled values make instance search unreliable (spec §4.1). -/
+def Faithful (T : TransMon) : Prop :=
+  ∀ ⦃m n : T.M⦄, (∀ x : T.X, T.act x m = T.act x n) → m = n
+
+theorem trivialTM_faithful : trivialTM.Faithful := by
+  intro m n _
+  rfl
+
+/-- The regular representation `(M, M)`: `M` acting on itself by right
+multiplication. Always faithful; the bridge from abstract monoids to
+transformation monoids. [DKS §2.1] -/
+def regular (M : Type) [Monoid M] [Fintype M] : TransMon where
+  X := M
+  M := M
+  act x m := x * m
+  act_one := mul_one
+  act_mul x m n := (mul_assoc x m n).symm
+
+theorem regular_faithful (M : Type) [Monoid M] [Fintype M] :
+    (regular M).Faithful := by
+  show ∀ ⦃m n : M⦄, (∀ x : M, (regular M).act x m = (regular M).act x n) → m = n
+  intro m n h
+  have h1 : (1 : M) * m = (1 : M) * n := h 1
+  simpa using h1
+
+-- Sanity checks (spec §6).
+example : Fintype.card (regular (ZMod 3)).X = 3 := rfl
+example : (regular (ZMod 3)).act (2 : ZMod 3) (2 : ZMod 3) = (1 : ZMod 3) := rfl  -- 2·2 = 4 ≡ 1
+example : (regular (ZMod 4)).act (3 : ZMod 4) (2 : ZMod 4) = (2 : ZMod 4) := rfl  -- 3·2 = 6 ≡ 2
 
 end TransMon
 end KRTheory
