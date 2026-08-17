@@ -5,7 +5,7 @@ so the induction runs through monoids with all constant maps adjoined
 [DKS §2.4].
 
 \begin{definition}[Bar]\label{def:bar}
-  \lean{KRTheory.TransMon.BarMonoid, KRTheory.TransMon.bar}
+  \lean{KRTheory.TransMon.BarMonoid, KRTheory.TransMon.bar}\leanok
   \uses{def:transmon}
   For $T = (X, M)$, $\overline{T} := (X, \overline{M})$ where
   $\overline{M} = M \sqcup \{\mathrm{reset}_x : x \in X\}$ with
@@ -18,7 +18,7 @@ so the induction runs through monoids with all constant maps adjoined
 \end{definition}
 
 \begin{lemma}[Bar absorbs the original]\label{lem:bar-divides}
-  \lean{KRTheory.TransMon.bar_divides}\uses{def:bar,def:sdiv}
+  \lean{KRTheory.TransMon.bar_divides}\leanok\uses{def:bar,def:sdiv}
   $T \prec \overline{T}$.
 \end{lemma}
 \begin{proof}

@@ -1,7 +1,7 @@
 \chapter{Reset monoids and the flip-flop}\label{ch:reset}
 
 \begin{definition}[Reset monoid]\label{def:resets}
-  \lean{KRTheory.TransMon.Resets, KRTheory.TransMon.resetMonoid}
+  \lean{KRTheory.TransMon.Resets, KRTheory.TransMon.resetMonoid}\leanok
   \uses{def:transmon}
   $U(X) := (X, \{\mathrm{id}\} \cup \{\mathrm{to}_x : x \in X\})$ with
   $a \cdot \mathrm{to}_y = \mathrm{to}_y$ and $a \cdot \mathrm{id} = a$;
@@ -9,14 +9,14 @@
 \end{definition}
 
 \begin{definition}[Flip-flop]\label{def:flipflop}
-  \lean{KRTheory.TransMon.flipFlop}\uses{def:resets}
+  \lean{KRTheory.TransMon.flipFlop}\leanok\uses{def:resets}
   The flip-flop is $U(\mathbf{2})$: two states, three elements — the
   unique non-group prime of Krohn--Rhodes theory. The monoid part of
   the wreath product of two flip-flops has $3^2 \cdot 3 = 27$ elements.
 \end{definition}
 
 \begin{lemma}[Split]\label{lem:reset-split}
-  \lean{KRTheory.TransMon.reset_split}
+  \lean{KRTheory.TransMon.reset_split}\leanok
   \uses{def:resets,def:flipflop,def:wreath,def:sdiv}
   For finite $X$, $x_0 \in X$ with $Y := X \setminus \{x_0\}$ nonempty:
   $U(X) \prec U(Y) \wr U(\mathbf 2)$.
@@ -34,7 +34,8 @@
 \end{proof}
 
 \begin{lemma}[DKS 2.12]\label{lem:reset-div-flipflops}
-  \lean{KRTheory.TransMon.reset_div_flipFlops}
+  \lean{KRTheory.TransMon.reset_div_flipFlops,
+        KRTheory.TransMon.resetMonoid_div_flipFlop_of_card_one}\leanok
   \uses{lem:reset-split,lem:wreath-mono,lem:wreathList-append,
         lem:wreath-trivial,def:wreathList}
   For finite nonempty $X$ there is $n$ with

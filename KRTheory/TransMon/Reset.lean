@@ -342,5 +342,88 @@ example : resetMonoid Bool ≺ resetMonoid {b : Bool // b ≠ true} ≀ flipFlop
   have : Nonempty {b : Bool // b ≠ true} := ⟨⟨false, by decide⟩⟩
   convert reset_split Bool true
 
+/-!
+### DKS Lemma 2.12: division into flip-flops
+
+Strong induction on `|X|` via `reset_split`: peel off one state at a
+time into a flip-flop factor, until a single state remains (the base
+case, collapsed directly onto the flip-flop).
+-/
+
+/-- A one-point reset monoid divides the flip-flop: collapse both
+resets onto the point. Base case of DKS 2.12. -/
+theorem resetMonoid_div_flipFlop_of_card_one (X : Type) [Fintype X]
+    (h : Fintype.card X = 1) : resetMonoid X ≺ flipFlop := by
+  obtain ⟨pt, hpt⟩ := Fintype.card_eq_one_iff.mp h
+  exact ⟨{ toSubmonoid := ⊤,
+           stateMap := fun _ => pt,
+           monoidMap :=
+             { toFun := fun r => match r.1 with
+                 | .id => .id
+                 | .to _ => .to pt,
+               map_one' := rfl,
+               map_mul' := fun a b => by
+                 obtain ⟨av, -⟩ := a
+                 obtain ⟨bv, -⟩ := b
+                 rcases av with _ | x <;> rcases bv with _ | y <;> rfl },
+           stateMap_surj := fun x => ⟨(default : Bool), (hpt x).symm⟩,
+           monoidMap_surj := fun r => by
+             rcases r with _ | y
+             · exact ⟨1, rfl⟩
+             · exact ⟨⟨.to true, trivial⟩, by rw [hpt y]; rfl⟩,
+           equivariant := fun _b n => by
+             obtain ⟨nv, -⟩ := n
+             rcases nv with _ | z <;> rfl }⟩
+
+/-- DKS Lemma 2.12: every reset monoid on a nonempty finite state set
+divides an iterated wreath product of flip-flops. Existential in the
+factor count; nonemptiness is necessary (empty-state monoids divide
+only empty-state ones). -/
+theorem reset_div_flipFlops (X : Type) [Fintype X] [Nonempty X] :
+    ∃ n : ℕ, resetMonoid X ≺ wreathList (List.replicate n flipFlop) := by
+  generalize hcard : Fintype.card X = N
+  induction N using Nat.strong_induction_on generalizing X with
+  | _ N ih =>
+    classical
+    rcases Nat.lt_or_ge N 2 with hN | hN
+    · -- N = 1 (N = 0 contradicts Nonempty: Fintype.card_pos gives card ≥ 1)
+      have h1 : Fintype.card X = 1 := by
+        have := Fintype.card_pos (α := X); omega
+      -- `List.replicate 1 flipFlop = [flipFlop]` is definitional, so the
+      -- singleton lemma's type matches the goal directly.
+      exact ⟨1, (resetMonoid_div_flipFlop_of_card_one X h1).trans
+        (div_wreathList_singleton flipFlop)⟩
+    · obtain ⟨x₀⟩ := ‹Nonempty X›
+      have : Nonempty {x : X // x ≠ x₀} := by
+        have h2 : 1 < Fintype.card X := by omega
+        obtain ⟨y, hy⟩ := Fintype.exists_ne_of_one_lt_card h2 x₀
+        exact ⟨⟨y, hy⟩⟩
+      obtain ⟨n, hn⟩ := ih (Fintype.card {x : X // x ≠ x₀})
+        (by
+          have : Fintype.card {x : X // x ≠ x₀} < Fintype.card X :=
+            Fintype.card_subtype_lt (x := x₀) (by simp)
+          omega)
+        {x : X // x ≠ x₀} rfl
+      refine ⟨n + 1, ?_⟩
+      -- Rewrite the GOAL first (no Trans instance exists for mixing `=`
+      -- into a `≺` calc): replicate (n+1) a = replicate n a ++ [a].
+      rw [List.replicate_succ']
+      calc resetMonoid X
+          ≺ resetMonoid {x : X // x ≠ x₀} ≀ flipFlop := reset_split X x₀
+        _ ≺ wreathList (List.replicate n flipFlop) ≀
+              wreathList [flipFlop] :=
+            hn.wreath (div_wreathList_singleton flipFlop)
+        _ ≺ wreathList (List.replicate n flipFlop ++ [flipFlop]) :=
+            wreathList_append _ _
+
+-- Acceptance sweep (spec §7 row 4): DKS 2.12 exercised end-to-end.
+example : ∃ n, resetMonoid (Fin 5) ≺ wreathList (List.replicate n flipFlop) :=
+  reset_div_flipFlops (Fin 5)
+example : ∃ n, flipFlop ≺ wreathList (List.replicate n flipFlop) :=
+  reset_div_flipFlops Bool
+-- The factor list is all-flip-flops by construction — the shape M8 needs:
+example (n : ℕ) (F : TransMon) (hF : F ∈ List.replicate n flipFlop) :
+    F = flipFlop := List.eq_of_mem_replicate hF
+
 end TransMon
 end KRTheory
