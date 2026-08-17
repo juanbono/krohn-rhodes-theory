@@ -6,7 +6,7 @@ $S$ is driven by a function of the back machine's current state. It is
 the composition operation of the Krohn--Rhodes theorem.
 
 \begin{definition}[Wreath product; DKS §2.2]\label{def:wreath}
-  \lean{KRTheory.TransMon.WreathMonoid, KRTheory.TransMon.wreath}
+  \lean{KRTheory.TransMon.WreathMonoid, KRTheory.TransMon.wreath}\leanok
   \uses{def:transmon}
   For $S = (X, M)$ and $T = (Y, N)$, the wreath product is
   $S \wr T := (X \times Y,\; W)$ where $W$ has carrier $M^Y \times N$,
@@ -18,7 +18,7 @@ the composition operation of the Krohn--Rhodes theorem.
 \end{definition}
 
 \begin{lemma}[Cardinality]\label{lem:wreath-card}
-  \lean{KRTheory.TransMon.WreathMonoid.natCard}\uses{def:wreath}
+  \lean{KRTheory.TransMon.WreathMonoid.natCard}\leanok\uses{def:wreath}
   $|W| = |M|^{|Y|}\cdot|N|$.
 \end{lemma}
 \begin{proof}
@@ -26,7 +26,7 @@ the composition operation of the Krohn--Rhodes theorem.
 \end{proof}
 
 \begin{definition}[Iterated wreath product]\label{def:wreathList}
-  \lean{KRTheory.TransMon.wreathList}\uses{def:wreath,def:trivialTM}
+  \lean{KRTheory.TransMon.wreathList}\leanok\uses{def:wreath,def:trivialTM}
   For a list $[T_1, \dots, T_k]$ of transformation monoids,
   $\mathrm{wreathList}$ is the right fold
   $T_1 \wr (T_2 \wr (\cdots \wr (T_k \wr \mathbf{1})))$.
@@ -36,7 +36,8 @@ the composition operation of the Krohn--Rhodes theorem.
 
 \begin{lemma}[Trivial absorption]\label{lem:wreath-trivial}
   \lean{KRTheory.TransMon.trivial_wreath_div,
-        KRTheory.TransMon.div_wreath_trivial}
+        KRTheory.TransMon.div_wreath_trivial,
+        KRTheory.TransMon.div_wreathList_singleton}\leanok
   \uses{def:wreath,def:trivialTM,def:sdiv}
   $\mathbf{1} \wr T \prec T$ and $S \prec S \wr \mathbf{1}$.
 \end{lemma}
@@ -49,7 +50,7 @@ the composition operation of the Krohn--Rhodes theorem.
 
 \begin{lemma}[Monotonicity]\label{lem:wreath-mono}
   \lean{KRTheory.TransMon.Covering.wreath,
-        KRTheory.TransMon.StrongDivides.wreath}
+        KRTheory.TransMon.StrongDivides.wreath}\leanok
   \uses{def:wreath,def:sdiv}
   If $S_1 \prec T_1$ and $S_2 \prec T_2$ then
   $S_1 \wr S_2 \prec T_1 \wr T_2$.
@@ -71,7 +72,7 @@ the composition operation of the Krohn--Rhodes theorem.
 \end{proof}
 
 \begin{lemma}[Associativity up to division]\label{lem:wreath-assoc}
-  \lean{KRTheory.TransMon.wreath_assoc_div}\uses{def:wreath,def:sdiv}
+  \lean{KRTheory.TransMon.wreath_assoc_div}\leanok\uses{def:wreath,def:sdiv}
   $(P \wr Q) \wr R \;\prec\; P \wr (Q \wr R)$.
 \end{lemma}
 \begin{proof}
@@ -83,7 +84,7 @@ the composition operation of the Krohn--Rhodes theorem.
 \end{proof}
 
 \begin{lemma}[Append]\label{lem:wreathList-append}
-  \lean{KRTheory.TransMon.wreathList_append}
+  \lean{KRTheory.TransMon.wreathList_append}\leanok
   \uses{def:wreathList,lem:wreath-trivial,lem:wreath-mono,lem:wreath-assoc,lem:sdiv-preorder}
   $\mathrm{wreathList}(L_1) \wr \mathrm{wreathList}(L_2) \prec
    \mathrm{wreathList}(L_1 \mathbin{+\!\!+} L_2)$.

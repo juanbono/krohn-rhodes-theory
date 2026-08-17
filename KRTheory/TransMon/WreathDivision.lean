@@ -13,6 +13,11 @@ induction (spec §3.3, §3.9).
 namespace KRTheory
 namespace TransMon
 
+/-- Registers `≺` with the `calc` tactic, so chains of strong-division
+steps can be written as `calc`-blocks instead of explicit `.trans`
+composition. -/
+instance : Trans StrongDivides StrongDivides StrongDivides := ⟨StrongDivides.trans⟩
+
 /-- Absorb a trivial front factor: `trivialTM ≀ T ≺ T`. -/
 theorem trivial_wreath_div (T : TransMon) : trivialTM ≀ T ≺ T :=
   ⟨{ toSubmonoid := ⊤
@@ -196,6 +201,26 @@ example : trivialTM ≀ trivialTM ≺ trivialTM := trivial_wreath_div _
 example : regular (ZMod 2) ≺ wreathList [regular (ZMod 2)] :=
   div_wreathList_singleton _
 example (P Q R : TransMon) : (P ≀ Q) ≀ R ≺ P ≀ (Q ≀ R) := wreath_assoc_div P Q R
+
+/-- The append lemma: gluing two iterated wreath decompositions.
+This is the lemma that assembles recursive Krohn–Rhodes decompositions
+(spec §3.9). -/
+theorem wreathList_append (L₁ L₂ : List TransMon) :
+    wreathList L₁ ≀ wreathList L₂ ≺ wreathList (L₁ ++ L₂) := by
+  induction L₁ with
+  | nil => simpa using trivial_wreath_div (wreathList L₂)
+  | cons S L₁ ih =>
+    -- (S ≀ WL₁) ≀ WL₂  ≺  S ≀ (WL₁ ≀ WL₂)  ≺  S ≀ WL(L₁ ++ L₂)
+    calc (wreathList (S :: L₁)) ≀ wreathList L₂
+        ≺ S ≀ (wreathList L₁ ≀ wreathList L₂) := by
+          simpa using wreath_assoc_div S (wreathList L₁) (wreathList L₂)
+      _ ≺ wreathList ((S :: L₁) ++ L₂) := by
+          simpa using (StrongDivides.refl S).wreath ih
+
+-- Milestone acceptance (spec §7 row 3) exercised end-to-end:
+example (A B C : TransMon) (h : A ≺ B ≀ C) (hB : B ≺ wreathList [B])
+    (hC : C ≺ wreathList [C]) : A ≺ wreathList [B, C] :=
+  (h.trans (hB.wreath hC)).trans (by simpa using wreathList_append [B] [C])
 
 end TransMon
 end KRTheory
