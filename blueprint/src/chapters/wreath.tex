@@ -1,0 +1,95 @@
+\chapter{Wreath products}\label{ch:wreath}
+
+The wreath product composes two transformation monoids into a cascade:
+the back machine $T$ reads the input directly, while the front machine
+$S$ is driven by a function of the back machine's current state. It is
+the composition operation of the Krohn--Rhodes theorem.
+
+\begin{definition}[Wreath product; DKS §2.2]\label{def:wreath}
+  \lean{KRTheory.TransMon.WreathMonoid, KRTheory.TransMon.wreath}
+  \uses{def:transmon}
+  For $S = (X, M)$ and $T = (Y, N)$, the wreath product is
+  $S \wr T := (X \times Y,\; W)$ where $W$ has carrier $M^Y \times N$,
+  multiplication
+  \[ (f, n)(g, k) \;=\; \bigl(y \mapsto f(y)\,g(y \cdot n),\; nk\bigr), \]
+  and right action $(x, y) \cdot (f, n) = (x \cdot f(y),\; y \cdot n)$.
+  In a product the left factor acts first, so $g$ is evaluated at the
+  state \emph{after} $n$ has acted.
+\end{definition}
+
+\begin{lemma}[Cardinality]\label{lem:wreath-card}
+  \lean{KRTheory.TransMon.WreathMonoid.natCard}\uses{def:wreath}
+  $|W| = |M|^{|Y|}\cdot|N|$.
+\end{lemma}
+\begin{proof}
+  $W$ is (as a set) the product $M^Y \times N$.
+\end{proof}
+
+\begin{definition}[Iterated wreath product]\label{def:wreathList}
+  \lean{KRTheory.TransMon.wreathList}\uses{def:wreath,def:trivialTM}
+  For a list $[T_1, \dots, T_k]$ of transformation monoids,
+  $\mathrm{wreathList}$ is the right fold
+  $T_1 \wr (T_2 \wr (\cdots \wr (T_k \wr \mathbf{1})))$.
+  Fixing one association avoids carrying an associativity isomorphism
+  through every statement.
+\end{definition}
+
+\begin{lemma}[Trivial absorption]\label{lem:wreath-trivial}
+  \lean{KRTheory.TransMon.trivial_wreath_div,
+        KRTheory.TransMon.div_wreath_trivial}
+  \uses{def:wreath,def:trivialTM,def:sdiv}
+  $\mathbf{1} \wr T \prec T$ and $S \prec S \wr \mathbf{1}$.
+\end{lemma}
+\begin{proof}
+  For the first: the monoid part of $\mathbf{1} \wr T$ is $N$ in
+  disguise; cover with the identity data. For the second: project
+  states by $\mathrm{fst}$ and evaluate the function component at the
+  unique point.
+\end{proof}
+
+\begin{lemma}[Monotonicity]\label{lem:wreath-mono}
+  \lean{KRTheory.TransMon.Covering.wreath,
+        KRTheory.TransMon.StrongDivides.wreath}
+  \uses{def:wreath,def:sdiv}
+  If $S_1 \prec T_1$ and $S_2 \prec T_2$ then
+  $S_1 \wr S_2 \prec T_1 \wr T_2$.
+\end{lemma}
+\begin{proof}
+  Let $(\varphi_i, N_i', \psi_i)$ witness $S_i \prec T_i$. Cover
+  $S_1 \wr S_2$ by the submonoid of pairs $(F, n)$ with
+  $n \in N_2'$, $F(y) \in N_1'$ for all $y$, and $F$
+  \emph{fiber-compatible}: $\varphi_2(y) = \varphi_2(y')$ implies
+  $\psi_1(F(y)) = \psi_1(F(y'))$. Closure under products uses the
+  equivariance of the second covering. Fix a section
+  $\sigma$ of $\varphi_2$; map $(F, n) \mapsto
+  (s \mapsto \psi_1(F(\sigma(s))),\, \psi_2(n))$. The morphism
+  property reduces, via equivariance and fiber-compatibility, to
+  $\varphi_2(\sigma(s) \cdot n) = \varphi_2(\sigma(s \cdot \psi_2 n))$;
+  surjectivity chooses preimages pointwise; equivariance of the new
+  covering is fiber-compatibility at $\varphi_2(\sigma(\varphi_2 y)) =
+  \varphi_2(y)$.
+\end{proof}
+
+\begin{lemma}[Associativity up to division]\label{lem:wreath-assoc}
+  \lean{KRTheory.TransMon.wreath_assoc_div}\uses{def:wreath,def:sdiv}
+  $(P \wr Q) \wr R \;\prec\; P \wr (Q \wr R)$.
+\end{lemma}
+\begin{proof}
+  Currying: both monoids have carrier
+  $M_P^{\,X_Q \times X_R} \times M_Q^{\,X_R} \times M_R$ up to the
+  evident bijections, and the twisted multiplications agree under this
+  identification; states correspond by re-association. The covering
+  uses the full monoid and these bijections.
+\end{proof}
+
+\begin{lemma}[Append]\label{lem:wreathList-append}
+  \lean{KRTheory.TransMon.wreathList_append}
+  \uses{def:wreathList,lem:wreath-trivial,lem:wreath-mono,lem:wreath-assoc,lem:sdiv-preorder}
+  $\mathrm{wreathList}(L_1) \wr \mathrm{wreathList}(L_2) \prec
+   \mathrm{wreathList}(L_1 \mathbin{+\!\!+} L_2)$.
+\end{lemma}
+\begin{proof}
+  Induction on $L_1$: the base case is trivial absorption; the cons
+  case re-associates with Lemma~\ref{lem:wreath-assoc} and applies
+  monotonicity and transitivity.
+\end{proof}

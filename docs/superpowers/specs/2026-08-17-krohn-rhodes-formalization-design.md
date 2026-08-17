@@ -219,8 +219,9 @@ structure TransMon : Type 1 where
 |---|---|
 | `FiniteMonoid.lean` | `exists_pow_idempotent`, `isUnit_of_mul_eq_one_right/left` (finite), `isUnit_of_generators_units` (units-only generating set ⇒ group) |
 | `TransMon/Basic.lean` | `TransMon`, action notation + lemma kit, `Faithful`, `trivialTM`, `regular`, `regular_faithful`, examples |
-| `TransMon/Division.lean` | `MonoidDivides` (`≺ₘ`), `StrongDivides` (`≺`), both preorders, `strongDivides.monoidDivides` (glue), submonoid/quotient feeders |
-| `TransMon/Wreath.lean` | `wreath` (`≀`) + monoid & action instances, `wreath_div_wreath`, `wreath_assoc_div`, `trivialTM` absorption, `wreathList`, `wreathList_append` |
+| `TransMon/Division.lean` | `MonoidDivides` (`≺ₘ`), `StrongDivides` (`≺`), both preorders, `strongDivides.monoidDivides` (glue), submonoid/quotient feeders, `Covering.extMap` kit (added in M3) |
+| `TransMon/Wreath.lean` | `WreathMonoid` + monoid instance & simp kit, `wreath` (`≀`) + action, `WreathMonoid.natCard`, `wreathList` |
+| `TransMon/WreathDivision.lean` | `trivialTM` absorption (`trivial_wreath_div`, `div_wreath_trivial`), `Covering.wreath` / `StrongDivides.wreath` (monotonicity), `wreath_assoc_div`, `wreathList_append` |
 | `TransMon/Bar.lean` | `bar`, monoid/action instances, `bar_divides : T ≺ T.bar`, (optional) `bar_mono` |
 | `TransMon/Reset.lean` | `resetMonoid` (= `U(X)` via `Option X`), `flipFlop`, `reset_div_flipFlops` ([DKS] 2.12) |
 | `TransMon/LocalDivisor.lean` | `localDivisor`, monoid/action instances, `localDivisor_faithful` (2.13), `localDivisor_card_lt`, `localDivisor_divides` |
