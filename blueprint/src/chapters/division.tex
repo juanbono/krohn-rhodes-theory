@@ -25,6 +25,25 @@ products.
   $\chi$ is onto $N$, so onto $N'$ from $Q$).
 \end{proof}
 
+\begin{lemma}[Surjective image divides]\label{lem:mdiv-of-surjective}
+  \lean{KRTheory.MonoidDivides.of_surjective}\leanok
+  \uses{def:mdiv}
+  If $f : N \twoheadrightarrow M$ is a surjective monoid morphism, then
+  $M \prec_{\mathrm m} N$.
+\end{lemma}
+\begin{proof}
+  Take $N' = N$ (the top submonoid) and $\psi = f$.
+\end{proof}
+
+\begin{lemma}[Submonoid divides]\label{lem:mdiv-of-submonoid}
+  \lean{KRTheory.MonoidDivides.of_submonoid}\leanok
+  \uses{def:mdiv}
+  Every submonoid $N' \le N$ divides $N$: $N' \prec_{\mathrm m} N$.
+\end{lemma}
+\begin{proof}
+  Take $\psi = \mathrm{id}$.
+\end{proof}
+
 \begin{definition}[Strong division; DKS §2.3]\label{def:sdiv}
   \lean{KRTheory.TransMon.StrongDivides, KRTheory.TransMon.Covering}\leanok
   \uses{def:transmon}

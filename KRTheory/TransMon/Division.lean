@@ -91,10 +91,11 @@ structure Covering (S T : TransMon) : Type where
 `MonoidDivides` wrapping its existential witness. -/
 def StrongDivides (S T : TransMon) : Prop := Nonempty (Covering S T)
 
--- Notation check (spec §8): every non-`scoped`/non-`local` `≺` infix in
--- Mathlib is declared `local` (`Order.Basic`, `Order.Zorn`,
--- `EuclideanDomain.Defs`, etc.), so none of it leaks into scope here;
--- `scoped` below is safe and does not shadow or get shadowed.
+-- Notation check (spec §8): every `≺` infix in Mathlib is declared
+-- `local` (never `scoped` or global) — e.g. in `Order.Basic`,
+-- `Order.Zorn`, `EuclideanDomain.Defs` — so none of it leaks into scope
+-- here; our `scoped` declaration below is safe and does not shadow or
+-- get shadowed.
 @[inherit_doc]
 scoped infix:50 " ≺ " => StrongDivides
 
@@ -133,6 +134,9 @@ def Covering.comp {S T U : TransMon}
   -- inside `c₂.toSubmonoid` (`inclusion`), on it `c₂.monoidMap` lands in
   -- `c₁.toSubmonoid` (`codRestrict`), and `c₁.monoidMap` finishes the
   -- trip to `S.M`.
+  -- `monoidMap_surj` and `equivariant` below rely on this composite
+  -- reducing definitionally to `c₁.monoidMap ⟨c₂.monoidMap n, _⟩` through
+  -- `Submonoid.inclusion`/`MonoidHom.codRestrict`.
   monoidMap :=
     c₁.monoidMap.comp
       ((c₂.monoidMap.comp

@@ -34,3 +34,11 @@
 \begin{proof}
   If $xm = xn$ for all $x$, take $x = 1$.
 \end{proof}
+
+\begin{lemma}\label{lem:trivialTM-faithful}
+  \lean{KRTheory.TransMon.trivialTM_faithful}\leanok\uses{def:trivialTM,def:faithful}
+  The trivial transformation monoid is faithful.
+\end{lemma}
+\begin{proof}
+  $M$ has only one element, so there is nothing to distinguish.
+\end{proof}
