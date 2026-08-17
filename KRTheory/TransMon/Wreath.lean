@@ -130,6 +130,45 @@ own state via `w.right`. -/
 @[simp] theorem wreath_act {S T : TransMon} (p : (S ≀ T).X) (w : (S ≀ T).M) :
     (S ≀ T).act p w = (S.act p.1 (w.left p.2), T.act p.2 w.right) := rfl
 
+/-!
+### Mirror kit at the projected type `(S ≀ T).M`
+
+`WreathMonoid.mul_left` and friends are stated at the bare type
+`WreathMonoid S T`, but goals about elements of a wreath-product
+transformation monoid live at the projected type `(S ≀ T).M` instead — the
+two types are definitionally but not syntactically equal, since `(S ≀ T).M`
+is a `TransMon.M` projection of the semireducible `wreath`. These four
+lemmas are the identical `rfl`-reductions, restated at `(S ≀ T).M` so they
+are available directly (`exact`, term-mode, or as rewrite targets once the
+goal is already in this shape) without a manual `show`-restatement first.
+Caution: `simp`/`rw` can still refuse to rewrite *through* a `.left`/
+`.right` projection applied to a `(S ≀ T).M`-typed subterm, independent of
+which lemma set is tried — the projected term itself is what trips the
+`implicit`-transparency type-correctness check, not a lemma-matching
+failure. `rfl` (elaborated at default transparency) reliably crosses this
+wall when `simp`/`rw` cannot.
+-/
+
+/-- The `left` component of a product at `(S ≀ T).M`: mirrors
+`WreathMonoid.mul_left` at the projected type. -/
+@[simp] theorem wreath_mul_left {S T : TransMon} (w w' : (S ≀ T).M) (y : T.X) :
+    (w * w').left y = w.left y * w'.left (T.act y w.right) := rfl
+
+/-- The `right` component of a product at `(S ≀ T).M`: mirrors
+`WreathMonoid.mul_right` at the projected type. -/
+@[simp] theorem wreath_mul_right {S T : TransMon} (w w' : (S ≀ T).M) :
+    (w * w').right = w.right * w'.right := rfl
+
+/-- The `left` component of the identity at `(S ≀ T).M`: mirrors
+`WreathMonoid.one_left` at the projected type. -/
+@[simp] theorem wreath_one_left {S T : TransMon} (y : T.X) :
+    (1 : (S ≀ T).M).left y = 1 := rfl
+
+/-- The `right` component of the identity at `(S ≀ T).M`: mirrors
+`WreathMonoid.one_right` at the projected type. -/
+@[simp] theorem wreath_one_right {S T : TransMon} :
+    (1 : (S ≀ T).M).right = (1 : T.M) := rfl
+
 /-- Iterated wreath product over a list, right fold with base `trivialTM`:
 `wreathList [T₁, T₂, T₃] = T₁ ≀ (T₂ ≀ (T₃ ≀ trivialTM))`. Fixing the
 association once avoids an associativity isomorphism in every statement

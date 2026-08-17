@@ -53,8 +53,9 @@ theorem div_wreathList_singleton (S : TransMon) : S ≺ wreathList [S] := by
 /-!
 ### Monotonicity of `≺` under `≀`
 
-Three `private` helpers feed `Covering.wreath` below; the public API of
-this section is only `Covering.wreath` and `StrongDivides.wreath`.
+Two `private` helpers feed `Covering.wreath` below (a third, `extMap_one`,
+is now the public `Covering.extMap_one` in `Division.lean`); the public
+API of this section is only `Covering.wreath` and `StrongDivides.wreath`.
 -/
 
 /-- (private) A chosen set-theoretic section of the state surjection
@@ -71,20 +72,12 @@ private theorem Covering.stateMap_sect {S T : TransMon} (c : Covering S T)
     (s : S.X) : c.stateMap (c.sect s) = s :=
   Function.surjInv_eq c.stateMap_surj s
 
-/-- (private) The totalization `extMap` preserves the unit: `1` lies in
-every covering submonoid, where `extMap` agrees with the monoid hom
-`c.monoidMap`. -/
-private theorem Covering.extMap_one {S T : TransMon} (c : Covering S T) :
-    c.extMap 1 = 1 := by
-  rw [c.extMap_of_mem (one_mem _)]
-  exact map_one _
-
 /-- The wreath product of two coverings: witnesses monotonicity of `≺`
 under `≀` (blueprint lem:wreath-mono). The submonoid consists of the
 *fiber-compatible* elements: the back component covers via `c₂`, every
 front value lies in `c₁`'s submonoid, and the front function descends
 along `c₂.stateMap`-fibers up to `c₁.extMap`. The monoid map reads the
-front component off at the chosen section `c₂.sect`, and fiber
+front component off at a chosen section of `c₂.stateMap`, and fiber
 compatibility is exactly what makes that a homomorphism. -/
 noncomputable def Covering.wreath {S₁ T₁ S₂ T₂ : TransMon}
     (c₁ : Covering S₁ T₁) (c₂ : Covering S₂ T₂) :
@@ -119,7 +112,7 @@ noncomputable def Covering.wreath {S₁ T₁ S₂ T₂ : TransMon}
         · show c₂.extMap (1 : T₂.M) = 1
           exact c₂.extMap_one
       map_mul' := by
-        rintro ⟨w, hr, hl, hc⟩ ⟨w', hr', hl', hc'⟩
+        rintro ⟨w, hr, hl, _hc⟩ ⟨w', hr', hl', hc'⟩
         refine WreathMonoid.ext (funext fun s => ?_) ?_
         · -- the two front factors are read at different `T₂`-states, but
           -- `c₂` identifies them, so fiber-compatibility of `w'` applies
@@ -170,6 +163,30 @@ theorem StrongDivides.wreath {S₁ T₁ S₂ T₂ : TransMon}
   obtain ⟨c₁⟩ := h₁; obtain ⟨c₂⟩ := h₂
   exact ⟨c₁.wreath c₂⟩
 
+/-!
+### Associativity of `≀` up to division
+-/
+
+/-- One-directional associativity: `(P ≀ Q) ≀ R ≺ P ≀ (Q ≀ R)`.
+The underlying map is currying; the twisted multiplications correspond
+exactly, so the covering is total (`⊤`) with a bijective monoid map. -/
+theorem wreath_assoc_div (P Q R : TransMon) :
+    (P ≀ Q) ≀ R ≺ P ≀ (Q ≀ R) :=
+  ⟨{ toSubmonoid := ⊤
+     stateMap := fun p => ((p.1, p.2.1), p.2.2)
+     monoidMap :=
+       { toFun := fun w =>
+           ⟨fun z => ⟨fun y => (w : (P ≀ (Q ≀ R)).M).left (y, z),
+              (w : (P ≀ (Q ≀ R)).M).right.left z⟩,
+            (w : (P ≀ (Q ≀ R)).M).right.right⟩
+         map_one' := rfl
+         map_mul' := fun _ _ => rfl }
+     stateMap_surj := fun p => ⟨(p.1.1, (p.1.2, p.2)), rfl⟩
+     monoidMap_surj := fun v =>
+       ⟨⟨⟨fun yz => (v.left yz.2).left yz.1, ⟨fun z => (v.left z).right, v.right⟩⟩, trivial⟩,
+         rfl⟩
+     equivariant := fun _ _ => rfl }⟩
+
 -- Sanity checks (spec §6).
 example {S₁ T₁ S₂ T₂ : TransMon} (h₁ : S₁ ≺ T₁) (h₂ : S₂ ≺ T₂) :
     S₁ ≀ S₂ ≺ T₁ ≀ T₂ := h₁.wreath h₂
@@ -178,6 +195,7 @@ example (T : TransMon) : T ≀ T ≺ T ≀ T :=
 example : trivialTM ≀ trivialTM ≺ trivialTM := trivial_wreath_div _
 example : regular (ZMod 2) ≺ wreathList [regular (ZMod 2)] :=
   div_wreathList_singleton _
+example (P Q R : TransMon) : (P ≀ Q) ≀ R ≺ P ≀ (Q ≀ R) := wreath_assoc_div P Q R
 
 end TransMon
 end KRTheory

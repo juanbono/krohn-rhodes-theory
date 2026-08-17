@@ -188,6 +188,12 @@ theorem Covering.extMap_coe {S T : TransMon} (c : Covering S T)
     (n : c.toSubmonoid) : c.extMap ↑n = c.monoidMap n := by
   rw [c.extMap_of_mem n.2]
 
+/-- The totalization `extMap` preserves the unit: `1` lies in every
+covering submonoid, where `extMap` agrees with the monoid hom
+`c.monoidMap`. -/
+theorem Covering.extMap_one {S T : TransMon} (c : Covering S T) :
+    c.extMap 1 = 1 := (c.extMap_coe 1).trans (map_one _)
+
 /-- `extMap` is multiplicative on pairs drawn from the covering
 submonoid, inherited from `c.monoidMap`'s multiplicativity there. -/
 theorem Covering.extMap_mul_of_mem {S T : TransMon} (c : Covering S T)
