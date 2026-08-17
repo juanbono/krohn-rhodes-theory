@@ -141,12 +141,14 @@ is a `TransMon.M` projection of the semireducible `wreath`. These four
 lemmas are the identical `rfl`-reductions, restated at `(S ≀ T).M` so they
 are available directly (`exact`, term-mode, or as rewrite targets once the
 goal is already in this shape) without a manual `show`-restatement first.
-Caution: `simp`/`rw` can still refuse to rewrite *through* a `.left`/
-`.right` projection applied to a `(S ≀ T).M`-typed subterm, independent of
-which lemma set is tried — the projected term itself is what trips the
-`implicit`-transparency type-correctness check, not a lemma-matching
-failure. `rfl` (elaborated at default transparency) reliably crosses this
-wall when `simp`/`rw` cannot.
+`simp`/`rw` rewrite through them successfully on the natural goal shape —
+`(w * w').left y` / `(1 : (S ≀ T).M).left y` with `y` a plain bound
+variable of type `T.X` — even when `S`/`T` are themselves compound
+`≀`-expressions. The one pattern that still stalls: supplying an explicit
+pair literal `(y, z)` where a nested wreath's state type `(Q ≀ R).X` is
+expected, forcing a `Q.X × R.X`-vs-`(Q ≀ R).X` defeq-unfold that trips
+`simp`/`rw`'s restricted (`implicit`) transparency matching; `rfl`
+(elaborated at default transparency) crosses that case too.
 -/
 
 /-- The `left` component of a product at `(S ≀ T).M`: mirrors
