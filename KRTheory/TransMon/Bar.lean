@@ -1,4 +1,7 @@
 import KRTheory.TransMon.Basic
+-- Only for `Covering`/`StrongDivides`/`≺`, needed to state `bar_divides`
+-- below; `Division` itself only imports `Basic`, so this stays acyclic.
+import KRTheory.TransMon.Division
 
 /-!
 # The bar operation: adjoining resets
@@ -129,6 +132,22 @@ regardless of the current state. -/
 @[simp] theorem bar_act_reset {T : TransMon} (x x₀ : T.X) :
     T.bar.act x (.reset x₀) = x₀ := rfl
 
+/-- The original divides its bar: cover through the `of`-image
+[DKS §2.4]. Together with Q(T)'s barred conclusions this removes bars
+from final statements. -/
+theorem bar_divides (T : TransMon) : T ≺ T.bar :=
+  ⟨{ toSubmonoid := MonoidHom.mrange BarMonoid.ofHom
+     stateMap := id
+     monoidMap :=
+       { toFun := fun n => match n.val with
+           | .of m => m
+           | .reset _ => 1  -- junk; unreachable, `toSubmonoid` is all `of`-shaped
+         map_one' := rfl
+         map_mul' := by rintro ⟨_, m, rfl⟩ ⟨_, m', rfl⟩; rfl }
+     stateMap_surj := Function.surjective_id
+     monoidMap_surj := fun m => ⟨⟨BarMonoid.ofHom m, m, rfl⟩, rfl⟩
+     equivariant := by rintro y ⟨_, m, rfl⟩; rfl }⟩
+
 -- Sanity checks (spec §6). Chirality guard over a noncommutative monoid:
 -- reset-then-act must move the reset point by m ON THE RIGHT.
 -- With T = regular (Equiv.Perm (Fin 3)): (.reset (swap 0 1) * .of (swap 1 2))
@@ -147,6 +166,8 @@ example : Nat.card (BarMonoid (regular (ZMod 3))) = 6 := by
   rfl
 example (x : trivialTM.X) :
     trivialTM.bar.act x (.reset PUnit.unit) = PUnit.unit := rfl
+example : trivialTM ≺ trivialTM.bar := bar_divides _
+example : (regular (ZMod 2)) ≺ (regular (ZMod 2)).bar := bar_divides _
 
 end TransMon
 end KRTheory
