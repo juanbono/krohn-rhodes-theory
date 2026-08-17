@@ -119,11 +119,58 @@ theorem monoidDivides {S T : TransMon} (h : S ≺ T) : S.M ≺ₘ T.M := by
 
 end StrongDivides
 
+/-- Composition of coverings: witnesses transitivity of `≺`.
+State maps compose contravariantly (`U.X → T.X → S.X`); the monoid data
+is pulled back as in `MonoidDivides.trans` — the covering submonoid of
+`U.M` is `ψ₂⁻¹(N₁) ≤ N₂` pushed forward into `U.M`, and the monoid map is
+`ψ₂` followed by `ψ₁`. [DKS §2.3, blueprint `lem:sdiv-preorder`] -/
+def Covering.comp {S T U : TransMon}
+    (c₁ : Covering S T) (c₂ : Covering T U) : Covering S U where
+  toSubmonoid :=
+    ((c₁.toSubmonoid.comap c₂.monoidMap).map c₂.toSubmonoid.subtype)
+  stateMap := c₁.stateMap ∘ c₂.stateMap
+  -- `n ↦ ψ₁ (ψ₂ n)`, assembled in three steps: the submonoid above sits
+  -- inside `c₂.toSubmonoid` (`inclusion`), on it `c₂.monoidMap` lands in
+  -- `c₁.toSubmonoid` (`codRestrict`), and `c₁.monoidMap` finishes the
+  -- trip to `S.M`.
+  monoidMap :=
+    c₁.monoidMap.comp
+      ((c₂.monoidMap.comp
+        (Submonoid.inclusion (by rintro _ ⟨y, -, rfl⟩; exact y.2))).codRestrict
+          c₁.toSubmonoid (by rintro ⟨_, y, hy, rfl⟩; exact hy))
+  stateMap_surj := c₁.stateMap_surj.comp c₂.stateMap_surj
+  monoidMap_surj := by
+    -- lift `s : S.M` through `ψ₁` to `t ∈ N₁`, then through `ψ₂` to
+    -- `u ∈ N₂`; `u` lies in the covering submonoid since `ψ₂ u = t ∈ N₁`.
+    intro s
+    obtain ⟨t, ht⟩ := c₁.monoidMap_surj s
+    obtain ⟨u, hu⟩ := c₂.monoidMap_surj ↑t
+    have hmem : c₂.monoidMap u ∈ c₁.toSubmonoid := by rw [hu]; exact t.2
+    refine ⟨⟨↑u, u, hmem, rfl⟩, ?_⟩
+    exact (congrArg c₁.monoidMap (Subtype.ext hu :
+      (⟨c₂.monoidMap u, hmem⟩ : c₁.toSubmonoid) = t)).trans ht
+  equivariant := by
+    -- every element of the composed submonoid is `↑n` for some
+    -- `n ∈ ψ₂⁻¹(N₁)`; then chase `c₁.equivariant` at the `T`-level and
+    -- `c₂.equivariant` at the `U`-level.
+    rintro y ⟨_, n, hn, rfl⟩
+    exact (c₁.equivariant _ ⟨c₂.monoidMap n, hn⟩).trans
+      (congrArg c₁.stateMap (c₂.equivariant y n))
+
+/-- `≺` is transitive: compose the witnessing coverings. [DKS §2.3,
+blueprint `lem:sdiv-preorder`] -/
+theorem StrongDivides.trans {S T U : TransMon}
+    (h₁ : S ≺ T) (h₂ : T ≺ U) : S ≺ U := by
+  obtain ⟨c₁⟩ := h₁; obtain ⟨c₂⟩ := h₂
+  exact ⟨c₁.comp c₂⟩
+
 -- Sanity checks (spec §6).
 example : trivialTM ≺ trivialTM := .refl _
 example : (regular (ZMod 3)) ≺ (regular (ZMod 3)) := .refl _
 example (h : trivialTM ≺ regular (ZMod 2)) :
     trivialTM.M ≺ₘ (regular (ZMod 2)).M := h.monoidDivides
+example {S T U : TransMon} (h₁ : S ≺ T) (h₂ : T ≺ U) : S ≺ U :=
+  h₁.trans h₂
 
 end TransMon
 

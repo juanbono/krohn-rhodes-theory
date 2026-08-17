@@ -5,14 +5,14 @@ the Krohn--Rhodes theorem is a statement about division into wreath
 products.
 
 \begin{definition}[Monoid division; DKS §2.3]\label{def:mdiv}
-  \lean{KRTheory.MonoidDivides}
+  \lean{KRTheory.MonoidDivides}\leanok
   For monoids $M, N$: $M \prec_{\mathrm m} N$ iff $M$ is a quotient of a
   submonoid of $N$, i.e.\ there are a submonoid $N' \le N$ and a
   surjective monoid morphism $\psi : N' \twoheadrightarrow M$.
 \end{definition}
 
 \begin{lemma}[Preorder]\label{lem:mdiv-preorder}
-  \lean{KRTheory.MonoidDivides.refl, KRTheory.MonoidDivides.trans}
+  \lean{KRTheory.MonoidDivides.refl, KRTheory.MonoidDivides.trans}\leanok
   \uses{def:mdiv}
   $\prec_{\mathrm m}$ is reflexive and transitive.
 \end{lemma}
@@ -26,7 +26,7 @@ products.
 \end{proof}
 
 \begin{definition}[Strong division; DKS §2.3]\label{def:sdiv}
-  \lean{KRTheory.TransMon.StrongDivides, KRTheory.TransMon.Covering}
+  \lean{KRTheory.TransMon.StrongDivides, KRTheory.TransMon.Covering}\leanok
   \uses{def:transmon}
   For transformation monoids $S = (X, M)$ and $T = (Y, N)$:
   $S \prec T$ iff there are a submonoid $N' \le N$, a surjection
@@ -38,7 +38,7 @@ products.
 
 \begin{lemma}[Preorder]\label{lem:sdiv-preorder}
   \lean{KRTheory.TransMon.StrongDivides.refl,
-        KRTheory.TransMon.StrongDivides.trans}
+        KRTheory.TransMon.StrongDivides.trans}\leanok
   \uses{def:sdiv}
   $\prec$ is reflexive and transitive.
 \end{lemma}
@@ -49,7 +49,7 @@ products.
 \end{proof}
 
 \begin{lemma}[Glue]\label{lem:sdiv-mdiv}
-  \lean{KRTheory.TransMon.StrongDivides.monoidDivides}
+  \lean{KRTheory.TransMon.StrongDivides.monoidDivides}\leanok
   \uses{def:sdiv,def:mdiv}
   $(X, M) \prec (Y, N)$ implies $M \prec_{\mathrm m} N$.
 \end{lemma}
