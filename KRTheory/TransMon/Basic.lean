@@ -58,6 +58,8 @@ a class — bundled values make instance search unreliable (spec §4.1). -/
 def Faithful (T : TransMon) : Prop :=
   ∀ ⦃m n : T.M⦄, (∀ x : T.X, T.act x m = T.act x n) → m = n
 
+/-- The trivial transformation monoid is faithful: `M` has only one element,
+so there is nothing to distinguish. -/
 theorem trivialTM_faithful : trivialTM.Faithful := by
   intro m n _
   rfl
@@ -72,6 +74,8 @@ def regular (M : Type) [Monoid M] [Fintype M] : TransMon where
   act_one := mul_one
   act_mul x m n := (mul_assoc x m n).symm
 
+/-- The regular representation is faithful: if `x * m = x * n` for all `x`,
+evaluate at `x = 1` to get `m = n`. [DKS §2.1] -/
 theorem regular_faithful (M : Type) [Monoid M] [Fintype M] :
     (regular M).Faithful := by
   show ∀ ⦃m n : M⦄, (∀ x : M, (regular M).act x m = (regular M).act x n) → m = n
