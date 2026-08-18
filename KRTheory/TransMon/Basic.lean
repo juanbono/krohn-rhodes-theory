@@ -4,7 +4,6 @@ import Mathlib.Data.ZMod.Basic
 -- is commutative and can't witness right-action chirality, so we borrow
 -- `Equiv.Perm (Fin 3)` as a small noncommutative test monoid.
 import Mathlib.GroupTheory.Perm.Basic
-import Mathlib.Data.Fintype.Perm
 
 /-!
 # Transformation monoids
@@ -26,11 +25,11 @@ structure TransMon : Type 1 where
   /-- The monoid carrier. -/
   M : Type
   /-- `X` is finite. -/
-  [fintypeX : Fintype X]
+  [finiteX : Finite X]
   /-- `M` has a monoid structure. -/
   [monoidM : Monoid M]
   /-- `M` is finite. -/
-  [fintypeM : Fintype M]
+  [finiteM : Finite M]
   /-- The right action of `M` on `X`. -/
   act : X → M → X
   /-- The identity of `M` acts trivially. -/
@@ -40,7 +39,7 @@ structure TransMon : Type 1 where
 
 namespace TransMon
 
-attribute [instance] fintypeX monoidM fintypeM
+attribute [instance] finiteX monoidM finiteM
 attribute [simp] act_one act_mul
 
 /-- Right-action notation. `m` binds tighter so `x ⊳ m * n` parses as
@@ -62,8 +61,12 @@ def trivialTM : TransMon where
   act_mul _ _ _ := rfl
 
 -- Sanity checks (spec §6): the trivial object is as small as it claims.
-example : Fintype.card trivialTM.X = 1 := rfl
-example : Fintype.card trivialTM.M = 1 := rfl
+example : Nat.card trivialTM.X = 1 := by
+  show Nat.card PUnit = 1
+  exact Nat.card_unique
+example : Nat.card trivialTM.M = 1 := by
+  show Nat.card PUnit = 1
+  exact Nat.card_unique
 example (x : trivialTM.X) (m : trivialTM.M) : trivialTM.act x m = x := by
   cases x; rfl
 
@@ -81,7 +84,7 @@ theorem trivialTM_faithful : trivialTM.Faithful := by
 /-- The regular representation `(M, M)`: `M` acting on itself by right
 multiplication. Always faithful; the bridge from abstract monoids to
 transformation monoids. [DKS §2.1] -/
-def regular (M : Type) [Monoid M] [Fintype M] : TransMon where
+def regular (M : Type) [Monoid M] [Finite M] : TransMon where
   X := M
   M := M
   act x m := x * m
@@ -90,7 +93,7 @@ def regular (M : Type) [Monoid M] [Fintype M] : TransMon where
 
 /-- The regular representation is faithful: if `x * m = x * n` for all `x`,
 evaluate at `x = 1` to get `m = n`. [DKS §2.1] -/
-theorem regular_faithful (M : Type) [Monoid M] [Fintype M] :
+theorem regular_faithful (M : Type) [Monoid M] [Finite M] :
     (regular M).Faithful := by
   show ∀ ⦃m n : M⦄, (∀ x : M, (regular M).act x m = (regular M).act x n) → m = n
   intro m n h
@@ -98,7 +101,9 @@ theorem regular_faithful (M : Type) [Monoid M] [Fintype M] :
   simpa using h1
 
 -- Sanity checks (spec §6).
-example : Fintype.card (regular (ZMod 3)).X = 3 := rfl
+example : Nat.card (regular (ZMod 3)).X = 3 := by
+  show Nat.card (ZMod 3) = 3
+  rw [Nat.card_eq_fintype_card, ZMod.card]
 example : (regular (ZMod 3)).act (2 : ZMod 3) (2 : ZMod 3) = (1 : ZMod 3) := rfl  -- 2·2 = 4 ≡ 1
 example : (regular (ZMod 4)).act (3 : ZMod 4) (2 : ZMod 4) = (2 : ZMod 4) := rfl  -- 3·2 = 6 ≡ 2
 

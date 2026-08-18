@@ -105,18 +105,18 @@ example :
       ⟨fun y => y, (1 : ZMod 3)⟩).right = (2 : ZMod 3) := rfl
 example :
     Nat.card (WreathMonoid (regular (ZMod 2)) (regular (ZMod 2))) = 8 := by
-  simp only [WreathMonoid.natCard, Nat.card_eq_fintype_card]
-  rfl
+  rw [WreathMonoid.natCard]
+  show Nat.card (ZMod 2) ^ Nat.card (ZMod 2) * Nat.card (ZMod 2) = 8
+  rw [Nat.card_eq_fintype_card, ZMod.card]  -- rw's trailing rfl (reducible) can't
+  rfl  -- close `2 ^ 2 * 2 = 8` on its own; a plain `rfl` uses the Nat-literal fast path
 
 /-- The wreath product of transformation monoids [DKS §2.2]: the cascade
-of `S` driven by `T`. `noncomputable` only because `Fintype` of the
-function component needs `DecidableEq T.X`, which `TransMon` deliberately
-does not carry (spec §4.1); the algebra itself is computable and `rfl`
-still evaluates actions and products. -/
-noncomputable def wreath (S T : TransMon) : TransMon where
+of `S` driven by `T`. Computable — under the 2026-08-17 §4.1 amendment
+the bundled finiteness is the Prop-valued `Finite`, so there is no data
+field to obstruct it. -/
+def wreath (S T : TransMon) : TransMon where
   X := S.X × T.X
   M := WreathMonoid S T
-  fintypeM := Fintype.ofFinite _
   act p w := (S.act p.1 (w.left p.2), T.act p.2 w.right)
   act_one p := by simp
   act_mul p w w' := by simp [TransMon.act_mul]
@@ -175,7 +175,7 @@ expected, forcing a `Q.X × R.X`-vs-`(Q ≀ R).X` defeq-unfold that trips
 `wreathList [T₁, T₂, T₃] = T₁ ≀ (T₂ ≀ (T₃ ≀ trivialTM))`. Fixing the
 association once avoids an associativity isomorphism in every statement
 (spec §3.3). -/
-noncomputable def wreathList : List TransMon → TransMon :=
+def wreathList : List TransMon → TransMon :=
   fun L => L.foldr wreath trivialTM
 
 /-- Folding over the empty list yields the trivial transformation monoid. -/
@@ -186,8 +186,7 @@ wreath product of the rest of the list. -/
 @[simp] theorem wreathList_cons (S : TransMon) (L : List TransMon) :
     wreathList (S :: L) = S ≀ wreathList L := rfl
 
--- Sanity checks (spec §6). Action evaluation stays rfl-checkable even
--- though `wreath` is noncomputable (defeq is unaffected).
+-- Sanity checks (spec §6). Action evaluation stays rfl-checkable.
 -- Guard: w.left must be evaluated at the CURRENT back-state p.2 = 2,
 -- giving (1 * id 2, 2*2) = (2, 1). A wrong definition evaluating w.left
 -- at the UPDATED state p.2·w.right = 4 = 1 would give (1 * id 1, 1) =

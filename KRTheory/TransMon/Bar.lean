@@ -101,16 +101,16 @@ for the opaque projections `T.M`/`T.X` there is nothing to find — unlike
 a bare type parameter, `T.M`/`T.X` cannot be generalized into a fresh
 instance argument by the handler itself. This is the conditional
 instance the handler would have produced had it been able to, obtained
-the same way `Fintype` is above: transported across `equivSum`.
+the same way `Finite` is below: transported across `equivSum`.
 At semireducible concrete transformation monoids the conditional hypotheses are not
 found by search on the projected types; bridge with e.g. `inferInstanceAs (DecidableEq
 (BarMonoid (regular (ZMod 3))))` after a `show` at the unfolded type. -/
 instance [DecidableEq T.X] [DecidableEq T.M] : DecidableEq (BarMonoid T) :=
   equivSum.decidableEq
 
-/-- `BarMonoid T` is finite: transported from the computable
-`Fintype (T.M ⊕ T.X)` instance across `equivSum`. -/
-instance : Fintype (BarMonoid T) := Fintype.ofEquiv _ equivSum.symm
+/-- `BarMonoid T` is finite, transported from the `Finite (T.M ⊕ T.X)`
+instance across `equivSum`. -/
+instance : Finite (BarMonoid T) := Finite.of_equiv _ equivSum.symm
 
 /-- `|BarMonoid T| = |M| + |X|`. -/
 theorem natCard : Nat.card (BarMonoid T) = Nat.card T.M + Nat.card T.X := by
@@ -165,8 +165,9 @@ example :  -- and the two permutations genuinely differ at 0
       (Equiv.swap 1 2 * Equiv.swap 0 1 : Equiv.Perm (Fin 3)).toFun 0 := by
   decide
 example : Nat.card (BarMonoid (regular (ZMod 3))) = 6 := by
-  rw [BarMonoid.natCard, Nat.card_eq_fintype_card, Nat.card_eq_fintype_card]  -- 3 + 3
-  rfl
+  rw [BarMonoid.natCard]
+  show Nat.card (ZMod 3) + Nat.card (ZMod 3) = 6
+  rw [Nat.card_eq_fintype_card, ZMod.card]
 example (x : trivialTM.X) :
     trivialTM.bar.act x (.reset PUnit.unit) = PUnit.unit := rfl
 example : trivialTM ≺ trivialTM.bar := bar_divides _
