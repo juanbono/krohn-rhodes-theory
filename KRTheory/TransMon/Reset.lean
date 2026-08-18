@@ -237,7 +237,10 @@ private def splitCovering {X Y : Type} [Finite X] [Finite Y] [Nonempty Y]
         (n.1 : (resetMonoid Y ≀ flipFlop).M).right
       map_one' := rfl
       map_mul' := by
-        -- The left factor's membership conditions are discarded: the product's value only reads w.left true and w.right, and it is w''s conditions that decide which splitMap branch fires.
+        -- The left factor's membership conditions are discarded: the
+        -- product's value only reads `w.left true` and `w.right`, and it
+        -- is the conditions of `w'` that decide which `splitMap` branch
+        -- fires.
         rintro ⟨w, -, -, -⟩ ⟨w', hw1', hw2', hw3'⟩
         show splitMap x₀ f (w.left true * w'.left (flipFlop.act true w.right))
             (w.right * w'.right) =

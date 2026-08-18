@@ -1,0 +1,105 @@
+\chapter{The group case}\label{ch:groupcase}
+
+\begin{definition}[Bundled finite group]\label{def:bundledfingroup}
+  \lean{KRTheory.TransMon.BundledFinGroup}\leanok
+  A carrier type together with group and finiteness structure --- the
+  factor datatype for group decompositions.
+\end{definition}
+
+\begin{lemma}[Maximal normal subgroup]\label{lem:max-normal}
+  \lean{KRTheory.TransMon.exists_maximal_normal_subgroup}\leanok
+  Every nontrivial finite group has a proper normal subgroup maximal
+  among proper normal subgroups.
+\end{lemma}
+\begin{proof}
+  The set of proper normal subgroups contains $\bot$ and the subgroup
+  lattice is finite; take a maximal element.
+\end{proof}
+
+\begin{lemma}[Simple quotient]\label{lem:simple-quotient}
+  \lean{KRTheory.TransMon.isSimpleGroup_quotient}\leanok
+  \uses{lem:max-normal}
+  If $N \trianglelefteq G$ is maximal proper normal, $G/N$ is simple.
+\end{lemma}
+\begin{proof}
+  A normal $\bar K \trianglelefteq G/N$ pulls back along the projection
+  to a normal $K \supseteq N$; by maximality $K = N$ (so
+  $\bar K = \bot$, since the projection kills $N$) or $K = \top$ (so
+  $\bar K = \top$, the projection being onto). Nontriviality of $G/N$
+  is $N \neq \top$.
+\end{proof}
+
+\begin{lemma}[Division feeders]\label{lem:subgroup-mdiv}
+  \lean{KRTheory.TransMon.subgroup_monoidDivides,
+        KRTheory.TransMon.quotient_monoidDivides}\leanok
+  \uses{def:mdiv}
+  $N \prec_m G$ for a subgroup, $G/N \prec_m G$ for a normal subgroup.
+\end{lemma}
+\begin{proof}
+  The identity correspondence on the underlying submonoid; the
+  canonical projection is a surjective homomorphism.
+\end{proof}
+
+\begin{lemma}[Kaloujnine--Krasner]\label{lem:kaloujnine-krasner}
+  \lean{KRTheory.TransMon.kaloujnine_krasner_div}\leanok
+  \uses{def:regular,def:wreath,def:sdiv,lem:subgroup-mdiv}
+  For $N \trianglelefteq G$:
+  $(G,G) \prec (N,N) \wr (G/N,\, G/N)$.
+\end{lemma}
+\begin{proof}
+  Fix a set-section $s$ of $\pi : G \to G/N$ with $\pi(s(q)) = q$. The
+  state map is $\varphi(n, q) := n\, s(q)$, surjective since
+  $g = \big(g\, s(\pi g)^{-1}\big) s(\pi g)$ with the first factor in
+  $N$. The monoid part embeds $G$ by
+  $g \mapsto (f_g, \pi g)$, $f_g(q) := s(q)\, g\, s(q \cdot \pi g)^{-1}
+  \in N$; the cocycle identity
+  $f_{gh}(q) = f_g(q)\, f_h(q \cdot \pi g)$ makes this a homomorphism
+  into the twisted product. The covering submonoid is its image, and
+  the monoid map is the explicit retraction
+  $w \mapsto s(\bar 1)^{-1}\, w_{\mathrm{left}}(\bar 1)\,
+  s(w_{\mathrm{right}})$, which recovers $g$. Equivariance:
+  $\varphi\big((n,q) \cdot (f_g, \pi g)\big)
+  = n\, f_g(q)\, s(q \cdot \pi g)
+  = n\, s(q)\, g = \varphi(n,q) \cdot g$.
+\end{proof}
+
+\begin{lemma}[Decomposition into simple factors]\label{lem:group-series}
+  \lean{KRTheory.TransMon.transfGroup_div_wreath_simples}\leanok
+  \uses{def:bundledfingroup,lem:max-normal,lem:simple-quotient,
+        lem:subgroup-mdiv,lem:kaloujnine-krasner,lem:wreath-mono,
+        lem:wreathList-append,def:wreathList}
+  For every finite group $G$ there is a list $L$ of finite simple
+  groups, each dividing $G$, with
+  $(G,G) \prec \wr_{H \in L}\,(H,H)$.
+\end{lemma}
+\begin{proof}
+  Strong induction on $|G|$. Trivial $G$: the empty list ($(G,G)$
+  covers onto the trivial transformation monoid). Otherwise take a
+  maximal proper normal $N$ (Lemma~\ref{lem:max-normal}); $G/N$ is
+  simple (Lemma~\ref{lem:simple-quotient}) and divides $G$; the
+  induction hypothesis decomposes $(N,N)$ (note $|N| < |G|$ since
+  $G/N$ is nontrivial); Kaloujnine--Krasner, monotonicity, and the
+  append lemma assemble $L := L_N \mathbin{+\!\!+} [G/N]$, and factors
+  of $L_N$ divide $N \prec_m G$ by transitivity.
+\end{proof}
+
+\begin{lemma}[{[DKS] 2.11}]\label{lem:group-bar}
+  \lean{KRTheory.TransMon.group_bar_div}\leanok
+  \uses{def:bar,def:resets,def:regular,def:wreath,def:sdiv}
+  If every element of $T$'s monoid is a unit, then
+  $\bar T \prec (X, U(X)) \wr (M, M)$.
+\end{lemma}
+\begin{proof}
+  States: $\varphi(x, g) := x \cdot g$; surjective via $g = 1$. The
+  covering submonoid consists of the wreath elements whose front
+  component is uniformly the identity (type A) or uniformly a reset
+  (type B) with the invariant that $\sigma(g) \cdot (g\, r)$ is
+  independent of $g$ (type-B condition). Type A covers $m$ (front
+  $\equiv \mathrm{id}$, back $m$); type B covers the reset to $x_0$
+  via $\sigma(g) := x_0 \cdot g^{-1}$, back $1$ --- this is where
+  every element being a unit enters, along with the reindexings
+  $g \mapsto g m$ in the closure proofs. The covering map reads the
+  front at $g = 1$: type A $\mapsto m$, type B $\mapsto$ reset to
+  $\sigma(1) \cdot r$. Faithfulness of $T$ is never used, and empty
+  state sets degenerate consistently on both sides.
+\end{proof}

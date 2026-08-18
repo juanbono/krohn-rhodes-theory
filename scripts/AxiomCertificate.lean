@@ -18,3 +18,6 @@ Quot.sound} (spec §1 item 4). Extend this list as milestones land. -/
 #print axioms localDivisor_faithful
 #print axioms localDivisor_card_lt
 #print axioms localDivisor_divides
+#print axioms kaloujnine_krasner_div
+#print axioms transfGroup_div_wreath_simples
+#print axioms group_bar_div
