@@ -178,5 +178,141 @@ example : (ld2 * ld0).val = 0 :=
 -- concrete instance is built in Task 8's guard once `act` exists, at
 -- the transformation-monoid level where chirality is observable.
 
+/-- Bootstrap-only: the existence half of `localDivisor_act_spec` — the
+action's target lands back in the image `X·c`, for ANY valid
+`cM`-witness `m` of `u.val` (not just the one `Classical.choose` happens
+to pick). Feeds the `act` field's own membership proof and the third
+leg of `act_mul` below, both of which need this before `localDivisor`
+exists to state the public lemma against. -/
+private theorem localDivisor_mem_aux (T : TransMon) (c : T.M) {x : T.X}
+    (hx : ∃ y, x = T.act y c) (u : LocalDivisor c) {m : T.M} (hm : u.val = c * m) :
+    ∃ y, T.act x m = T.act y c := by
+  obtain ⟨y, hy⟩ := hx
+  obtain ⟨m₂, hm₂⟩ := u.mem_right
+  exact ⟨T.act y m₂, by rw [hy, ← T.act_mul, ← hm, hm₂, T.act_mul]⟩
+
+/-- Bootstrap-only mirror of `localDivisor_act_spec`, proven directly
+about the raw action formula against a plain `x : T.X` (before it is
+packaged into the `localDivisor` `TransMon`), so the `act_one`/`act_mul`
+fields below can cite it while `localDivisor` is still being built. The
+public `localDivisor_act_spec` after `localDivisor` restates the
+identical fact against the completed structure — the same relationship
+`mul_spec_aux` has to `mul_spec` above. -/
+private theorem localDivisor_act_spec_aux (T : TransMon) (c : T.M) {x : T.X}
+    (hx : ∃ y, x = T.act y c) (u : LocalDivisor c) {m : T.M}
+    (hm : u.val = c * m) :
+    T.act x (Classical.choose u.mem_left) = T.act x m := by
+  obtain ⟨y, hy⟩ := hx
+  rw [hy, ← T.act_mul, ← T.act_mul, ← Classical.choose_spec u.mem_left, hm]
+
+/-- The local divisor as a transformation monoid [DKS §2.5, blueprint
+`def:localdiv-tm`]: `LocalDivisor c` acting on the image `X·c` by
+`ξ ∘ (cm) := ξ · m`. The action reads a `cM`-decomposition via
+`Classical.choose`; use `localDivisor_act_spec`, never the
+definition. -/
+noncomputable def localDivisor (T : TransMon) (c : T.M) : TransMon where
+  X := {x : T.X // ∃ y, x = T.act y c}
+  M := LocalDivisor c
+  act ξ u :=
+    ⟨T.act ξ.val (Classical.choose u.mem_left),
+      localDivisor_mem_aux T c ξ.2 u (Classical.choose_spec u.mem_left)⟩
+  act_one ξ := by
+    apply Subtype.ext
+    show T.act ξ.val (Classical.choose (1 : LocalDivisor c).mem_left) = ξ.val
+    rw [localDivisor_act_spec_aux T c ξ.2 1 (LocalDivisor.val_one.trans (mul_one c).symm),
+      T.act_one]
+  act_mul ξ u v := by
+    apply Subtype.ext
+    obtain ⟨mᵤ, hmᵤ⟩ := u.mem_left
+    obtain ⟨mᵥ, hmᵥ⟩ := v.mem_left
+    have huv : (u * v).val = c * (mᵤ * mᵥ) := by
+      rw [LocalDivisor.mul_spec_right u v hmᵥ, hmᵤ, mul_assoc]
+    show T.act ξ.val (Classical.choose (u * v).mem_left)
+        = T.act (T.act ξ.val (Classical.choose u.mem_left)) (Classical.choose v.mem_left)
+    rw [localDivisor_act_spec_aux T c ξ.2 (u * v) huv, T.act_mul,
+      localDivisor_act_spec_aux T c ξ.2 u hmᵤ,
+      localDivisor_act_spec_aux T c (localDivisor_mem_aux T c ξ.2 u hmᵤ) v hmᵥ]
+
+/-- Choose-independence for the action: ANY `cM`-witness computes it. -/
+theorem localDivisor_act_spec (T : TransMon) (c : T.M) (ξ : (localDivisor T c).X)
+    (u : (localDivisor T c).M) {m : T.M} (hm : u.val = c * m) :
+    ((localDivisor T c).act ξ u).val = T.act ξ.val m := by
+  show T.act ξ.val (Classical.choose u.mem_left) = T.act ξ.val m
+  exact localDivisor_act_spec_aux T c ξ.2 u hm
+
+/-- [DKS] 2.13 (blueprint `lem:localdiv-faithful`): local divisors of
+faithful transformation monoids are faithful — the induction may
+recurse into them. -/
+theorem localDivisor_faithful {T : TransMon} (hT : T.Faithful)
+    (c : T.M) : (localDivisor T c).Faithful := by
+  intro u v h
+  apply LocalDivisor.ext
+  refine hT fun x => ?_
+  obtain ⟨mu, hmu⟩ := u.mem_left
+  obtain ⟨mv, hmv⟩ := v.mem_left
+  calc T.act x u.val
+      = T.act (T.act x c) mu := by rw [hmu, T.act_mul]
+    _ = ((localDivisor T c).act ⟨T.act x c, x, rfl⟩ u).val :=
+        (localDivisor_act_spec T c ⟨T.act x c, x, rfl⟩ u hmu).symm
+    _ = ((localDivisor T c).act ⟨T.act x c, x, rfl⟩ v).val := by
+        rw [h ⟨T.act x c, x, rfl⟩]
+    _ = T.act (T.act x c) mv := localDivisor_act_spec T c ⟨T.act x c, x, rfl⟩ v hmv
+    _ = T.act x v.val := by rw [hmv, ← T.act_mul]
+
+-- Sanity (spec §6). Over `regular (ZMod 4)` at `c = 2`: the state
+-- space is the image `{0, 2}`, and acting by the reset-like element
+-- `0` of the local divisor sends every state to `0 · m`-form values.
+-- Chirality guard: `act ξ u = ξ · m` for `u = c * m` — the witness
+-- multiplies on the RIGHT of the state. With the noncommutative
+-- `regular (Function.End (Fin 2))`, a transposed definition
+-- (`ξ ∘ u := ξ · m'` read from `u = m' * c`) picks the OTHER
+-- factorization and produces a different state; the example below
+-- pins the correct one via `localDivisor_act_spec` + `decide`.
+private def id2 : Function.End (Fin 2) := fun x => x
+private def swap2 : Function.End (Fin 2) := fun x => 1 - x
+private def const0 : Function.End (Fin 2) := fun _ => 0
+private def const1 : Function.End (Fin 2) := fun _ => 1
+
+-- `Function.End (Fin 2) := Fin 2 → Fin 2` is a plain `def`, so instance
+-- search does not see through it to the Pi-type's `Finite`/`DecidableEq`
+-- instances on its own; bridge them once, for this guard's use only
+-- (same rationale as `BarMonoid`'s conditional `DecidableEq` in
+-- `Bar.lean`).
+private instance : Finite (Function.End (Fin 2)) :=
+  inferInstanceAs (Finite (Fin 2 → Fin 2))
+private instance : DecidableEq (Function.End (Fin 2)) :=
+  inferInstanceAs (DecidableEq (Fin 2 → Fin 2))
+
+-- `c := swap2`, the unique non-identity UNIT of `Function.End (Fin 2)`.
+-- (Every non-unit of this 4-element monoid is a left-zero constant map,
+-- for which `cM` collapses to `{c}` and the action degenerates to the
+-- identity no matter which witness is read — no non-unit `c` in this
+-- particular monoid can guard chirality, so the unit `swap2` is the
+-- only workable choice here; non-unit `c` is exercised by the `ZMod 4`
+-- sanity example above and by `localDivisor_card_lt`/`localDivisor_divides`
+-- in Task 9.)
+private def guardU : LocalDivisor (swap2 : Function.End (Fin 2)) :=
+  ⟨const0, ⟨const1, by decide⟩, ⟨const0, by decide⟩⟩
+
+private def guardXi :
+    (localDivisor (regular (Function.End (Fin 2))) swap2).X :=
+  ⟨swap2, id2, show swap2 = id2 * swap2 by decide⟩
+
+-- The correct reading (the `mem_left`/cM-witness `const1`) pins the
+-- result to `const0`.
+example :
+    ((localDivisor (regular (Function.End (Fin 2))) swap2).act guardXi guardU).val
+      = const0 := by
+  rw [localDivisor_act_spec (regular (Function.End (Fin 2))) swap2 guardXi guardU
+    (m := const1) (show const0 = swap2 * const1 by decide)]
+  show swap2 * const1 = const0
+  decide
+
+-- A transposed definition reading the `mem_right`/Mc-witness `const0`
+-- instead would compute `swap2 * const0 = const1 ≠ const0`: this example
+-- kills that transposition.
+example : (swap2 * const0 : Function.End (Fin 2)) = const1 := by decide
+example : (const0 : Function.End (Fin 2)) ≠ const1 := by decide
+
 end TransMon
 end KRTheory
