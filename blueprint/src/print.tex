@@ -3,7 +3,7 @@
 \usepackage[colorlinks=true]{hyperref}
 
 % leanblueprint-compatible macros (print fallbacks)
-\newcommand{\lean}[1]{\marginpar{\tiny\texttt{#1}}}
+\newcommand{\lean}[1]{\marginpar{\tiny\ttfamily\detokenize{#1}}}
 \newcommand{\leanok}{\marginpar{\tiny$\checkmark$}}
 \newcommand{\uses}[1]{}
 \newcommand{\notready}{}

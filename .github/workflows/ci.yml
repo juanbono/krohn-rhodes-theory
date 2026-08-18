@@ -5,9 +5,54 @@ on:
     branches: [main]
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: leanprover/lean-action@v1
+      - name: Axiom certificate
+        run: |
+          set -o pipefail
+          lake env lean scripts/AxiomCertificate.lean | tee axioms.out
+          test -s axioms.out
+          # 12 = current certificate entries (one line per `#print axioms`
+          # command, regardless of wording); update when the certificate
+          # grows. NOTE: `grep -c 'depends on axioms'` undercounts here —
+          # a zero-axiom theorem (`regular_faithful`) prints "does not
+          # depend on any axioms" instead, so line count is used.
+          test "$(wc -l < axioms.out)" -eq 12
+          python3 - <<'EOF'
+          import re, sys
+          allowed = {"propext", "Classical.choice", "Quot.sound"}
+          bad = False
+          for line in open("axioms.out"):
+              m = re.search(r"depends on axioms: \[(.*)\]", line)
+              if m:
+                  extra = {a.strip() for a in m.group(1).split(",")} - allowed
+                  if extra:
+                      print("DISALLOWED:", extra, "<-", line.strip())
+                      bad = True
+          sys.exit(1 if bad else 0)
+          EOF
+
+  blueprint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install TeX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends texlive-latex-extra latexmk
+      - name: Build blueprint PDF
+        run: latexmk -pdf -interaction=nonstopmode print.tex
+        working-directory: blueprint/src
+      - name: Upload PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: blueprint-pdf
+          path: blueprint/src/print.pdf
