@@ -1,0 +1,77 @@
+\chapter{Division}\label{ch:division}
+
+Division is the ``is at most as complicated as'' preorder of the theory:
+the Krohn--Rhodes theorem is a statement about division into wreath
+products.
+
+\begin{definition}[Monoid division; DKS §2.3]\label{def:mdiv}
+  \lean{KRTheory.MonoidDivides}\leanok
+  For monoids $M, N$: $M \prec_{\mathrm m} N$ iff $M$ is a quotient of a
+  submonoid of $N$, i.e.\ there are a submonoid $N' \le N$ and a
+  surjective monoid morphism $\psi : N' \twoheadrightarrow M$.
+\end{definition}
+
+\begin{lemma}[Preorder]\label{lem:mdiv-preorder}
+  \lean{KRTheory.MonoidDivides.refl, KRTheory.MonoidDivides.trans}\leanok
+  \uses{def:mdiv}
+  $\prec_{\mathrm m}$ is reflexive and transitive.
+\end{lemma}
+\begin{proof}
+  Reflexivity: $N' = N$, $\psi = \mathrm{id}$. Transitivity: given
+  $\psi : N' \twoheadrightarrow M$ (with $N' \le N$) and
+  $\chi : P' \twoheadrightarrow N$ (with $P' \le P$), let
+  $Q = \chi^{-1}(N') \le P'$, a submonoid of $P$; then
+  $\psi \circ \chi|_Q : Q \twoheadrightarrow M$ (surjective because
+  $\chi$ is onto $N$, so onto $N'$ from $Q$).
+\end{proof}
+
+\begin{lemma}[Surjective image divides]\label{lem:mdiv-of-surjective}
+  \lean{KRTheory.MonoidDivides.of_surjective}\leanok
+  \uses{def:mdiv}
+  If $f : N \twoheadrightarrow M$ is a surjective monoid morphism, then
+  $M \prec_{\mathrm m} N$.
+\end{lemma}
+\begin{proof}
+  Take $N' = N$ (the top submonoid) and $\psi = f$.
+\end{proof}
+
+\begin{lemma}[Submonoid divides]\label{lem:mdiv-of-submonoid}
+  \lean{KRTheory.MonoidDivides.of_submonoid}\leanok
+  \uses{def:mdiv}
+  Every submonoid $N' \le N$ divides $N$: $N' \prec_{\mathrm m} N$.
+\end{lemma}
+\begin{proof}
+  Take $\psi = \mathrm{id}$.
+\end{proof}
+
+\begin{definition}[Strong division; DKS §2.3]\label{def:sdiv}
+  \lean{KRTheory.TransMon.StrongDivides, KRTheory.TransMon.Covering}\leanok
+  \uses{def:transmon}
+  For transformation monoids $S = (X, M)$ and $T = (Y, N)$:
+  $S \prec T$ iff there are a submonoid $N' \le N$, a surjection
+  $\varphi : Y \twoheadrightarrow X$, and a surjective monoid morphism
+  $\psi : N' \twoheadrightarrow M$ with
+  $\varphi(y) \cdot \psi(n) = \varphi(y \cdot n)$ for all $y \in Y$,
+  $n \in N'$. The witnessing triple is a \emph{covering}.
+\end{definition}
+
+\begin{lemma}[Preorder]\label{lem:sdiv-preorder}
+  \lean{KRTheory.TransMon.StrongDivides.refl,
+        KRTheory.TransMon.StrongDivides.trans}\leanok
+  \uses{def:sdiv}
+  $\prec$ is reflexive and transitive.
+\end{lemma}
+\begin{proof}
+  Reflexivity: identity covering. Transitivity: compose the state
+  surjections, and pull the monoid data back exactly as in
+  Lemma~\ref{lem:mdiv-preorder}; equivariance is a two-step chase.
+\end{proof}
+
+\begin{lemma}[Glue]\label{lem:sdiv-mdiv}
+  \lean{KRTheory.TransMon.StrongDivides.monoidDivides}\leanok
+  \uses{def:sdiv,def:mdiv}
+  $(X, M) \prec (Y, N)$ implies $M \prec_{\mathrm m} N$.
+\end{lemma}
+\begin{proof}
+  Read $\psi$ off the covering and forget the states.
+\end{proof}
