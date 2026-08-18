@@ -101,5 +101,126 @@ example : Nonempty (regular (ZMod 4)).X :=
   nonempty_of_not_isUnit (regular_faithful _) (c := (2 : ZMod 4))
     (by show ¬ IsUnit (2 : ZMod 4); decide)
 
+section Decomposition
+
+variable (T : TransMon) (N : Submonoid T.M) (c : T.M)
+
+/-- The [DKS] §3 state map [blueprint `def:decomp-covers`]: a wreath
+state `(p, inl x)` denotes the plain state `x`; `(p, inr n)` denotes
+`p · n` — the tracked local part with its `N`-suffix applied. -/
+def decompState : ((localDivisor T c).bar ≀ (rightFactor T N).bar).X → T.X :=
+  fun q => match q.2 with
+  | .inl x => x
+  | .inr n => T.act q.1.val ↑n
+
+/-- The local divisor element `c·m·c` — both memberships definitional. -/
+def cnc (m : T.M) : LocalDivisor c :=
+  ⟨c * m * c, ⟨m * c, by rw [mul_assoc]⟩, ⟨c * m, rfl⟩⟩
+
+/-- Cover of `of ↑n` for `n ∈ N`: trivial front, `of n` back. -/
+noncomputable def coverN (n : ↥N) : ((localDivisor T c).bar ≀ (rightFactor T N).bar).M :=
+  ⟨fun _ => 1, .of n⟩
+
+/-- Cover of `of c`: reset-to-`x·c` at original states, the local
+element `c·n·c` at regular states; back resets the suffix to `1`. -/
+def coverC : ((localDivisor T c).bar ≀ (rightFactor T N).bar).M :=
+  ⟨fun y => match y with
+    | .inl x => .reset ⟨T.act x c, x, rfl⟩
+    | .inr n => .of (cnc T c ↑n),
+   .reset (.inr 1)⟩
+
+/-- Cover of `reset x`. THE TAG CHOICE [blueprint `def:decomp-covers`,
+`rem:bar-gap`]: [DKS] leave this front arbitrary; we make it a reset,
+so every product containing a reset cover has reset-shaped front at
+every state — the syntactic tag that replaces faithfulness of the
+bar in the ψ-selection. -/
+def coverReset (x : T.X) :
+    ((localDivisor T c).bar ≀ (rightFactor T N).bar).M :=
+  ⟨fun _ => .reset ⟨T.act x c, x, rfl⟩, .reset (.inl x)⟩
+
+/-- The generator covers. -/
+def decompGens : Set ((localDivisor T c).bar ≀ (rightFactor T N).bar).M :=
+  Set.range (coverN T N c) ∪ {coverC T N c} ∪ Set.range (coverReset T N c)
+
+/-- The covering submonoid: the closure of the generator covers
+[blueprint `lem:decomp-tag`]. -/
+noncomputable def decompSub : Submonoid ((localDivisor T c).bar ≀ (rightFactor T N).bar).M :=
+  Submonoid.closure (decompGens T N c)
+
+/-- `w` covers `s`: acting upstairs matches acting downstairs, in the
+`Covering.equivariant` orientation. -/
+def CoversAt (w : ((localDivisor T c).bar ≀ (rightFactor T N).bar).M)
+    (s : (T.bar).M) : Prop :=
+  ∀ q, T.bar.act (decompState T N c q) s =
+    decompState T N c (((localDivisor T c).bar ≀ (rightFactor T N).bar).act q w)
+
+theorem coversAt_one : CoversAt T N c 1 1 := by
+  intro q
+  rw [T.bar.act_one (decompState T N c q),
+    ((localDivisor T c).bar ≀ (rightFactor T N).bar).act_one q]
+
+theorem CoversAt.mul {w w' s s'} (h : CoversAt T N c w s)
+    (h' : CoversAt T N c w' s') : CoversAt T N c (w * w') (s * s') := by
+  intro q
+  rw [T.bar.act_mul (decompState T N c q) s s', h q,
+    ((localDivisor T c).bar ≀ (rightFactor T N).bar).act_mul q w w',
+    h' (((localDivisor T c).bar ≀ (rightFactor T N).bar).act q w)]
+
+theorem coversAt_coverN (n : ↥N) :
+    CoversAt T N c (coverN T N c n) (.of ↑n) := by
+  rintro ⟨p, y⟩
+  cases y with
+  | inl x => rfl
+  | inr m =>
+    show T.act (T.act p.val ↑m) ↑n = T.act ((localDivisor T c).bar.act p 1).val ↑(m * n)
+    rw [(localDivisor T c).bar.act_one p, ← T.act_mul, Submonoid.coe_mul]
+
+theorem coversAt_coverC : CoversAt T N c (coverC T N c) (.of c) := by
+  rintro ⟨p, y⟩
+  cases y with
+  | inl x =>
+    show T.act x c = T.act (T.act x c) ↑(1 : ↥N)
+    rw [Submonoid.coe_one, T.act_one]
+  | inr n =>
+    have hm : (cnc T c ↑n).val = c * (↑n * c) := by
+      show c * ↑n * c = c * (↑n * c)
+      rw [mul_assoc]
+    have hspec := localDivisor_act_spec T c p (cnc T c ↑n) hm
+    show T.act (T.act p.val ↑n) c =
+      T.act ((localDivisor T c).act p (cnc T c ↑n)).val ↑(1 : ↥N)
+    rw [hspec, Submonoid.coe_one, T.act_one, ← T.act_mul]
+
+theorem coversAt_coverReset (x : T.X) :
+    CoversAt T N c (coverReset T N c x) (.reset x) := by
+  intro q
+  rfl
+
+theorem decompState_surjective (hT : T.Faithful) (hc : ¬ IsUnit c) :
+    Function.Surjective (decompState T N c) := by
+  intro x
+  obtain ⟨x₀⟩ := nonempty_of_not_isUnit hT hc
+  exact ⟨(⟨T.act x₀ c, x₀, rfl⟩, .inl x), rfl⟩
+
+-- Sanity (spec §6). `cnc` value guard over noncommutative
+-- Perm (Fin 3): (cnc c m).val must be c*m*c — a transposed definition
+-- (m*c*m or c*m alone) differs; certified by the ≠-decide below.
+example : (cnc (regular (Equiv.Perm (Fin 3))) (Equiv.swap 0 1)
+    (Equiv.swap 1 2)).val =
+    Equiv.swap 0 1 * Equiv.swap 1 2 * Equiv.swap 0 1 := rfl
+example : (Equiv.swap 0 1 * Equiv.swap 1 2 * Equiv.swap 0 1 :
+    Equiv.Perm (Fin 3)) ≠ Equiv.swap 0 1 * Equiv.swap 1 2 := by decide
+-- decompState chirality: at an inr-state the tracked part acts FIRST
+-- (p · n, not n-then-p); over regular (Equiv.Perm (Fin 3)) with the
+-- state pair (p, inr n) the value is p.val * n — transposed would be
+-- n * p.val ≠.
+example :
+    decompState (regular (Equiv.Perm (Fin 3))) ⊤ (Equiv.swap 0 1)
+      (⟨Equiv.swap 0 1, (1 : Equiv.Perm (Fin 3)),
+          show Equiv.swap 0 1 = (1 : Equiv.Perm (Fin 3)) * Equiv.swap 0 1 by simp⟩,
+        .inr ⟨Equiv.swap 1 2, trivial⟩) =
+    Equiv.swap 0 1 * Equiv.swap 1 2 := rfl
+
+end Decomposition
+
 end TransMon
 end KRTheory
