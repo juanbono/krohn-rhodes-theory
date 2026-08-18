@@ -151,5 +151,137 @@ example : ↥(alternatingGroup (Fin 3)) ≺ₘ Equiv.Perm (Fin 3) :=
 example : (Equiv.Perm (Fin 3) ⧸ alternatingGroup (Fin 3)) ≺ₘ
     Equiv.Perm (Fin 3) := quotient_monoidDivides _
 
+section KaloujnineKrasner
+
+variable (G : Type) [Group G] [Finite G] (N : Subgroup G) [N.Normal]
+
+/-- The KK cocycle: front coordinate of the classical embedding at
+section point `q`: `s(q) · g · s(q·ḡ)⁻¹ ∈ N`, with `s := Quotient.out`.
+`Classical.choice` enters through `out` and stays inside this section's
+private defs. -/
+private noncomputable def kkCocycle (g : G) (q : G ⧸ N) : ↥N :=
+  ⟨q.out * g * ((q * QuotientGroup.mk g).out)⁻¹, by
+    have : QuotientGroup.mk
+        (q.out * g * ((q * QuotientGroup.mk g).out)⁻¹) = (1 : G ⧸ N) := by
+      rw [QuotientGroup.mk_mul, QuotientGroup.mk_mul, QuotientGroup.mk_inv,
+        QuotientGroup.out_eq', QuotientGroup.out_eq']
+      group
+    exact (QuotientGroup.eq_one_iff _).mp this⟩
+
+/-- The KK embedding `G → ↥N ≀ (G ⧸ N)` (monoid part): cocycle front,
+projection back. A `MonoidHom` via the cocycle identity. -/
+private noncomputable def kkEmbed :
+    G →* WreathMonoid (regular ↥N) (regular (G ⧸ N)) where
+  toFun g := ⟨fun q => kkCocycle G N g q, QuotientGroup.mk g⟩
+  map_one' := by
+    have hleft : kkCocycle G N 1 = fun _ : G ⧸ N => (1 : ↥N) := by
+      funext q
+      apply Subtype.ext
+      show q.out * (1 : G) * ((q * QuotientGroup.mk (1 : G)).out)⁻¹ = (1 : G)
+      rw [QuotientGroup.mk_one, mul_one, mul_one]
+      group
+    apply WreathMonoid.ext
+    · exact hleft
+    · show QuotientGroup.mk (1 : G) = (1 : G ⧸ N)
+      rfl
+  map_mul' := by
+    intro g h
+    have hleft : kkCocycle G N (g * h) =
+        fun q => kkCocycle G N g q * kkCocycle G N h (q * QuotientGroup.mk g) := by
+      funext q
+      apply Subtype.ext
+      show q.out * (g * h) * ((q * QuotientGroup.mk (g * h)).out)⁻¹
+          = (q.out * g * ((q * QuotientGroup.mk g).out)⁻¹) *
+            ((q * QuotientGroup.mk g).out * h *
+              ((q * QuotientGroup.mk g * QuotientGroup.mk h).out)⁻¹)
+      rw [QuotientGroup.mk_mul]
+      group
+    apply WreathMonoid.ext
+    · exact hleft
+    · show QuotientGroup.mk (g * h) = QuotientGroup.mk g * QuotientGroup.mk h
+      rfl
+
+/-- The explicit retraction recovering `g` from `kkEmbed g`:
+`s(1̄)⁻¹ · (front at 1̄) · s(back)`. -/
+private noncomputable def kkRetract
+    (w : WreathMonoid (regular ↥N) (regular (G ⧸ N))) : G :=
+  ((1 : G ⧸ N).out)⁻¹ * N.subtype (w.left (1 : G ⧸ N)) * (w.right).out
+
+private theorem kkRetract_kkEmbed (g : G) :
+    kkRetract G N (kkEmbed G N g) = g := by
+  show ((1 : G ⧸ N).out)⁻¹ *
+      ((1 : G ⧸ N).out * g * (((1 : G ⧸ N) * QuotientGroup.mk g).out)⁻¹) *
+      ((QuotientGroup.mk g : G ⧸ N)).out = g
+  rw [one_mul]
+  group
+
+/-- Kaloujnine–Krasner as a strong division [spec §3.7, blueprint
+`lem:kaloujnine-krasner`]: `(G,G) ≺ (N,N) ≀ (G⧸N, G⧸N)`. States map by
+`(n, q) ↦ n · s(q)`; the covering submonoid is the embedding's range,
+inverted by the explicit retraction. -/
+theorem kaloujnine_krasner_div :
+    regular G ≺ regular ↥N ≀ regular (G ⧸ N) := by
+  refine ⟨{ toSubmonoid := MonoidHom.mrange (kkEmbed G N)
+            stateMap := fun p => N.subtype p.1 * (p.2).out
+            monoidMap :=
+              { toFun := fun w => kkRetract G N w.1
+                map_one' := by
+                  show kkRetract G N (1 : ↥(MonoidHom.mrange (kkEmbed G N))).1 = (1 : G)
+                  have h1 : ((1 : ↥(MonoidHom.mrange (kkEmbed G N))).1 :
+                      WreathMonoid (regular ↥N) (regular (G ⧸ N))) = kkEmbed G N 1 :=
+                    (map_one (kkEmbed G N)).symm
+                  rw [h1]
+                  exact kkRetract_kkEmbed G N 1
+                map_mul' := by
+                  rintro ⟨_, g, rfl⟩ ⟨_, h, rfl⟩
+                  show kkRetract G N _
+                      = kkRetract G N (kkEmbed G N g) * kkRetract G N (kkEmbed G N h)
+                  rw [kkRetract_kkEmbed, kkRetract_kkEmbed]
+                  show kkRetract G N (kkEmbed G N g * kkEmbed G N h) = g * h
+                  rw [← map_mul]
+                  exact kkRetract_kkEmbed G N (g * h) }
+            stateMap_surj := ?_
+            monoidMap_surj := fun g =>
+              ⟨⟨kkEmbed G N g, g, rfl⟩, kkRetract_kkEmbed G N g⟩
+            equivariant := ?_ }⟩
+  · -- surjectivity of φ: g = (g * s(π g)⁻¹) * s(π g), first factor ∈ N
+    show ∀ g : G, ∃ y : ↥N × (G ⧸ N), (y.1 : G) * y.2.out = g
+    intro g
+    refine ⟨⟨⟨g * (((QuotientGroup.mk g : G ⧸ N)).out)⁻¹, ?_⟩,
+      QuotientGroup.mk g⟩, ?_⟩
+    · exact (QuotientGroup.eq_one_iff _).mp (by
+        rw [QuotientGroup.mk_mul, QuotientGroup.mk_inv,
+          QuotientGroup.out_eq']
+        group)
+    · show g * ((QuotientGroup.mk g : G ⧸ N).out)⁻¹ *
+        ((QuotientGroup.mk g : G ⧸ N)).out = g
+      group
+  · -- equivariance: φ((n,q) ⊳ kkEmbed g) = φ(n,q) * g
+    show ∀ (y : ↥N × (G ⧸ N)) (m : ↥(MonoidHom.mrange (kkEmbed G N))),
+        (y.1 : G) * y.2.out * kkRetract G N m.1
+          = N.subtype ((regular ↥N ≀ regular (G ⧸ N)).act y m.1).1
+              * ((regular ↥N ≀ regular (G ⧸ N)).act y m.1).2.out
+    rintro ⟨n, q⟩ ⟨_, g, rfl⟩
+    show (n : G) * q.out * kkRetract G N (kkEmbed G N g)
+        = ((n * kkCocycle G N g q : ↥N) : G) * (q * QuotientGroup.mk g).out
+    rw [kkRetract_kkEmbed]
+    show (n : G) * q.out * g
+        = (n : G) * (kkCocycle G N g q : G) * (q * QuotientGroup.mk g).out
+    show (n : G) * q.out * g
+        = (n : G) * (q.out * g * ((q * QuotientGroup.mk g).out)⁻¹) *
+          (q * QuotientGroup.mk g).out
+    group
+
+end KaloujnineKrasner
+
+-- Acceptance (spec §7 row 6 shape): the classic concrete instance.
+-- `decide`-guards are not possible in this section (`Quotient.out` is
+-- noncomputable); the twisted monoid laws pin the chirality instead
+-- (Covering.wreath precedent, plan Decision 6).
+example : regular (Equiv.Perm (Fin 3)) ≺
+    regular ↥(alternatingGroup (Fin 3)) ≀
+      regular (Equiv.Perm (Fin 3) ⧸ alternatingGroup (Fin 3)) :=
+  kaloujnine_krasner_div _ _
+
 end TransMon
 end KRTheory
