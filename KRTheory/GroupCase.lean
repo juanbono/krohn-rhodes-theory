@@ -343,5 +343,288 @@ example : ∃ L : List BundledFinGroup,
       H.carrier ≺ₘ Multiplicative (ZMod 5) :=
   transfGroup_div_wreath_simples _
 
+section GroupBar
+
+variable (T : TransMon)
+
+/-!
+### Computation bridges
+
+Every goal in this section sits at the projected type
+`(resetMonoid T.X ≀ regular T.M).M`, so `w.right`/`w'.right` carry the
+opaque stated type `(regular T.M).M` even though they are `T.M` values.
+Writing `g * w.right` fresh (as source syntax) then fails to elaborate:
+`HMul` instance search won't unfold `regular` to find the underlying
+`Monoid T.M` instance, and generic `rw`/`simp` lemmas over such a
+product likewise fail their own internal type-check once `w.left`/
+`w.right` appear anywhere else in the same goal (a projection on the
+opaque `w` cannot be re-verified at `rw`'s restricted transparency).
+`mulTM` sidesteps this: a monomorphic function forces the (successful)
+*application*-level unification instead of instance search, and the
+handful of lemmas below restate the algebra needed by `mul_mem'` and
+`group_bar_div` purely in terms of it, so those proofs can close by
+`exact`/`congrArg` composition rather than by rewriting the opaque
+goal directly. Follows `Reset.lean`'s `show`-then-rewrite discipline;
+`mulTM`-avoidance is the extra rung this section needs.
+-/
+
+/-- Multiplication in `T.M`, spelled as a named function rather than
+`*` for the reason above. -/
+private def mulTM (g r : T.M) : T.M := g * r
+
+/-- `mulTM` unfolds to ordinary multiplication. -/
+private theorem mulTM_def (g r : T.M) : mulTM T g r = g * r := rfl
+
+/-- `1` is neutral for `mulTM` on the left. -/
+private theorem mulTM_one_mul (r : T.M) : mulTM T 1 r = r := by
+  rw [mulTM_def, one_mul]
+
+/-- `T.act` unfolds over an `mulTM` product: the `act_mul` identity,
+restated through `mulTM` for `equivariant`'s type-A case. -/
+private theorem act_mulTM (x : T.X) (a b : T.M) :
+    T.act x (mulTM T a b) = T.act (T.act x a) b := by
+  rw [mulTM_def, T.act_mul]
+
+/-- `T.act` distributes over an `mulTM`-shaped product with the reset
+factor on the right: associativity plus `act_mul`, proved once at
+concrete types so `mul_mem'`/`map_mul'` can apply it by `exact` instead
+of `rw`-ing a goal that mixes `w.right` with other `T.act`
+applications. -/
+private theorem act_mul_mulTM (x : T.X) (a b c : T.M) :
+    T.act x (a * mulTM T b c) = T.act (T.act x (a * b)) c := by
+  rw [mulTM_def, ← mul_assoc, T.act_mul]
+
+/-- Mirror of `act_mul_mulTM` with the `mulTM`-shaped factor on the
+left instead of the right. -/
+private theorem act_mul_mulTM' (x : T.X) (a b c : T.M) :
+    T.act x (mulTM T a b * c) = T.act (T.act x (a * b)) c := by
+  rw [mulTM_def, T.act_mul]
+
+/-- The two associativity shapes above land on the same value: lets
+`mul_mem'`'s type-B·B case transport between the covering conditions
+on `w` and on `w'` without further rewriting. -/
+private theorem mulTM_swap_act (x : T.X) (a b c : T.M) :
+    T.act x (a * mulTM T b c) = T.act x (mulTM T a b * c) :=
+  (act_mul_mulTM T x a b c).trans (act_mul_mulTM' T x a b c).symm
+
+/-- The wreath product's front component of `w * w'`, read at `1` and
+re-expressed via `mulTM`: `w`'s own reading point times `w'`'s reading
+shifted by `w.right`. The identity `group_bar_div`'s `map_mul'`
+case-splits on. -/
+private theorem groupBarMap_left_one (w w' : (resetMonoid T.X ≀ regular T.M).M) :
+    (w * w').left (1 : T.M) = w.left (1 : T.M) * w'.left w.right := by
+  show w.left (1 : T.M) * w'.left (mulTM T 1 w.right) = w.left (1 : T.M) * w'.left w.right
+  exact congrArg (w.left (1 : T.M) * w'.left ·) (mulTM_one_mul T w.right)
+
+/-- The type-A/type-B classification conditions for the 2.11 covering
+(mirror of `splitSub`'s style in `Reset.lean`):
+C1 — the front component has uniform shape;
+C2 — for reset fronts, the landing state `x ⊳ (g * r)` is independent
+of the sample point `g`. -/
+private def groupBarSub : Submonoid (resetMonoid T.X ≀ regular T.M).M where
+  carrier := {w | (∀ g g' : T.M, (w.left g = Resets.id ↔ w.left g' = Resets.id)) ∧
+    ∀ (g g' : T.M) (x x' : T.X), w.left g = Resets.to x → w.left g' = Resets.to x' →
+      have r : T.M := w.right
+      T.act x (g * r) = T.act x' (g' * r)}
+  one_mem' := by
+    refine ⟨fun _ _ => Iff.rfl, fun g g' x x' hx _ => ?_⟩
+    change (Resets.id : Resets T.X) = Resets.to x at hx
+    exact absurd hx (by simp)
+  mul_mem' := by
+    rintro w w' ⟨hC1, hC2⟩ ⟨hC1', hC2'⟩
+    refine ⟨fun g g' => ?_, fun g g' x x' hgx hg'x' => ?_⟩
+    · -- C1: transport the front's id-ness between samples `g`/`g'`,
+      -- casing on `w'`'s shape at the shifted points `g * w.right` and
+      -- `g' * w.right` (the reset-selection law reduces the product's
+      -- front to whichever factor is non-`id`).
+      show w.left g * w'.left (mulTM T g w.right) = Resets.id ↔
+        w.left g' * w'.left (mulTM T g' w.right) = Resets.id
+      rcases hb : w'.left (mulTM T g w.right) with _ | y
+      · show w.left g = Resets.id ↔ w.left g' * w'.left (mulTM T g' w.right) = Resets.id
+        rcases hb' : w'.left (mulTM T g' w.right) with _ | z
+        · show w.left g = Resets.id ↔ w.left g' = Resets.id
+          exact hC1 g g'
+        · show w.left g = Resets.id ↔ (Resets.to z : Resets T.X) = Resets.id
+          exact absurd (hb'.symm.trans ((hC1' (mulTM T g w.right) (mulTM T g' w.right)).mp hb))
+            (by simp)
+      · show (Resets.to y : Resets T.X) = Resets.id ↔
+          w.left g' * w'.left (mulTM T g' w.right) = Resets.id
+        rcases hb' : w'.left (mulTM T g' w.right) with _ | z
+        · show (Resets.to y : Resets T.X) = Resets.id ↔ w.left g' = Resets.id
+          exact absurd (hb.symm.trans ((hC1' (mulTM T g w.right) (mulTM T g' w.right)).mpr hb'))
+            (by simp)
+        · show (Resets.to y : Resets T.X) = Resets.id ↔ (Resets.to z : Resets T.X) = Resets.id
+          exact ⟨fun h => absurd h (by simp), fun h => absurd h (by simp)⟩
+    · -- C2: the four cases of the case-map. A·B/B·B (`w'` supplies the
+      -- reset at the shifted point) close via `hC2'` + associativity;
+      -- B·A (`w` supplies it) closes via `hC2` + `T.act_mul`; the two
+      -- mixed shapes are impossible by C1's uniformity on `w'`.
+      change w.left g * w'.left (mulTM T g w.right) = Resets.to x at hgx
+      change w.left g' * w'.left (mulTM T g' w.right) = Resets.to x' at hg'x'
+      show T.act x (g * mulTM T w.right w'.right) = T.act x' (g' * mulTM T w.right w'.right)
+      rcases hb : w'.left (mulTM T g w.right) with _ | y
+      · rw [hb] at hgx
+        change w.left g = Resets.to x at hgx
+        rcases hb' : w'.left (mulTM T g' w.right) with _ | z
+        · rw [hb'] at hg'x'
+          change w.left g' = Resets.to x' at hg'x'
+          exact (act_mul_mulTM T x g w.right w'.right).trans
+            ((congrArg (T.act · w'.right) (hC2 g g' x x' hgx hg'x')).trans
+              (act_mul_mulTM T x' g' w.right w'.right).symm)
+        · exact absurd (hb'.symm.trans ((hC1' (mulTM T g w.right) (mulTM T g' w.right)).mp hb))
+            (by simp)
+      · rw [hb] at hgx
+        change (Resets.to y : Resets T.X) = Resets.to x at hgx
+        rcases hb' : w'.left (mulTM T g' w.right) with _ | z
+        · exact absurd (hb.symm.trans ((hC1' (mulTM T g w.right) (mulTM T g' w.right)).mpr hb'))
+            (by simp)
+        · rw [hb'] at hg'x'
+          change (Resets.to z : Resets T.X) = Resets.to x' at hg'x'
+          have hbx : w'.left (mulTM T g w.right) = Resets.to x := hb.trans hgx
+          have hb'x' : w'.left (mulTM T g' w.right) = Resets.to x' := hb'.trans hg'x'
+          exact (mulTM_swap_act T x g w.right w'.right).trans
+            ((hC2' (mulTM T g w.right) (mulTM T g' w.right) x x' hbx hb'x').trans
+              (mulTM_swap_act T x' g' w.right w'.right).symm)
+
+/-- The covering's value map: read the front at `1`. Type A (`id`)
+covers the original element `w.right`; type B (`to x`) covers the reset
+onto the landing state `x ⊳ w.right`. -/
+private def groupBarMap (w : (resetMonoid T.X ≀ regular T.M).M) :
+    BarMonoid T :=
+  match w.left (1 : T.M) with
+  | Resets.id => .of w.right
+  | Resets.to x => .reset (T.act x w.right)
+
+/-- [DKS] 2.11 [blueprint `lem:group-bar`], strengthened: neither
+faithfulness nor nonempty states are needed (spec §3.7 as amended
+2026-08-18). If every element of `T.M` is a unit, the barred `T`
+strongly divides `U(T.X) ≀ (T.M, T.M)`. The right factor is the
+REGULAR representation of `T.M` even when `T.X ≠ T.M` [DKS §2.4]. -/
+theorem group_bar_div (hg : ∀ m : T.M, IsUnit m) :
+    T.bar ≺ resetMonoid T.X ≀ regular T.M := by
+  refine ⟨{ toSubmonoid := groupBarSub T
+            stateMap := fun p => T.act p.1 p.2
+            monoidMap :=
+              { toFun := fun w => groupBarMap T w.1
+                map_one' := rfl
+                map_mul' := ?_ }
+            stateMap_surj := fun x => ⟨(x, (1 : T.M)), T.act_one x⟩
+            monoidMap_surj := ?_
+            equivariant := ?_ }⟩
+  · -- map_mul': the front of the product read at `1` is
+    -- `w.left 1 * w'.left w.right` (`groupBarMap_left_one`); case on
+    -- `w.left 1` (transported to `w`'s own reading point) and
+    -- `w'.left w.right` (transported to `w'`'s own reading point via
+    -- `hC1'`), mirroring `BarMonoid`'s four-case multiplication table.
+    rintro ⟨w, hC1, hC2⟩ ⟨w', hC1', hC2'⟩
+    show (match (w * w').left (1 : T.M) with
+        | Resets.id => BarMonoid.of (w * w').right
+        | Resets.to x => BarMonoid.reset (T.act x (w * w').right) : BarMonoid T) =
+      (match w.left (1 : T.M) with
+        | Resets.id => BarMonoid.of w.right
+        | Resets.to x => BarMonoid.reset (T.act x w.right) : BarMonoid T) *
+      (match w'.left (1 : T.M) with
+        | Resets.id => BarMonoid.of w'.right
+        | Resets.to x => BarMonoid.reset (T.act x w'.right) : BarMonoid T)
+    have hleft : (w * w').left (1 : T.M) = w.left (1 : T.M) * w'.left w.right :=
+      groupBarMap_left_one T w w'
+    have hright : (w * w').right = w.right * w'.right := wreath_mul_right w w'
+    rw [hleft, hright]
+    rcases hA : w.left (1 : T.M) with _ | x0 <;> rcases hB : w'.left w.right with _ | y0
+    · -- A·A
+      have hw'1 : w'.left (1 : T.M) = Resets.id := (hC1' 1 w.right).mpr hB
+      rw [hw'1]
+      rfl
+    · -- A·B: `w'` supplies the reset; align the sample points `w.right`
+      -- and `1` via `hC2'`, bridged by `one_mul`.
+      rcases hw'1 : w'.left (1 : T.M) with _ | y0'
+      · exact absurd ((hC1' 1 w.right).mp hw'1) (by rw [hB]; simp)
+      · show (BarMonoid.reset (T.act y0 (w.right * w'.right)) : BarMonoid T) =
+          (BarMonoid.of w.right : BarMonoid T) *
+            (BarMonoid.reset (T.act y0' w'.right) : BarMonoid T)
+        show (BarMonoid.reset (T.act y0 (w.right * w'.right)) : BarMonoid T) =
+          (BarMonoid.reset (T.act y0' w'.right) : BarMonoid T)
+        exact congrArg BarMonoid.reset
+          ((hC2' w.right 1 y0 y0' hB hw'1).trans (congrArg (T.act y0') (one_mul w'.right)))
+    · -- B·A: `w` supplies the reset; `T.act_mul` closes it directly.
+      have hw'1 : w'.left (1 : T.M) = Resets.id := (hC1' 1 w.right).mpr hB
+      rw [hw'1]
+      show (BarMonoid.reset (T.act x0 (w.right * w'.right)) : BarMonoid T) =
+        (BarMonoid.reset (T.act x0 w.right) : BarMonoid T) * (BarMonoid.of w'.right : BarMonoid T)
+      show (BarMonoid.reset (T.act x0 (w.right * w'.right)) : BarMonoid T) =
+        (BarMonoid.reset (T.act (T.act x0 w.right) w'.right) : BarMonoid T)
+      exact congrArg BarMonoid.reset (T.act_mul x0 w.right w'.right)
+    · -- B·B: same alignment as A·B.
+      rcases hw'1 : w'.left (1 : T.M) with _ | y0'
+      · exact absurd ((hC1' 1 w.right).mp hw'1) (by rw [hB]; simp)
+      · show (BarMonoid.reset (T.act y0 (w.right * w'.right)) : BarMonoid T) =
+          (BarMonoid.reset (T.act x0 w.right) : BarMonoid T) *
+            (BarMonoid.reset (T.act y0' w'.right) : BarMonoid T)
+        show (BarMonoid.reset (T.act y0 (w.right * w'.right)) : BarMonoid T) =
+          (BarMonoid.reset (T.act y0' w'.right) : BarMonoid T)
+        exact congrArg BarMonoid.reset
+          ((hC2' w.right 1 y0 y0' hB hw'1).trans (congrArg (T.act y0') (one_mul w'.right)))
+  · -- monoidMap_surj: `of m` is covered by the constant-`id` front
+    -- (type A, back `m`); `reset x0` is covered by the unit-inverse
+    -- front `g ↦ to (x0 ⊳ ↑(hg g).unit⁻¹)` (type B, back `1`) — the
+    -- unit hypothesis enters exactly here.
+    rintro (m | x0)
+    · exact ⟨⟨⟨fun _ => Resets.id, m⟩, fun _ _ => Iff.rfl, fun g g' x x' hx _ =>
+        absurd hx (by simp)⟩, rfl⟩
+    · have act_inv_eq : ∀ g : T.M,
+          T.act (T.act x0 (↑(hg g).unit⁻¹ : T.M)) g = x0 := fun g => by
+        rw [← T.act_mul, IsUnit.val_inv_mul, T.act_one]
+      refine ⟨⟨⟨fun g => Resets.to (T.act x0 (↑(hg g).unit⁻¹ : T.M)), 1⟩, ?_, ?_⟩, ?_⟩
+      · exact fun g g' => ⟨fun h => absurd h (by simp), fun h => absurd h (by simp)⟩
+      · intro g g' x x' hgx hg'x'
+        show T.act x (g * (1 : T.M)) = T.act x' (g' * (1 : T.M))
+        injection hgx with hx
+        injection hg'x' with hx'
+        rw [mul_one, mul_one, ← hx, ← hx']
+        exact (act_inv_eq g).trans (act_inv_eq g').symm
+      · show BarMonoid.reset (T.act (T.act x0 (↑(hg 1).unit⁻¹ : T.M)) (1 : T.M)) =
+          (BarMonoid.reset x0 : BarMonoid T)
+        exact congrArg BarMonoid.reset (act_inv_eq 1)
+  · -- equivariant: case on `w.left 1`'s shape, transporting to sample
+    -- `g` by C1; type A closes by `act_mulTM`, type B by `hC2` between
+    -- samples `1` and `g` (`one_mul` aligns the exponents).
+    rintro ⟨x, g⟩ ⟨w, hC1, hC2⟩
+    show T.bar.act (T.act x g) (groupBarMap T w) =
+      T.act ((resetMonoid T.X).act x (w.left g)) (mulTM T g w.right)
+    rw [show groupBarMap T w = match w.left (1 : T.M) with
+        | Resets.id => BarMonoid.of w.right
+        | Resets.to x1 => BarMonoid.reset (T.act x1 w.right) from rfl]
+    rcases hA : w.left (1 : T.M) with _ | x1
+    · have hAg : w.left g = Resets.id := (hC1 1 g).mp hA
+      show T.bar.act (T.act x g) (BarMonoid.of w.right : BarMonoid T) =
+        T.act ((resetMonoid T.X).act x (w.left g)) (mulTM T g w.right)
+      rw [hAg]
+      show T.act (T.act x g) w.right = T.act x (mulTM T g w.right)
+      exact (act_mulTM T x g w.right).symm
+    · rcases hAg : w.left g with _ | x2
+      · exact absurd ((hC1 1 g).mpr hAg) (by rw [hA]; simp)
+      · show T.bar.act (T.act x g) (BarMonoid.reset (T.act x1 w.right) : BarMonoid T) =
+          T.act x2 (mulTM T g w.right)
+        show T.act x1 w.right = T.act x2 (mulTM T g w.right)
+        exact (congrArg (T.act x1) (one_mul w.right)).symm.trans (hC2 1 g x1 x2 hA hAg)
+
+-- Sanity (spec §6): 2.11 at the regular representation of `Perm (Fin 3)`
+-- (every element a unit via `Group.isUnit`).
+example : (regular (Equiv.Perm (Fin 3))).bar ≺
+    resetMonoid (Equiv.Perm (Fin 3)) ≀ regular (Equiv.Perm (Fin 3)) :=
+  group_bar_div _ fun g : Equiv.Perm (Fin 3) => Group.isUnit g
+-- Guard: `groupBarMap` reads the front AT 1 and moves the target BY
+-- `w.right` ON THE RIGHT: for `w = ⟨const (to x₀), m⟩` the value must
+-- be `reset (x₀ ⊳ m)`; a transposed definition reading `x₀` alone (or
+-- acting on the left) gives `reset x₀ ≠`. Over the noncommutative
+-- `regular (Equiv.Perm (Fin 3))` with `x₀ := swap 0 1`, `m := swap 1 2`:
+example : groupBarMap (regular (Equiv.Perm (Fin 3)))
+    ⟨fun _ => Resets.to (Equiv.swap 0 1), Equiv.swap 1 2⟩ =
+    BarMonoid.reset (Equiv.swap 0 1 * Equiv.swap 1 2) := rfl
+example : (Equiv.swap 0 1 * Equiv.swap 1 2 : Equiv.Perm (Fin 3)) ≠
+    Equiv.swap 0 1 := by decide
+
+end GroupBar
+
 end TransMon
 end KRTheory
