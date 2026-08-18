@@ -124,11 +124,11 @@ Remark~\ref{rem:bar-gap}).
 \end{theorem}
 \begin{proof}
   The covering submonoid is the closure of the covers; the value map
-  $\psi$ sends $w$ to the unique cover of $w$ whose constructor class
+  $\psi$ sends $w$ to the unique element covered by $w$ whose constructor class
   matches $w$'s tag (existence by induction over the closure — covers
   multiply, and ShapeOK persists by Lemma~\ref{lem:decomp-tag};
   uniqueness by Lemma~\ref{lem:decomp-cover-unique}). $\psi$ is a
-  homomorphism: $\psi(w)\psi(w')$ covers $ww'$ and its constructor
+  homomorphism: $ww'$ covers $\psi(w)\psi(w')$ and its constructor
   class is the product of the tags, which is $ww'$'s tag. $\psi$ is
   onto: the generators of $\bar M$ (Lemma~\ref{lem:bar-generated}
   applied to $M = \langle N \cup \{c\}\rangle$) are the $\psi$-images of
