@@ -166,7 +166,7 @@ with `rightFactor T N` the transformation monoid on states `T.X ⊕ ↥N`, monoi
 
 > Q(T): there is a list L of factors, each either `flipFlop` or `regular G` with G a nontrivial finite simple group and `G ≺ₘ M`, such that `T̄ ≺ wreathList L`.
 
-**Claim: Q holds for all faithful finite T**, by strong induction on (|M|, |X|) lexicographically.
+**Claim: Q holds for all faithful finite T with nonempty states**, by strong induction on (|M|, |X|) lexicographically. (Nonemptiness is preserved by the recursion — X·c is nonempty when X is, and X ⊔ N always is — and is exactly what M8 needs: `krohnRhodes` carries `[Nonempty T.X]` per the note below; the empty-state faithful T has a trivial monoid and is excluded.)
 
 - **M a group**: §3.7 gives Q directly (groups produced are subquotients of G, dividing G; flip-flops from §3.5).
 - **M not a group**: pick a minimal generating set A of M; some c ∈ A is not a unit (otherwise the units form a submonoid containing A, forcing M to be a group — prelim lemma). Let N := ⟨A ∖ {c}⟩; minimality gives c ∉ N, so N is proper: |N| < |M|. Apply Thm 3.1:
