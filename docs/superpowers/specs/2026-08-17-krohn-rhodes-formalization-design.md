@@ -129,10 +129,13 @@ Prelims needed (`FiniteMonoid.lean`): in a finite monoid, an element with a one-
 
 Base case of the induction: M = G a finite group.
 
-- `compositionSeries_exists`: every finite group has a chain 1 = G₀ ⊴ G₁ ⊴ … ⊴ Gₙ = G with simple quotients. (Survey Mathlib's Jordan–Hölder framework first; existence-only is a short direct induction via a maximal proper normal subgroup if the framework doesn't fit.)
+- Composition-series existence is FUSED into the induction (amended 2026-08-18 during M6 planning): Mathlib has no `JordanHolderLattice (Subgroup G)` instantiation, its framework covers uniqueness (a §2 non-goal) rather than existence, and the only consumer is the induction below — which instead peels one maximal proper normal subgroup per step (prelims: `exists_maximal_normal_subgroup`, `isSimpleGroup_quotient`). No standalone series artifact.
 - `kaloujnine_krasner_div`: for N ⊴ G, `regular G ≺ regular N ≀ regular (G ⧸ N)`. Uses a classical section of the quotient map; equivariance is the classical Kaloujnine–Krasner computation.
 - `transfGroup_div_wreath_simples`: chaining the above along a composition series (induction on its length, glued by `StrongDivides.wreath` and `wreathList_append`): `regular G ≺ wreathList` of `regular Gᵢ` with each Gᵢ simple and `Gᵢ ≺ₘ G` (each Gᵢ is a quotient of a subgroup of G).
 - ([DKS] 2.11) `group_bar_div`: `(X, G)̄ ≺ (X, U(X)) ≀ (G, G)` for a faithful transformation group (X, G). Note the right factor is the *regular* (G, G) even when X ≠ G.
+- **Encoding (amended 2026-08-18):** a "transformation group" is a `TransMon` `T` with the Prop `∀ m : T.M, IsUnit m` — a `[Group T.M]` instance would diamond with the bundled `monoidM`. This Prop is exactly the M8 branch predicate (group case vs `¬IsUnit c`). Abstract-group statements quantify `[Group G] [Finite G]` and use `regular G`.
+- **`group_bar_div` needs neither faithfulness nor nonempty states** (amended 2026-08-18): the covering construction uses only `∀ m, IsUnit m`; statement `T.bar ≺ resetMonoid T.X ≀ regular T.M`.
+- Factors are carried as `BundledFinGroup` (carrier + `[Group]` + `[Finite]`), introduced in `GroupCase.lean` (moved early from `KrohnRhodes.lean`; M8's `KRPrime.grp` reuses it).
 
 Combined group case: `(X,G)̄ ≺ flip-flops ≀ simple group factors`, all groups dividing G.
 
@@ -233,9 +236,9 @@ structure TransMon : Type 1 where
 | `TransMon/Bar.lean` | `BarMonoid` (fresh inductive; `of`/`reset`), `bar`, `BarMonoid.ofHom`, `bar_divides : T ≺ T.bar` (`bar_mono` confirmed unneeded, not built) |
 | `TransMon/Reset.lean` | `Resets` (fresh inductive; `id`/`to`), `resetMonoid` (= `U(X)`), `flipFlop`, `reset_split`, `reset_div_flipFlops` ([DKS] 2.12) |
 | `TransMon/LocalDivisor.lean` | `localDivisor`, monoid/action instances, `localDivisor_faithful` (2.13), `localDivisor_card_lt`, `localDivisor_divides` |
-| `GroupCase.lean` | `compositionSeries_exists` (or Mathlib reuse), `kaloujnine_krasner_div`, `transfGroup_div_wreath_simples`, `group_bar_div` (2.11) |
+| `GroupCase.lean` | `BundledFinGroup`, `exists_maximal_normal_subgroup`, `isSimpleGroup_quotient`, `subgroup_monoidDivides`, `quotient_monoidDivides`, `card_subgroup_lt_of_ne_top`, `regular_div_trivialTM_of_subsingleton`, `kaloujnine_krasner_div`, `transfGroup_div_wreath_simples`, `group_bar_div` (2.11) |
 | `Decomposition.lean` | [DKS] Thm 3.1 `decomposition` and its covering construction |
-| `KrohnRhodes.lean` | `BundledFinGroup`, `KRPrime`, `KRPrime.toTransMon`, the induction, `krohnRhodes`, `krohnRhodes_monoid` |
+| `KrohnRhodes.lean` | `KRPrime` (consuming `GroupCase.BundledFinGroup`), `KRPrime.toTransMon`, the induction, `krohnRhodes`, `krohnRhodes_monoid` |
 | `SemigroupVersion.lean` | `SemigroupDivides` (`≺ₛ`), `monoidDivides.semigroupDivides`, `withOne` transfer, `krohnRhodes_semigroup` |
 
 ## 5. Project layout

@@ -1,4 +1,3 @@
-import KRTheory.FiniteMonoid
 import KRTheory.TransMon.Division
 
 /-!
