@@ -101,7 +101,10 @@ for the opaque projections `T.M`/`T.X` there is nothing to find — unlike
 a bare type parameter, `T.M`/`T.X` cannot be generalized into a fresh
 instance argument by the handler itself. This is the conditional
 instance the handler would have produced had it been able to, obtained
-the same way `Fintype` is above: transported across `equivSum`. -/
+the same way `Fintype` is above: transported across `equivSum`.
+At semireducible concrete transformation monoids the conditional hypotheses are not
+found by search on the projected types; bridge with e.g. `inferInstanceAs (DecidableEq
+(BarMonoid (regular (ZMod 3)))` after a `show` at the unfolded type. -/
 instance [DecidableEq T.X] [DecidableEq T.M] : DecidableEq (BarMonoid T) :=
   equivSum.decidableEq
 

@@ -19,6 +19,11 @@ def MonoidDivides (M N : Type) [Monoid M] [Monoid N] : Prop :=
 @[inherit_doc]
 scoped infix:50 " ≺ₘ " => MonoidDivides
 
+-- No `Trans` instance (hence no `calc` support) is possible for `≺ₘ`:
+-- `Trans` wants a bare relation `α → β → Sort u`, and `MonoidDivides`
+-- carries `[Monoid _]` binders between its arguments. Chains use `.trans`.
+-- (`≺` on `TransMon` has no such binders; it does get `calc` support.)
+
 namespace MonoidDivides
 
 variable {M N P : Type} [Monoid M] [Monoid N] [Monoid P]
@@ -222,6 +227,7 @@ group case. -/
 noncomputable def Covering.sect {S T : TransMon} (c : Covering S T) :
     S.X → T.X := Function.surjInv c.stateMap_surj
 
+/-- The defining property of the section: `stateMap` retracts it. -/
 @[simp]
 theorem Covering.stateMap_sect {S T : TransMon} (c : Covering S T)
     (x : S.X) : c.stateMap (c.sect x) = x :=

@@ -16,6 +16,8 @@ Everything here is computable.
 The second half of the file is the one-point splitting `reset_split`
 [DKS Lemma 2.12, blueprint `lem:reset-split`], the inductive step that
 peels a single state off a reset monoid into a flip-flop factor.
+The file closes with the DKS 2.12 induction itself (`reset_div_flipFlops`),
+peeling one state per flip-flop factor.
 -/
 
 namespace KRTheory
@@ -37,7 +39,7 @@ neutral. (Left factor acts first, and a later reset overwrites.) -/
 instance : Monoid (Resets X) where
   mul a b := match b with | .id => a | .to y => .to y
   one := .id
-  mul_assoc a b c := by cases c <;> cases b <;> rfl
+  mul_assoc a b c := by cases c <;> rfl
   one_mul a := by cases a <;> rfl
   mul_one _ := rfl
 
@@ -110,7 +112,7 @@ monoid records "and if not, on which other point?". The state map
 and the covering submonoid is cut out by the three conditions that make
 that atlas consistent (see `splitSub`).
 
-The four private helpers below carry the covering's data. They are
+The five private helpers below carry the covering's data. They are
 stated for an *arbitrary* finite `Y` equipped with a map `f : Y → X`
 hitting everything but `x₀`, rather than for `Y = {x // x ≠ x₀}`
 directly, for two reasons.
@@ -166,8 +168,8 @@ component is constant (C1), whose front component is a genuine reset
 whenever the back component resets the bit to `false` (C2), and whose
 front component is the identity whenever the back component is (C3).
 C1 makes `splitMap` well defined, C2 rules out its junk value, and C3
-pins the identity fibre — together they are exactly closure under the
-twisted multiplication. -/
+pins the identity fibre — together they are closed under the twisted
+multiplication and are precisely what `splitMap` needs to be a homomorphism. -/
 private def splitSub (Y : Type) [Fintype Y] :
     Submonoid (resetMonoid Y ≀ flipFlop).M where
   carrier := {w | (∀ b b', w.left b = w.left b') ∧
@@ -232,6 +234,7 @@ private def splitCovering {X Y : Type} [Fintype X] [Fintype Y] [Nonempty Y]
         (n.1 : (resetMonoid Y ≀ flipFlop).M).right
       map_one' := rfl
       map_mul' := by
+        -- The left factor's membership conditions are discarded: the product's value only reads w.left true and w.right, and it is w''s conditions that decide which splitMap branch fires.
         rintro ⟨w, -, -, -⟩ ⟨w', hw1', hw2', hw3'⟩
         show splitMap x₀ f (w.left true * w'.left (flipFlop.act true w.right))
             (w.right * w'.right) =
