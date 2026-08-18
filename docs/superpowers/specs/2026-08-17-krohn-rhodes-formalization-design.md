@@ -131,7 +131,7 @@ Base case of the induction: M = G a finite group.
 
 - `compositionSeries_exists`: every finite group has a chain 1 = G₀ ⊴ G₁ ⊴ … ⊴ Gₙ = G with simple quotients. (Survey Mathlib's Jordan–Hölder framework first; existence-only is a short direct induction via a maximal proper normal subgroup if the framework doesn't fit.)
 - `kaloujnine_krasner_div`: for N ⊴ G, `regular G ≺ regular N ≀ regular (G ⧸ N)`. Uses a classical section of the quotient map; equivariance is the classical Kaloujnine–Krasner computation.
-- `transfGroup_div_wreath_simples`: chaining the above along a composition series (induction on its length, glued by `wreath_div_wreath` and `wreathList_append`): `regular G ≺ wreathList` of `regular Gᵢ` with each Gᵢ simple and `Gᵢ ≺ₘ G` (each Gᵢ is a quotient of a subgroup of G).
+- `transfGroup_div_wreath_simples`: chaining the above along a composition series (induction on its length, glued by `StrongDivides.wreath` and `wreathList_append`): `regular G ≺ wreathList` of `regular Gᵢ` with each Gᵢ simple and `Gᵢ ≺ₘ G` (each Gᵢ is a quotient of a subgroup of G).
 - ([DKS] 2.11) `group_bar_div`: `(X, G)̄ ≺ (X, U(X)) ≀ (G, G)` for a faithful transformation group (X, G). Note the right factor is the *regular* (G, G) even when X ≠ G.
 
 Combined group case: `(X,G)̄ ≺ flip-flops ≀ simple group factors`, all groups dividing G.
@@ -173,12 +173,12 @@ theorem krohnRhodes (T : TransMon) (hT : T.Faithful) :
       ∀ p ∈ L, ∀ G, p = .grp G → IsSimpleGroup G.carrier ∧ G.carrier ≺ₘ T.M
 
 /-- Abstract finite monoid form (via the regular representation). -/
-theorem krohnRhodes_monoid (M : Type) [Monoid M] [Fintype M] :
+theorem krohnRhodes_monoid (M : Type) [Monoid M] [Finite M] :
     ∃ L : List KRPrime, M ≺ₘ (wreathList (L.map KRPrime.toTransMon)).M ∧
       ∀ p ∈ L, ∀ G, p = .grp G → IsSimpleGroup G.carrier ∧ G.carrier ≺ₘ M
 
 /-- Classical 1965 semigroup form (via WithOne S = S¹). -/
-theorem krohnRhodes_semigroup (S : Type) [Semigroup S] [Fintype S] :
+theorem krohnRhodes_semigroup (S : Type) [Semigroup S] [Finite S] :
     ∃ L : List KRPrime, S ≺ₛ (wreathList (L.map KRPrime.toTransMon)).M ∧
       ∀ p ∈ L, ∀ G, p = .grp G → IsSimpleGroup G.carrier ∧ G.carrier ≺ₛ S
 ```
@@ -197,9 +197,9 @@ For `krohnRhodes_semigroup`: S ≺ₛ S¹ = `WithOne S` (Mathlib), apply the mon
 structure TransMon : Type 1 where
   X : Type
   M : Type
-  [fintypeX : Fintype X]
+  [finiteX : Finite X]
   [monoidM : Monoid M]
-  [fintypeM : Fintype M]
+  [finiteM : Finite M]
   act : X → M → X
   act_one : ∀ x, act x 1 = x
   act_mul : ∀ x m n, act x (m * n) = act (act x m) n
@@ -210,7 +210,8 @@ structure TransMon : Type 1 where
 - **Bundled**, because the theorem quantifies over a `List` of transformation monoids and constructions (`≀`, bar, local divisor) are functions `TransMon → … → TransMon`. Unbundled carriers cannot form lists.
 - **Raw right action** (not `MulAction Mᵐᵒᵖ X`, not a left action): formulas match [DKS] symbol-for-symbol, proof states stay free of `op/unop` noise, and this matches Mathlib's own `DFA.step : σ → α → σ` design. Cost accepted: a self-written ~30-line action lemma kit. Adapters to Mathlib's `MulAction` can be derived later if ever needed; the reverse retrofit would not be possible.
 - Carriers in `Type` (no universe polymorphism): everything is finite; `Type 1` structure, `List TransMon` works.
-- `Fintype` fields registered as instances via `attribute [instance]`. `DecidableEq` is **not** bundled; proofs use classical decidability locally (`open scoped Classical` or `Classical.dec`), while concrete examples (`Bool`, `Fin n`, `Option _`) remain computable through their native instances.
+- **Finiteness is bundled as `Finite` (Prop), not `Fintype` (data).** *Amended 2026-08-17 during M5 planning, superseding the original `Fintype`-field choice, on milestone-4 evidence:* `Fintype {x // P x}` demands `DecidablePred P`, which forced `reset_split` into a classically-decorated statement repaired at each call site by `convert` + `Subsingleton (Fintype _)`, and the local divisor's carriers (`cM ∩ Mc`, `X·c`) are subtypes twice over. `Finite` fields cost nothing classically (`Subtype.finite` needs no decidability), proof irrelevance makes instance mismatch impossible, and `wreath` stops being `noncomputable` (its only obstruction was filling a `Fintype` field for a function type). Cardinality is uniformly `Nat.card`. Fields registered as instances via `attribute [instance]` as before.
+- `DecidableEq` is **not** bundled; proofs use classical decidability locally (`open scoped Classical` or `Classical.dec`), while concrete examples (`Bool`, `Fin n`, `Option _`) remain computable through their native instances. Note (post-amendment): examples stated at projected types such as `(regular (ZMod 3)).X` use `Nat.card`, since instance search will not unfold the semireducible projection to reach native `Fintype` data.
 - `Faithful` is a `Prop`-valued predicate (likely a class) on `TransMon`, not a field: the bar and wreath constructions do not preserve it uniformly, and non-faithful objects appear naturally mid-proof.
 
 ### 4.2 Conventions
@@ -257,9 +258,9 @@ kr-theory/
 
 ## 6. Process and infrastructure
 
-- **Scaffold**: `lake` project depending on Mathlib (current stable), toolchain pinned to Mathlib's choice (elan auto-switches), `lake exe cache get` for prebuilt oleans. Git from day one; the repo can be pushed to GitHub whenever the user wants (CI activates then).
+- **Scaffold**: `lake` project depending on Mathlib (current stable), toolchain pinned to Mathlib's choice (elan auto-switches), `lake exe cache get` for prebuilt oleans. Git from day one; remote `github.com/juanbono/krohn-rhodes-theory` added 2026-08-17 — publishing (push, fast-forward `main`, CI activation, axiom-certificate and blueprint jobs) is a milestone-5 task.
 - **Blueprint-driven development** (`leanblueprint`): for each milestone, the LaTeX chapter (definitions, statements, informal proofs, `\lean{}` / `\leanok` annotations) is written *before* the Lean. The dependency graph is the progress dashboard. This is the learning loop: informal proof through your hands first, then formalize.
-- **Sanity-check discipline** (the formalization analogue of TDD): a definition is not "done" until concrete examples witness it behaving correctly — e.g. `flipFlop` has exactly 3 elements; `x ⊳ (reset x₀) = x₀`; the wreath of two flip-flops has 27 (3² · 3) monoid elements (`decide`/`rfl`/`Fintype.card` computations); `regular (ZMod 3)` is faithful. Wrong-but-consistent definitions are the main way formalizations lose months; examples catch them at birth.
+- **Sanity-check discipline** (the formalization analogue of TDD): a definition is not "done" until concrete examples witness it behaving correctly — e.g. `flipFlop` has exactly 3 elements; `x ⊳ (reset x₀) = x₀`; the wreath of two flip-flops has 27 (3² · 3) monoid elements (`decide`/`rfl`/`Nat.card` computations bridged to native instances); `regular (ZMod 3)` is faithful. Wrong-but-consistent definitions are the main way formalizations lose months; examples catch them at birth.
 - **CI**: GitHub Actions with `lean-action` (build + Mathlib cache). A final job checks the axiom certificate: `#print axioms` of the three main theorems must contain at most `Classical.choice`, `propext`, `Quot.sound`. Sorries allowed on feature branches, never on `main` past their milestone.
 - **Workflow**: milestone-by-milestone; each milestone = blueprint chapter → Lean skeleton with `sorry`-stubs and examples → proofs → review → commit. Superpowers process skills (TDD-analogue above, verification-before-completion, code review) apply.
 
@@ -272,7 +273,7 @@ kr-theory/
 | 2 | Division | `Division.lean` | preorders + glue lemma proved |
 | 3 | Wreath | `Wreath.lean` | monoid instance, monotonicity, `wreath_assoc_div`, `wreathList_append` |
 | 4 | Bar + resets | `Bar.lean`, `Reset.lean` | [DKS] 2.12 proved |
-| 5 | Local divisor | `FiniteMonoid.lean`, `LocalDivisor.lean` | 2.13 + card-lt + divides proved |
+| 5 | Local divisor | `Finite` bundling swap (§4.1 amendment); repo publish + CI certificate/blueprint jobs; `FiniteMonoid.lean`, `LocalDivisor.lean` | 2.13 + card-lt + divides proved; CI green on published repo |
 | 6 | Group case | `GroupCase.lean` | `group_bar_div` + `transfGroup_div_wreath_simples` |
 | 7 | **Theorem 3.1** | `Decomposition.lean` (blueprint chapter first) | `decomposition` proved |
 | 8 | Main induction | `KrohnRhodes.lean` | `krohnRhodes`, `krohnRhodes_monoid` |
@@ -289,7 +290,8 @@ Milestones 4, 5, 6 are mutually independent and may be reordered. Estimated tota
 | Degenerate cases (`|X| ≤ 1`, trivial M) may break faithfulness side conditions | Dedicated audit task in milestone 4; keep bars on the left of ≺ |
 | Notation clashes (`≀`, `≺`) with Mathlib | All notation scoped; checked at milestone 1 |
 | Well-definedness plumbing in `localDivisor` (`Classical.choose`) may be brittle | Isolate in dedicated `choose`-independence lemmas; API never exposes the choice |
-| `wreath_div_wreath` needs sections of surjections (choice) | Fine classically; noted so nobody expects computability there |
+| `StrongDivides.wreath` needs sections of surjections (choice) | Fine classically; noted so nobody expects computability there |
+| The `Fintype`→`Finite` swap (§4.1 amendment) may surface semireducible-projection elaboration surprises | Dedicated early M5 task with known adjustment sites enumerated in the plan; acceptance = green build + unchanged axiom certificate before any local-divisor work builds on it |
 | Bundled-structure instance friction (`attribute [instance]` fields) | Standard Mathlib pattern (`Bundled`); milestone 1 validates early |
 
 ## 9. Future ideas ledger (post-v1)
