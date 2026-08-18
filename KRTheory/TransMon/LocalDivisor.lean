@@ -13,9 +13,10 @@ division) are what make that descent sound — see spec §3.6.
 The carrier is a fresh structure, NOT a subtype of `M`: the product is
 not the restriction of `M`'s product, so a `Monoid` instance on a
 subtype would be a diamond trap (same rationale as `WreathMonoid`).
-The product reads a decomposition witness via `Classical.choose`; the
-`mul_spec`/`mul_spec_right` lemmas quarantine that choice — nothing
-downstream ever mentions it (spec §8 mitigation).
+Two sites read a decomposition witness via `Classical.choose`: the
+product (quarantined by `mul_spec`/`mul_spec_right`) and the action
+(quarantined by `localDivisor_act_spec`) — nothing downstream ever
+mentions the choice directly (spec §8 mitigation).
 -/
 
 namespace KRTheory
@@ -77,8 +78,8 @@ section
 
 /-- Bootstrap-only: the twisted product, scoped to this section so
 `mul_assoc`/`one_mul`/`mul_one` can use `*` notation and `mul_spec_aux`
-below. Shadowed in visibility by the `Monoid` instance's derived `Mul`
-once the section ends. -/
+below. Drops out of instance search once the section ends, leaving the
+`Monoid` instance's derived `Mul` as the only resolution path. -/
 private noncomputable local instance instMulAux : Mul (LocalDivisor c) where
   mul u v :=
     { val := Classical.choose u.mem_right * v.val
@@ -335,7 +336,7 @@ not in the carrier: `1 = c * m` would make `c` a unit by finiteness
 theorem localDivisor_card_lt {c : M} (hc : ¬ IsUnit c) :
     Nat.card (LocalDivisor c) < Nat.card M := by
   rw [Nat.card_congr (LocalDivisor.equivSubtype (c := c))]
-  refine Nat.card_subtype_lt (x := (1 : M)) ?_
+  refine Finite.card_subtype_lt (x := (1 : M)) ?_
   rintro ⟨⟨m, hm⟩, -⟩
   -- hm : (1 : M) = c * m — c is right-invertible, hence (finite) a unit
   exact hc ⟨⟨c, m, hm.symm, mul_eq_one_comm.mp hm.symm⟩, rfl⟩

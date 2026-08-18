@@ -3,11 +3,6 @@
 -- additionally carries the `≀`-division calculus that the DKS 2.12
 -- induction consumes downstream.
 import KRTheory.TransMon.WreathDivision
--- For `Nat.card_subtype_lt`, consumed by the strong-induction step of
--- `reset_div_flipFlops` below. `KRTheory.lean` importing this first is a
--- convenience for whole-project builds; it does not reach this file's
--- own compilation, which is driven solely by its own `import`s.
-import KRTheory.FiniteMonoid
 
 /-!
 # Reset monoids and the flip-flop
@@ -405,8 +400,7 @@ theorem reset_div_flipFlops (X : Type) [Finite X] [Nonempty X] :
         exact ⟨⟨y, hy⟩⟩
       obtain ⟨n, hn⟩ := ih (Nat.card {x : X // x ≠ x₀})
         (by
-          have := Nat.card_subtype_lt (α := X) (p := (· ≠ x₀))
-            (x := x₀) (by simp)
+          have := Finite.card_subtype_lt (p := (· ≠ x₀)) (x := x₀) (by simp)
           omega)
         {x : X // x ≠ x₀} rfl
       refine ⟨n + 1, ?_⟩

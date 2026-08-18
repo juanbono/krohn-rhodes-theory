@@ -28,9 +28,10 @@
 \end{proof}
 
 \begin{lemma}[Strict subtype count]\label{lem:card-subtype-lt}
-  \lean{KRTheory.Nat.card_subtype_lt}\leanok
+  \lean{Finite.card_subtype_lt}\leanok
   A predicate on a finite type that fails at some point carves out a
-  strictly smaller subtype.
+  strictly smaller subtype. (Supplied by Mathlib; recorded because
+  Lemma~\ref{lem:localdiv-card} hinges on it.)
 \end{lemma}
 \begin{proof}
   Transport of the corresponding \texttt{Fintype} fact along a
