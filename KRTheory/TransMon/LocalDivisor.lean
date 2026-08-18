@@ -68,7 +68,9 @@ closes, these local instances drop out of search entirely, leaving the
 `mul_spec` onward and for downstream files — matching what a single
 bundled instance would have provided, had self-reference through
 notation been possible. The `mul` field's body is untouched from the
-design: `Classical.choose` appears here, and only here.
+design: `Classical.choose` appears in this definition and only here —
+the two `mul_spec` proofs unfold it, and nothing else in the file or
+downstream mentions it.
 -/
 
 section
