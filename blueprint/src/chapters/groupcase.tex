@@ -1,13 +1,13 @@
 \chapter{The group case}\label{ch:groupcase}
 
 \begin{definition}[Bundled finite group]\label{def:bundledfingroup}
-  \lean{KRTheory.TransMon.BundledFinGroup}
+  \lean{KRTheory.TransMon.BundledFinGroup}\leanok
   A carrier type together with group and finiteness structure --- the
   factor datatype for group decompositions.
 \end{definition}
 
 \begin{lemma}[Maximal normal subgroup]\label{lem:max-normal}
-  \lean{KRTheory.TransMon.exists_maximal_normal_subgroup}
+  \lean{KRTheory.TransMon.exists_maximal_normal_subgroup}\leanok
   Every nontrivial finite group has a proper normal subgroup maximal
   among proper normal subgroups.
 \end{lemma}
@@ -17,7 +17,7 @@
 \end{proof}
 
 \begin{lemma}[Simple quotient]\label{lem:simple-quotient}
-  \lean{KRTheory.TransMon.isSimpleGroup_quotient}
+  \lean{KRTheory.TransMon.isSimpleGroup_quotient}\leanok
   \uses{lem:max-normal}
   If $N \trianglelefteq G$ is maximal proper normal, $G/N$ is simple.
 \end{lemma}
@@ -31,7 +31,7 @@
 
 \begin{lemma}[Division feeders]\label{lem:subgroup-mdiv}
   \lean{KRTheory.TransMon.subgroup_monoidDivides,
-        KRTheory.TransMon.quotient_monoidDivides}
+        KRTheory.TransMon.quotient_monoidDivides}\leanok
   \uses{def:mdiv}
   $N \prec_m G$ for a subgroup, $G/N \prec_m G$ for a normal subgroup.
 \end{lemma}
@@ -41,7 +41,7 @@
 \end{proof}
 
 \begin{lemma}[Kaloujnine--Krasner]\label{lem:kaloujnine-krasner}
-  \lean{KRTheory.TransMon.kaloujnine_krasner_div}
+  \lean{KRTheory.TransMon.kaloujnine_krasner_div}\leanok
   \uses{def:regular,def:wreath,def:sdiv,lem:subgroup-mdiv}
   For $N \trianglelefteq G$:
   $(G,G) \prec (N,N) \wr (G/N,\, G/N)$.
@@ -64,7 +64,7 @@
 \end{proof}
 
 \begin{lemma}[Decomposition into simple factors]\label{lem:group-series}
-  \lean{KRTheory.TransMon.transfGroup_div_wreath_simples}
+  \lean{KRTheory.TransMon.transfGroup_div_wreath_simples}\leanok
   \uses{def:bundledfingroup,lem:max-normal,lem:simple-quotient,
         lem:subgroup-mdiv,lem:kaloujnine-krasner,lem:wreath-mono,
         lem:wreathList-append,def:wreathList}
@@ -84,7 +84,7 @@
 \end{proof}
 
 \begin{lemma}[{[DKS] 2.11}]\label{lem:group-bar}
-  \lean{KRTheory.TransMon.group_bar_div}
+  \lean{KRTheory.TransMon.group_bar_div}\leanok
   \uses{def:bar,def:resets,def:regular,def:wreath,def:sdiv}
   If every element of $T$'s monoid is a unit, then
   $\bar T \prec (X, U(X)) \wr (M, M)$.
