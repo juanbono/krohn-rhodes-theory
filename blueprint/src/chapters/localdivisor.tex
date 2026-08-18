@@ -1,0 +1,62 @@
+\chapter{Local divisors}\label{ch:localdivisor}
+
+\begin{definition}[Local divisor]\label{def:localdiv}
+  \lean{KRTheory.TransMon.LocalDivisor}
+  For $c \in M$: carrier $M_c := cM \cap Mc$, product
+  $(mc) \circ (cn) := mcn$, identity $c$. Well defined: if
+  $u = mc = m'c$ and $v = cn$, then
+  $mv = m(cn) = (mc)n = un = (m'c)n = m'v$ --- the product depends only
+  on $u$ and $v$, not on the chosen decomposition. Note $\circ$ is
+  \emph{not} the restriction of the ambient product.
+\end{definition}
+
+\begin{definition}[Local divisor as a transformation monoid]
+  \label{def:localdiv-tm}
+  \lean{KRTheory.TransMon.localDivisor}
+  \uses{def:localdiv,def:transmon}
+  For a transformation monoid $(X, M)$ and $c \in M$: states
+  $X_c := X \cdot c$, action $\xi \circ (cm) := \xi \cdot m$. Well
+  defined and lands in $X_c$: writing $\xi = y \cdot c$ and
+  $u = cm = m'c$, we get
+  $\xi \cdot m = y \cdot (cm) = y \cdot (m'c) = (y \cdot m') \cdot c$.
+\end{definition}
+
+\begin{lemma}[{[DKS] 2.13}: faithfulness]\label{lem:localdiv-faithful}
+  \lean{KRTheory.TransMon.localDivisor_faithful}
+  \uses{def:localdiv-tm,def:faithful}
+  If $(X, M)$ is faithful, so is $(X_c, M_c)$.
+\end{lemma}
+\begin{proof}
+  Let $u = cm_u$, $v = cm_v$ in $M_c$ act equally on all of $X_c$. For
+  every $x \in X$: $x \cdot u = (x \cdot c) \cdot m_u =
+  (x \cdot c) \circ u = (x \cdot c) \circ v = x \cdot v$, and
+  faithfulness of $(X, M)$ gives $u = v$.
+\end{proof}
+
+\begin{lemma}[Cardinality drop]\label{lem:localdiv-card}
+  \lean{KRTheory.TransMon.localDivisor_card_lt}
+  \uses{def:localdiv,lem:finite-unit,lem:card-subtype-lt}
+  If $c$ is not a unit, then $|M_c| < |M|$.
+\end{lemma}
+\begin{proof}
+  $1 \notin M_c$: from $1 = cm$ finiteness (Lemma~\ref{lem:finite-unit})
+  makes $c$ a unit. So the carrier misses $1$ and
+  Lemma~\ref{lem:card-subtype-lt} applies.
+\end{proof}
+
+\begin{lemma}[Division]\label{lem:localdiv-divides}
+  \lean{KRTheory.TransMon.localDivisor_divides}
+  \uses{def:localdiv,def:mdiv}
+  $M_c \prec_m M$. This is what makes the strong form of Krohn--Rhodes
+  survive recursion: simple groups produced inside $M_c$ divide $M_c$,
+  hence divide $M$.
+\end{lemma}
+\begin{proof}
+  $N := \{\, m \mid cm \in Mc \,\}$ is a submonoid of $M$
+  ($c1 = 1c$; if $cm = m_2 c$ and $cn = n_2 c$ then
+  $c(mn) = m_2 c n = m_2 n_2 c$), and $\psi(m) := cm$ is a
+  homomorphism $N \to M_c$: $\psi(m)\circ\psi(n) = (m_2 c)\circ(cn)
+  = m_2 c n = c(mn) = \psi(mn)$, with $\psi(1) = c$ the identity of
+  $M_c$. Surjectivity: $u = cm = m_2 c \in M_c$ gives $m \in N$ and
+  $\psi(m) = u$.
+\end{proof}
