@@ -168,6 +168,49 @@ theorem StrongDivides.trans {S T U : TransMon}
   obtain ⟨c₁⟩ := h₁; obtain ⟨c₂⟩ := h₂
   exact ⟨c₁.comp c₂⟩
 
+open scoped Classical in
+/-- `c.monoidMap` totalized to all of `T.M`, sending non-members to `1`.
+Lets fiber-compatibility conditions be stated without dependent
+membership proofs (used by wreath monotonicity). Classical `dite`. -/
+noncomputable def Covering.extMap {S T : TransMon} (c : Covering S T) :
+    T.M → S.M := fun t =>
+  if h : t ∈ c.toSubmonoid then c.monoidMap ⟨t, h⟩ else 1
+
+/-- `extMap` agrees with `c.monoidMap` on members of the covering
+submonoid — the defining case of the totalization. -/
+theorem Covering.extMap_of_mem {S T : TransMon} (c : Covering S T)
+    {t : T.M} (h : t ∈ c.toSubmonoid) :
+    c.extMap t = c.monoidMap ⟨t, h⟩ := dite_eq_left h
+
+/-- `extMap` recovers `c.monoidMap` exactly on (the coercion of) the
+covering submonoid. -/
+theorem Covering.extMap_coe {S T : TransMon} (c : Covering S T)
+    (n : c.toSubmonoid) : c.extMap ↑n = c.monoidMap n := by
+  rw [c.extMap_of_mem n.2]
+
+/-- The totalization `extMap` preserves the unit: `1` lies in every
+covering submonoid, where `extMap` agrees with the monoid hom
+`c.monoidMap`. -/
+theorem Covering.extMap_one {S T : TransMon} (c : Covering S T) :
+    c.extMap 1 = 1 := (c.extMap_coe 1).trans (map_one _)
+
+/-- `extMap` is multiplicative on pairs drawn from the covering
+submonoid, inherited from `c.monoidMap`'s multiplicativity there. -/
+theorem Covering.extMap_mul_of_mem {S T : TransMon} (c : Covering S T)
+    {a b : T.M} (ha : a ∈ c.toSubmonoid) (hb : b ∈ c.toSubmonoid) :
+    c.extMap (a * b) = c.extMap a * c.extMap b := by
+  rw [c.extMap_of_mem (mul_mem ha hb), c.extMap_of_mem ha, c.extMap_of_mem hb,
+    ← map_mul]
+  rfl
+
+/-- The covering's equivariance condition, restated through `extMap` for
+elements of the covering submonoid. -/
+theorem Covering.act_extMap {S T : TransMon} (c : Covering S T)
+    {t : T.M} (h : t ∈ c.toSubmonoid) (y : T.X) :
+    S.act (c.stateMap y) (c.extMap t) = c.stateMap (T.act y t) := by
+  rw [c.extMap_of_mem h]
+  exact c.equivariant y ⟨t, h⟩
+
 -- Sanity checks (spec §6).
 example : trivialTM ≺ trivialTM := .refl _
 example : (regular (ZMod 3)) ≺ (regular (ZMod 3)) := .refl _
