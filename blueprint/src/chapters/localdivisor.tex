@@ -1,7 +1,7 @@
 \chapter{Local divisors}\label{ch:localdivisor}
 
 \begin{definition}[Local divisor]\label{def:localdiv}
-  \lean{KRTheory.TransMon.LocalDivisor}
+  \lean{KRTheory.TransMon.LocalDivisor}\leanok
   For $c \in M$: carrier $M_c := cM \cap Mc$, product
   $(mc) \circ (cn) := mcn$, identity $c$. Well defined: if
   $u = mc = m'c$ and $v = cn$, then
@@ -12,7 +12,7 @@
 
 \begin{definition}[Local divisor as a transformation monoid]
   \label{def:localdiv-tm}
-  \lean{KRTheory.TransMon.localDivisor}
+  \lean{KRTheory.TransMon.localDivisor}\leanok
   \uses{def:localdiv,def:transmon}
   For a transformation monoid $(X, M)$ and $c \in M$: states
   $X_c := X \cdot c$, action $\xi \circ (cm) := \xi \cdot m$. Well
@@ -22,7 +22,7 @@
 \end{definition}
 
 \begin{lemma}[{[DKS] 2.13}: faithfulness]\label{lem:localdiv-faithful}
-  \lean{KRTheory.TransMon.localDivisor_faithful}
+  \lean{KRTheory.TransMon.localDivisor_faithful}\leanok
   \uses{def:localdiv-tm,def:faithful}
   If $(X, M)$ is faithful, so is $(X_c, M_c)$.
 \end{lemma}
@@ -34,7 +34,7 @@
 \end{proof}
 
 \begin{lemma}[Cardinality drop]\label{lem:localdiv-card}
-  \lean{KRTheory.TransMon.localDivisor_card_lt}
+  \lean{KRTheory.TransMon.localDivisor_card_lt}\leanok
   \uses{def:localdiv,lem:finite-unit,lem:card-subtype-lt}
   If $c$ is not a unit, then $|M_c| < |M|$.
 \end{lemma}
@@ -45,7 +45,7 @@
 \end{proof}
 
 \begin{lemma}[Division]\label{lem:localdiv-divides}
-  \lean{KRTheory.TransMon.localDivisor_divides}
+  \lean{KRTheory.TransMon.localDivisor_divides}\leanok
   \uses{def:localdiv,def:mdiv}
   $M_c \prec_m M$. This is what makes the strong form of Krohn--Rhodes
   survive recursion: simple groups produced inside $M_c$ divide $M_c$,

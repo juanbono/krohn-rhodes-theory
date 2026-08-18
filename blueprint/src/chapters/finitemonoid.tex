@@ -1,7 +1,7 @@
 \chapter{Finite monoid preliminaries}\label{ch:finitemonoid}
 
 \begin{lemma}[One-sided inverses]\label{lem:finite-unit}
-  \lean{mul_eq_one_comm, IsUnit.of_mul_eq_one_right}
+  \lean{mul_eq_one_comm, IsUnit.of_mul_eq_one_right}\leanok
   In a finite monoid, $ab = 1$ implies $ba = 1$; in particular either
   one-sided inverse relation makes both factors units. (Supplied by
   Mathlib; recorded because the cardinality bound
@@ -14,7 +14,7 @@
 \end{proof}
 
 \begin{lemma}[Idempotent power]\label{lem:idem-pow}
-  \lean{KRTheory.exists_pow_idempotent}
+  \lean{KRTheory.exists_pow_idempotent}\leanok
   Every element $a$ of a finite monoid has a power $a^n$ with
   $n \ge 1$ and $a^n a^n = a^n$.
 \end{lemma}
@@ -28,7 +28,7 @@
 \end{proof}
 
 \begin{lemma}[Strict subtype count]\label{lem:card-subtype-lt}
-  \lean{KRTheory.Nat.card_subtype_lt}
+  \lean{KRTheory.Nat.card_subtype_lt}\leanok
   A predicate on a finite type that fails at some point carves out a
   strictly smaller subtype.
 \end{lemma}

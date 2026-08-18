@@ -14,3 +14,7 @@ Quot.sound} (spec §1 item 4). Extend this list as milestones land. -/
 #print axioms bar_divides
 #print axioms reset_split
 #print axioms reset_div_flipFlops
+#print axioms KRTheory.exists_pow_idempotent
+#print axioms localDivisor_faithful
+#print axioms localDivisor_card_lt
+#print axioms localDivisor_divides
