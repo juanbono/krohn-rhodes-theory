@@ -72,10 +72,10 @@ where `trivialTM` is the one-point, one-element transformation monoid. Fixing th
 
 Lemmas required:
 
-- `Monoid ((Y → M) × N)` with the multiplication above (associativity is a direct computation).
-- `wreath_div_wreath` (monotonicity): `S₁ ≺ T₁ → S₂ ≺ T₂ → S₁ ≀ S₂ ≺ T₁ ≀ T₂`. Proof note: the front component needs functions constant on φ₂-fibers and a choice of section of φ₂; this is the standard proof, mildly fiddly.
+- `WreathMonoid` (fresh structure; see §4.3) with the multiplication above (associativity is a direct computation).
+- `StrongDivides.wreath` (monotonicity): `S₁ ≺ T₁ → S₂ ≺ T₂ → S₁ ≀ S₂ ≺ T₁ ≀ T₂`. Proof note: the front component needs functions constant on φ₂-fibers and a choice of section of φ₂; this is the standard proof, mildly fiddly.
 - `wreath_assoc_div`: `(P ≀ Q) ≀ R ≺ P ≀ (Q ≀ R)`. The underlying map is currying; expected to be an isomorphism, but only the division direction is needed.
-- `trivial_wreath_div` / `wreath_trivial_div`: absorption of `trivialTM` up to division.
+- `trivial_wreath_div` / `div_wreath_trivial`: absorption of `trivialTM` up to division.
 - `wreathList_append`: `wreathList L₁ ≀ wreathList L₂ ≺ wreathList (L₁ ++ L₂)` (induction on L₁ using the two lemmas above). This is the lemma that glues recursive decompositions.
 
 ### 3.4 The bar operation (adjoining resets)
@@ -91,7 +91,11 @@ inr x₀ * inl m = inr (x₀ · m)      -- resetting then doing m = resetting to
 inr x₀ * inr x₁ = inr x₁
 ```
 
+**Implementation note (M4):** the Lean carrier is a fresh inductive `BarMonoid T` (constructors `of`/`reset`), not raw `M ⊕ X` — same diamond-avoidance rationale as the wreath monoid's fresh structure (§4.3).
+
 Lemmas: monoid instance (case bash), action instance, `bar_divides : T ≺ T̄`, and monotonicity `S ≺ T → S̄ ≺ T̄` if the induction turns out to need it (flagged, not assumed).
+
+**Implementation note (M4):** `bar_mono` is confirmed *not* needed — the Krohn–Rhodes induction's bars ride on the induction hypothesis's own output (`Q(T)` already delivers `T̄ ≺ …` directly), so it is recorded here but not built (YAGNI).
 
 Degenerate-case audit (implementation task): `|X| ≤ 1` makes resets collide with the identity; faithfulness claims about T̄ must be checked there. All main-line uses keep bars on the *left* of ≺, where this is harmless.
 
@@ -99,9 +103,12 @@ Degenerate-case audit (implementation task): `|X| ≤ 1` makes resets collide wi
 
 `U(X) := (X, resets + identity)`. Implementation: monoid carrier `Option X` — `none` = identity, `some x` = reset to x, multiplication `a * b = if b = none then a else b`.
 
+**Implementation note (M4):** the Lean carrier is a fresh inductive `Resets X` (constructors `id`/`to`), not raw `Option X` — avoids planting a global `Monoid (Option _)` instance on a ubiquitous type.
+
 The **flip-flop** is `flipFlop := U(Bool)`: 2 states, 3 elements — identity plus two resets. This is the unique non-group prime of the theory.
 
 - ([DKS] 2.12) `reset_div_flipFlops`: for finite X, `U(X)` divides an iterated wreath product of flip-flops. Proof: induction on |X| (split X into two blocks; one flip-flop selects the block, smaller reset monoids act inside).
+- **Implementation note (M4):** the formal statement requires **`[Nonempty X]`** — an empty-state transformation monoid strongly divides only empty-state ones (no function into `∅`), so `U(∅)` divides no flip-flop wreath; [DKS] assume nonempty state sets implicitly. The statement is also existential in the factor count: `∃ n, resetMonoid X ≺ wreathList (List.replicate n flipFlop)` (Krohn–Rhodes only needs existence).
 - Note `U(X)` is reset-closed: `U(X)̄` adds nothing new (up to division), so no bars are needed on flip-flop factors.
 
 ### 3.6 Local divisors
@@ -124,7 +131,7 @@ Base case of the induction: M = G a finite group.
 
 - `compositionSeries_exists`: every finite group has a chain 1 = G₀ ⊴ G₁ ⊴ … ⊴ Gₙ = G with simple quotients. (Survey Mathlib's Jordan–Hölder framework first; existence-only is a short direct induction via a maximal proper normal subgroup if the framework doesn't fit.)
 - `kaloujnine_krasner_div`: for N ⊴ G, `regular G ≺ regular N ≀ regular (G ⧸ N)`. Uses a classical section of the quotient map; equivariance is the classical Kaloujnine–Krasner computation.
-- `transfGroup_div_wreath_simples`: chaining the above along a composition series (induction on its length, glued by `wreath_div_wreath` and `wreathList_append`): `regular G ≺ wreathList` of `regular Gᵢ` with each Gᵢ simple and `Gᵢ ≺ₘ G` (each Gᵢ is a quotient of a subgroup of G).
+- `transfGroup_div_wreath_simples`: chaining the above along a composition series (induction on its length, glued by `StrongDivides.wreath` and `wreathList_append`): `regular G ≺ wreathList` of `regular Gᵢ` with each Gᵢ simple and `Gᵢ ≺ₘ G` (each Gᵢ is a quotient of a subgroup of G).
 - ([DKS] 2.11) `group_bar_div`: `(X, G)̄ ≺ (X, U(X)) ≀ (G, G)` for a faithful transformation group (X, G). Note the right factor is the *regular* (G, G) even when X ≠ G.
 
 Combined group case: `(X,G)̄ ≺ flip-flops ≀ simple group factors`, all groups dividing G.
@@ -154,7 +161,7 @@ The covering construction (the φ and ψ of the division) is the technical heart
   `T̄ ≺ (X·c, Mc)̄ ≀ (X ⊔ N, N)̄`.
   - (X·c, Mc) is faithful (3.6.1) and |Mc| < |M| (3.6.2) → IH gives Q(X·c, Mc); its groups divide Mc ≺ₘ M (3.6.3), hence divide M.
   - (X ⊔ N, N) is faithful (regular part) and |N| < |M| (state space grew — this is why the measure is lex with |M| first) → IH gives Q(X ⊔ N, N); its groups divide N ≤ M, hence divide M.
-  - Glue with `wreath_div_wreath`, `wreathList_append`, transitivity.
+  - Glue with `StrongDivides.wreath`, `wreathList_append`, transitivity.
 
 **Main theorems** (target signatures, provisional syntax):
 
@@ -166,12 +173,12 @@ theorem krohnRhodes (T : TransMon) (hT : T.Faithful) :
       ∀ p ∈ L, ∀ G, p = .grp G → IsSimpleGroup G.carrier ∧ G.carrier ≺ₘ T.M
 
 /-- Abstract finite monoid form (via the regular representation). -/
-theorem krohnRhodes_monoid (M : Type) [Monoid M] [Fintype M] :
+theorem krohnRhodes_monoid (M : Type) [Monoid M] [Finite M] :
     ∃ L : List KRPrime, M ≺ₘ (wreathList (L.map KRPrime.toTransMon)).M ∧
       ∀ p ∈ L, ∀ G, p = .grp G → IsSimpleGroup G.carrier ∧ G.carrier ≺ₘ M
 
 /-- Classical 1965 semigroup form (via WithOne S = S¹). -/
-theorem krohnRhodes_semigroup (S : Type) [Semigroup S] [Fintype S] :
+theorem krohnRhodes_semigroup (S : Type) [Semigroup S] [Finite S] :
     ∃ L : List KRPrime, S ≺ₛ (wreathList (L.map KRPrime.toTransMon)).M ∧
       ∀ p ∈ L, ∀ G, p = .grp G → IsSimpleGroup G.carrier ∧ G.carrier ≺ₛ S
 ```
@@ -190,9 +197,9 @@ For `krohnRhodes_semigroup`: S ≺ₛ S¹ = `WithOne S` (Mathlib), apply the mon
 structure TransMon : Type 1 where
   X : Type
   M : Type
-  [fintypeX : Fintype X]
+  [finiteX : Finite X]
   [monoidM : Monoid M]
-  [fintypeM : Fintype M]
+  [finiteM : Finite M]
   act : X → M → X
   act_one : ∀ x, act x 1 = x
   act_mul : ∀ x m n, act x (m * n) = act (act x m) n
@@ -203,7 +210,8 @@ structure TransMon : Type 1 where
 - **Bundled**, because the theorem quantifies over a `List` of transformation monoids and constructions (`≀`, bar, local divisor) are functions `TransMon → … → TransMon`. Unbundled carriers cannot form lists.
 - **Raw right action** (not `MulAction Mᵐᵒᵖ X`, not a left action): formulas match [DKS] symbol-for-symbol, proof states stay free of `op/unop` noise, and this matches Mathlib's own `DFA.step : σ → α → σ` design. Cost accepted: a self-written ~30-line action lemma kit. Adapters to Mathlib's `MulAction` can be derived later if ever needed; the reverse retrofit would not be possible.
 - Carriers in `Type` (no universe polymorphism): everything is finite; `Type 1` structure, `List TransMon` works.
-- `Fintype` fields registered as instances via `attribute [instance]`. `DecidableEq` is **not** bundled; proofs use classical decidability locally (`open scoped Classical` or `Classical.dec`), while concrete examples (`Bool`, `Fin n`, `Option _`) remain computable through their native instances.
+- **Finiteness is bundled as `Finite` (Prop), not `Fintype` (data).** *Amended 2026-08-17 during M5 planning, superseding the original `Fintype`-field choice, on milestone-4 evidence:* `Fintype {x // P x}` demands `DecidablePred P`, which forced `reset_split` into a classically-decorated statement repaired at each call site by `convert` + `Subsingleton (Fintype _)`, and the local divisor's carriers (`cM ∩ Mc`, `X·c`) are subtypes twice over. `Finite` fields cost nothing classically (`Subtype.finite` needs no decidability), proof irrelevance makes instance mismatch impossible, and `wreath` stops being `noncomputable` (its only obstruction was filling a `Fintype` field for a function type). Cardinality is uniformly `Nat.card`. Fields registered as instances via `attribute [instance]` as before.
+- `DecidableEq` is **not** bundled; proofs use classical decidability locally (`open scoped Classical` or `Classical.dec`), while concrete examples (`Bool`, `Fin n`, `Option _`) remain computable through their native instances. Note (post-amendment): examples stated at projected types such as `(regular (ZMod 3)).X` use `Nat.card`, since instance search will not unfold the semireducible projection to reach native `Fintype` data.
 - `Faithful` is a `Prop`-valued predicate (likely a class) on `TransMon`, not a field: the bar and wreath constructions do not preserve it uniformly, and non-faithful objects appear naturally mid-proof.
 
 ### 4.2 Conventions
@@ -222,8 +230,8 @@ structure TransMon : Type 1 where
 | `TransMon/Division.lean` | `MonoidDivides` (`≺ₘ`), `StrongDivides` (`≺`), both preorders, `strongDivides.monoidDivides` (glue), submonoid/quotient feeders, `Covering.extMap` kit (added in M3) |
 | `TransMon/Wreath.lean` | `WreathMonoid` + monoid instance & simp kit, `wreath` (`≀`) + action, `WreathMonoid.natCard`, `wreathList` |
 | `TransMon/WreathDivision.lean` | `trivialTM` absorption (`trivial_wreath_div`, `div_wreath_trivial`), `Covering.wreath` / `StrongDivides.wreath` (monotonicity), `wreath_assoc_div`, `wreathList_append` |
-| `TransMon/Bar.lean` | `bar`, monoid/action instances, `bar_divides : T ≺ T.bar`, (optional) `bar_mono` |
-| `TransMon/Reset.lean` | `resetMonoid` (= `U(X)` via `Option X`), `flipFlop`, `reset_div_flipFlops` ([DKS] 2.12) |
+| `TransMon/Bar.lean` | `BarMonoid` (fresh inductive; `of`/`reset`), `bar`, `BarMonoid.ofHom`, `bar_divides : T ≺ T.bar` (`bar_mono` confirmed unneeded, not built) |
+| `TransMon/Reset.lean` | `Resets` (fresh inductive; `id`/`to`), `resetMonoid` (= `U(X)`), `flipFlop`, `reset_split`, `reset_div_flipFlops` ([DKS] 2.12) |
 | `TransMon/LocalDivisor.lean` | `localDivisor`, monoid/action instances, `localDivisor_faithful` (2.13), `localDivisor_card_lt`, `localDivisor_divides` |
 | `GroupCase.lean` | `compositionSeries_exists` (or Mathlib reuse), `kaloujnine_krasner_div`, `transfGroup_div_wreath_simples`, `group_bar_div` (2.11) |
 | `Decomposition.lean` | [DKS] Thm 3.1 `decomposition` and its covering construction |
@@ -250,9 +258,9 @@ kr-theory/
 
 ## 6. Process and infrastructure
 
-- **Scaffold**: `lake` project depending on Mathlib (current stable), toolchain pinned to Mathlib's choice (elan auto-switches), `lake exe cache get` for prebuilt oleans. Git from day one; the repo can be pushed to GitHub whenever the user wants (CI activates then).
+- **Scaffold**: `lake` project depending on Mathlib (current stable), toolchain pinned to Mathlib's choice (elan auto-switches), `lake exe cache get` for prebuilt oleans. Git from day one; remote `github.com/juanbono/krohn-rhodes-theory` added 2026-08-17 — publishing (push, fast-forward `main`, CI activation, axiom-certificate and blueprint jobs) is a milestone-5 task.
 - **Blueprint-driven development** (`leanblueprint`): for each milestone, the LaTeX chapter (definitions, statements, informal proofs, `\lean{}` / `\leanok` annotations) is written *before* the Lean. The dependency graph is the progress dashboard. This is the learning loop: informal proof through your hands first, then formalize.
-- **Sanity-check discipline** (the formalization analogue of TDD): a definition is not "done" until concrete examples witness it behaving correctly — e.g. `flipFlop` has exactly 3 elements; `x ⊳ (reset x₀) = x₀`; the wreath of two flip-flops has 36 monoid elements (`decide`/`rfl`/`Fintype.card` computations); `regular (ZMod 3)` is faithful. Wrong-but-consistent definitions are the main way formalizations lose months; examples catch them at birth.
+- **Sanity-check discipline** (the formalization analogue of TDD): a definition is not "done" until concrete examples witness it behaving correctly — e.g. `flipFlop` has exactly 3 elements; `x ⊳ (reset x₀) = x₀`; the wreath of two flip-flops has 27 (3² · 3) monoid elements (`decide`/`rfl`/`Nat.card` computations bridged to native instances); `regular (ZMod 3)` is faithful. Wrong-but-consistent definitions are the main way formalizations lose months; examples catch them at birth.
 - **CI**: GitHub Actions with `lean-action` (build + Mathlib cache). A final job checks the axiom certificate: `#print axioms` of the three main theorems must contain at most `Classical.choice`, `propext`, `Quot.sound`. Sorries allowed on feature branches, never on `main` past their milestone.
 - **Workflow**: milestone-by-milestone; each milestone = blueprint chapter → Lean skeleton with `sorry`-stubs and examples → proofs → review → commit. Superpowers process skills (TDD-analogue above, verification-before-completion, code review) apply.
 
@@ -265,7 +273,7 @@ kr-theory/
 | 2 | Division | `Division.lean` | preorders + glue lemma proved |
 | 3 | Wreath | `Wreath.lean` | monoid instance, monotonicity, `wreath_assoc_div`, `wreathList_append` |
 | 4 | Bar + resets | `Bar.lean`, `Reset.lean` | [DKS] 2.12 proved |
-| 5 | Local divisor | `FiniteMonoid.lean`, `LocalDivisor.lean` | 2.13 + card-lt + divides proved |
+| 5 | Local divisor | `Finite` bundling swap (§4.1 amendment); repo publish + CI certificate/blueprint jobs; `FiniteMonoid.lean`, `LocalDivisor.lean` | 2.13 + card-lt + divides proved; CI green on published repo |
 | 6 | Group case | `GroupCase.lean` | `group_bar_div` + `transfGroup_div_wreath_simples` |
 | 7 | **Theorem 3.1** | `Decomposition.lean` (blueprint chapter first) | `decomposition` proved |
 | 8 | Main induction | `KrohnRhodes.lean` | `krohnRhodes`, `krohnRhodes_monoid` |
@@ -282,7 +290,8 @@ Milestones 4, 5, 6 are mutually independent and may be reordered. Estimated tota
 | Degenerate cases (`|X| ≤ 1`, trivial M) may break faithfulness side conditions | Dedicated audit task in milestone 4; keep bars on the left of ≺ |
 | Notation clashes (`≀`, `≺`) with Mathlib | All notation scoped; checked at milestone 1 |
 | Well-definedness plumbing in `localDivisor` (`Classical.choose`) may be brittle | Isolate in dedicated `choose`-independence lemmas; API never exposes the choice |
-| `wreath_div_wreath` needs sections of surjections (choice) | Fine classically; noted so nobody expects computability there |
+| `StrongDivides.wreath` needs sections of surjections (choice) | Fine classically; noted so nobody expects computability there |
+| The `Fintype`→`Finite` swap (§4.1 amendment) may surface semireducible-projection elaboration surprises | Dedicated early M5 task with known adjustment sites enumerated in the plan; acceptance = green build + unchanged axiom certificate before any local-divisor work builds on it |
 | Bundled-structure instance friction (`attribute [instance]` fields) | Standard Mathlib pattern (`Bundled`); milestone 1 validates early |
 
 ## 9. Future ideas ledger (post-v1)

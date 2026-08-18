@@ -168,6 +168,11 @@ theorem StrongDivides.trans {S T U : TransMon}
   obtain ⟨c₁⟩ := h₁; obtain ⟨c₂⟩ := h₂
   exact ⟨c₁.comp c₂⟩
 
+/-- Registers `≺` with the `calc` tactic, so chains of strong-division
+steps can be written as `calc`-blocks instead of explicit `.trans`
+composition. -/
+instance : Trans StrongDivides StrongDivides StrongDivides := ⟨StrongDivides.trans⟩
+
 open scoped Classical in
 /-- `c.monoidMap` totalized to all of `T.M`, sending non-members to `1`.
 Lets fiber-compatibility conditions be stated without dependent
@@ -210,6 +215,17 @@ theorem Covering.act_extMap {S T : TransMon} (c : Covering S T)
     S.act (c.stateMap y) (c.extMap t) = c.stateMap (T.act y t) := by
   rw [c.extMap_of_mem h]
   exact c.equivariant y ⟨t, h⟩
+
+/-- A chosen section of the state surjection: `c.stateMap (c.sect x) = x`.
+Noncomputable (choice); used by wreath monotonicity and, later, the
+group case. -/
+noncomputable def Covering.sect {S T : TransMon} (c : Covering S T) :
+    S.X → T.X := Function.surjInv c.stateMap_surj
+
+@[simp]
+theorem Covering.stateMap_sect {S T : TransMon} (c : Covering S T)
+    (x : S.X) : c.stateMap (c.sect x) = x :=
+  Function.surjInv_eq c.stateMap_surj x
 
 -- Sanity checks (spec §6).
 example : trivialTM ≺ trivialTM := .refl _

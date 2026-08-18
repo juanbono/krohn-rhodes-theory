@@ -13,11 +13,6 @@ induction (spec §3.3, §3.9).
 namespace KRTheory
 namespace TransMon
 
-/-- Registers `≺` with the `calc` tactic, so chains of strong-division
-steps can be written as `calc`-blocks instead of explicit `.trans`
-composition. -/
-instance : Trans StrongDivides StrongDivides StrongDivides := ⟨StrongDivides.trans⟩
-
 /-- Absorb a trivial front factor: `trivialTM ≀ T ≺ T`. -/
 theorem trivial_wreath_div (T : TransMon) : trivialTM ≀ T ≺ T :=
   ⟨{ toSubmonoid := ⊤
@@ -58,24 +53,12 @@ theorem div_wreathList_singleton (S : TransMon) : S ≺ wreathList [S] := by
 /-!
 ### Monotonicity of `≺` under `≀`
 
-Two `private` helpers feed `Covering.wreath` below (a third, `extMap_one`,
-is now the public `Covering.extMap_one` in `Division.lean`); the public
-API of this section is only `Covering.wreath` and `StrongDivides.wreath`.
+`Covering.wreath` below draws its section helper (`Covering.sect` /
+`Covering.stateMap_sect`) and its totalization helper (`Covering.extMap`
+and kin, including `extMap_one`) from the public API in `Division.lean`;
+the public API of this section is only `Covering.wreath` and
+`StrongDivides.wreath`.
 -/
-
-/-- (private) A chosen set-theoretic section of the state surjection
-`c.stateMap`. Used by `Covering.wreath` to push front-machine data of
-`T₁ ≀ T₂` down to `S₁ ≀ S₂`: a front value must be read off at *some*
-`T₂`-state above the given `S₂`-state, and fiber-compatibility makes the
-choice irrelevant. -/
-private noncomputable def Covering.sect {S T : TransMon} (c : Covering S T) :
-    S.X → T.X := Function.surjInv c.stateMap_surj
-
-/-- (private) The defining equation of `Covering.sect`: it really is a
-section of `c.stateMap`. -/
-private theorem Covering.stateMap_sect {S T : TransMon} (c : Covering S T)
-    (s : S.X) : c.stateMap (c.sect s) = s :=
-  Function.surjInv_eq c.stateMap_surj s
 
 /-- The wreath product of two coverings: witnesses monotonicity of `≺`
 under `≀` (blueprint lem:wreath-mono). The submonoid consists of the

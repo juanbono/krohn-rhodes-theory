@@ -1,0 +1,33 @@
+\chapter{The bar operation}\label{ch:bar}
+
+Cascade decompositions must be able to overwrite the front coordinate,
+so the induction runs through monoids with all constant maps adjoined
+[DKS §2.4].
+
+\begin{definition}[Bar]\label{def:bar}
+  \lean{KRTheory.TransMon.BarMonoid, KRTheory.TransMon.bar}\leanok
+  \uses{def:transmon}
+  For $T = (X, M)$, $\overline{T} := (X, \overline{M})$ where
+  $\overline{M} = M \sqcup \{\mathrm{reset}_x : x \in X\}$ with
+  $m \cdot \mathrm{reset}_x = \mathrm{reset}_x$,
+  $\mathrm{reset}_x \cdot m = \mathrm{reset}_{x \cdot m}$,
+  $\mathrm{reset}_x \cdot \mathrm{reset}_y = \mathrm{reset}_y$, and
+  $\mathrm{reset}_x$ acting as the constant map $x$.
+  (In Lean the carrier is a fresh inductive with embeddings
+  \lean{KRTheory.TransMon.BarMonoid.ofHom}.)
+\end{definition}
+
+\begin{lemma}[Bar absorbs the original]\label{lem:bar-divides}
+  \lean{KRTheory.TransMon.bar_divides}\leanok\uses{def:bar,def:sdiv}
+  $T \prec \overline{T}$.
+\end{lemma}
+\begin{proof}
+  Cover through the image of $M$ in $\overline{M}$; states unchanged.
+\end{proof}
+
+\begin{remark}[Degenerate states]\label{rem:bar-degenerate}
+  For $|X| \le 1$ every reset acts as the identity, so
+  $\overline{T}$'s action is not faithful. No lemma in the development
+  claims faithfulness of $\overline{T}$; bars appear on the left of
+  $\prec$ or as covering \emph{sources}, where this is harmless.
+\end{remark}
