@@ -262,6 +262,20 @@ theorem localDivisor_faithful {T : TransMon} (hT : T.Faithful)
 -- Sanity (spec §6). Over `regular (ZMod 4)` at `c = 2`: the state
 -- space is the image `{0, 2}`, and acting by the reset-like element
 -- `0` of the local divisor sends every state to `0 · m`-form values.
+-- Concretely: state `ξ := 0` (in the image via `0 = 0 * 2`) acted on by
+-- `ld0` (`ld0.val = 0`, a `cM`-witness `m = 0` since `0 = 2 * 0`) lands
+-- back on `0`.
+private def xi0 :
+    (localDivisor (regular (ZMod 4)) (2 : ZMod 4)).X :=
+  ⟨(0 : ZMod 4), (0 : ZMod 4), show (0 : ZMod 4) = 0 * 2 by decide⟩
+
+example :
+    ((localDivisor (regular (ZMod 4)) (2 : ZMod 4)).act xi0 ld0).val = (0 : ZMod 4) := by
+  rw [localDivisor_act_spec (regular (ZMod 4)) (2 : ZMod 4) xi0 ld0
+    (m := (0 : ZMod 4)) (show ld0.val = 2 * 0 by decide)]
+  show (0 : ZMod 4) * 0 = 0
+  decide
+
 -- Chirality guard: `act ξ u = ξ · m` for `u = c * m` — the witness
 -- multiplies on the RIGHT of the state. With the noncommutative
 -- `regular (Function.End (Fin 2))`, a transposed definition
