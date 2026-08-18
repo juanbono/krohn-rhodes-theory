@@ -328,5 +328,57 @@ example :
 example : (swap2 * const0 : Function.End (Fin 2)) = const1 := by decide
 example : (const0 : Function.End (Fin 2)) ≠ const1 := by decide
 
+/-- Cardinality drop (blueprint `lem:localdiv-card`): a non-unit's
+local divisor is strictly smaller — the recursion's measure. `1` is
+not in the carrier: `1 = c * m` would make `c` a unit by finiteness
+(`mul_eq_one_comm`). -/
+theorem localDivisor_card_lt {c : M} (hc : ¬ IsUnit c) :
+    Nat.card (LocalDivisor c) < Nat.card M := by
+  rw [Nat.card_congr (LocalDivisor.equivSubtype (c := c))]
+  refine Nat.card_subtype_lt (x := (1 : M)) ?_
+  rintro ⟨⟨m, hm⟩, -⟩
+  -- hm : (1 : M) = c * m — c is right-invertible, hence (finite) a unit
+  exact hc ⟨⟨c, m, hm.symm, mul_eq_one_comm.mp hm.symm⟩, rfl⟩
+
+omit [Finite M] in
+/-- Division (blueprint `lem:localdiv-divides`): `Mc ≺ₘ M` via the
+submonoid `N = {m | c * m ∈ Mc}` and `ψ : m ↦ c * m`. THE lemma that
+keeps the strong form alive through recursion (spec §3.6): simple
+groups arising inside `Mc` divide `Mc`, hence divide `M`. -/
+theorem localDivisor_divides (c : M) : LocalDivisor c ≺ₘ M := by
+  refine ⟨{ carrier := {m | ∃ m₂, c * m = m₂ * c}
+            one_mem' := ⟨1, by rw [mul_one, one_mul]⟩
+            mul_mem' := ?_ },
+    { toFun := fun m => ⟨c * m.1, ⟨m.1, rfl⟩, m.2⟩
+      map_one' := ?_
+      map_mul' := ?_ }, ?_⟩
+  · -- mul_mem': c(mn) = m₂(cn) = m₂n₂c
+    rintro m n ⟨m₂, hm₂⟩ ⟨n₂, hn₂⟩
+    exact ⟨m₂ * n₂, by rw [← mul_assoc, hm₂, mul_assoc, hn₂, ← mul_assoc]⟩
+  · -- ψ 1 = ⟨c * 1⟩ = ⟨c⟩ = 1
+    ext
+    simp
+  · -- ψ(m n) = ψ m * ψ n via mul_spec_right with witness ψ n = c * n
+    rintro ⟨m, hm⟩ ⟨n, hn⟩
+    ext
+    rw [LocalDivisor.mul_spec_right _ _ (n := n) rfl]
+    show c * (m * n) = c * m * n
+    rw [mul_assoc]
+  · -- surjective: u = c * m = m₂ * c puts m in N with ψ m = u
+    rintro ⟨u, ⟨m, hm⟩, ⟨m₂, hm₂⟩⟩
+    exact ⟨⟨m, m₂, by rw [← hm, hm₂]⟩, by ext; exact hm.symm⟩
+
+-- Sanity (spec §6): `2` is not a unit in `ZMod 4`, so its local
+-- divisor (carrier `{0, 2}`) is strictly smaller and divides.
+example : ¬ IsUnit (2 : ZMod 4) := by decide
+example : Nat.card (LocalDivisor (2 : ZMod 4)) < Nat.card (ZMod 4) :=
+  localDivisor_card_lt (by decide)
+example : LocalDivisor (2 : ZMod 4) ≺ₘ ZMod 4 := localDivisor_divides _
+-- Milestone acceptance shape (spec §7 row 5): the measure and the
+-- division hold together for any non-unit.
+example (c : ZMod 4) (h : ¬ IsUnit c) :
+    LocalDivisor c ≺ₘ ZMod 4 ∧ Nat.card (LocalDivisor c) < Nat.card (ZMod 4) :=
+  ⟨localDivisor_divides c, localDivisor_card_lt h⟩
+
 end TransMon
 end KRTheory
