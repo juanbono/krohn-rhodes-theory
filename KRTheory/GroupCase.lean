@@ -283,5 +283,65 @@ example : regular (Equiv.Perm (Fin 3)) ≺
       regular (Equiv.Perm (Fin 3) ⧸ alternatingGroup (Fin 3)) :=
   kaloujnine_krasner_div _ _
 
+/-- The group half of Krohn–Rhodes [spec §3.7, blueprint
+`lem:group-series`]: every finite group's regular representation
+strongly divides an iterated wreath of simple-group regulars, each
+factor dividing `G`. Fused strong induction on `Nat.card G` — one
+maximal proper normal subgroup is peeled per step (no composition-series
+artifact; spec §3.7 as amended 2026-08-18). -/
+theorem transfGroup_div_wreath_simples (G : Type) [Group G] [Finite G] :
+    ∃ L : List BundledFinGroup,
+      regular G ≺ wreathList (L.map fun H => regular H.carrier) ∧
+      ∀ H ∈ L, IsSimpleGroup H.carrier ∧ H.carrier ≺ₘ G := by
+  generalize hcard : Nat.card G = n
+  induction n using Nat.strong_induction_on generalizing G with
+  | _ n ih =>
+    rcases subsingleton_or_nontrivial G with hG | hG
+    · -- trivial group: the empty decomposition
+      exact ⟨[], by simpa using regular_div_trivialTM_of_subsingleton G,
+        by simp⟩
+    · obtain ⟨N, hNnorm, hNtop, hmax⟩ :=
+        exists_maximal_normal_subgroup (G := G)
+      have := hNnorm
+      have hsimple := isSimpleGroup_quotient N hNtop hmax
+      obtain ⟨L, hLdiv, hLcond⟩ := ih (Nat.card ↥N)
+        (by have := card_subgroup_lt_of_ne_top N hNtop; omega)
+        ↥N rfl
+      refine ⟨L ++ [⟨G ⧸ N⟩], ?_, ?_⟩
+      · calc regular G
+            ≺ regular ↥N ≀ regular (G ⧸ N) :=
+              kaloujnine_krasner_div G N
+          _ ≺ wreathList (L.map fun H => regular H.carrier) ≀
+                wreathList [regular (G ⧸ N)] :=
+              hLdiv.wreath (div_wreathList_singleton _)
+          _ ≺ wreathList ((L.map fun H => regular H.carrier) ++
+                [regular (G ⧸ N)]) := wreathList_append _ _
+          _ = wreathList ((L ++ [(⟨G ⧸ N⟩ : BundledFinGroup)]).map fun H =>
+                regular H.carrier) := by simp
+      · intro H hH
+        rcases List.mem_append.mp hH with h | h
+        · obtain ⟨hs, hd⟩ := hLcond H h
+          exact ⟨hs, hd.trans (subgroup_monoidDivides N)⟩
+        · simp only [List.mem_singleton] at h
+          subst h
+          exact ⟨hsimple, quotient_monoidDivides N⟩
+
+-- Acceptance sweep (spec §7 row 6): the theorem instantiates at the
+-- smallest interesting groups; the factor conditions destructure.
+example : ∃ L : List BundledFinGroup,
+    regular (Equiv.Perm (Fin 3)) ≺
+      wreathList (L.map fun H => regular H.carrier) ∧
+    ∀ H ∈ L, IsSimpleGroup H.carrier ∧
+      H.carrier ≺ₘ Equiv.Perm (Fin 3) :=
+  transfGroup_div_wreath_simples _
+-- `Multiplicative (ZMod 5)`: the cyclic group of order 5 (`ZMod 5`'s
+-- raw monoid is multiplicative and not a group).
+example : ∃ L : List BundledFinGroup,
+    regular (Multiplicative (ZMod 5)) ≺
+      wreathList (L.map fun H => regular H.carrier) ∧
+    ∀ H ∈ L, IsSimpleGroup H.carrier ∧
+      H.carrier ≺ₘ Multiplicative (ZMod 5) :=
+  transfGroup_div_wreath_simples _
+
 end TransMon
 end KRTheory
