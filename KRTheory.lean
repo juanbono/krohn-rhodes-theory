@@ -5,3 +5,4 @@ import KRTheory.TransMon.Wreath
 import KRTheory.TransMon.WreathDivision
 import KRTheory.TransMon.Bar
 import KRTheory.TransMon.Reset
+import KRTheory.TransMon.LocalDivisor
