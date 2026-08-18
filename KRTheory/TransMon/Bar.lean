@@ -104,7 +104,7 @@ instance the handler would have produced had it been able to, obtained
 the same way `Fintype` is above: transported across `equivSum`.
 At semireducible concrete transformation monoids the conditional hypotheses are not
 found by search on the projected types; bridge with e.g. `inferInstanceAs (DecidableEq
-(BarMonoid (regular (ZMod 3)))` after a `show` at the unfolded type. -/
+(BarMonoid (regular (ZMod 3))))` after a `show` at the unfolded type. -/
 instance [DecidableEq T.X] [DecidableEq T.M] : DecidableEq (BarMonoid T) :=
   equivSum.decidableEq
 
