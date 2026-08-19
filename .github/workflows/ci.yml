@@ -20,12 +20,12 @@ jobs:
           set -o pipefail
           lake env lean scripts/AxiomCertificate.lean | tee axioms.out
           test -s axioms.out
-          # 16 = current certificate entries (one line per `#print axioms`
+          # 18 = current certificate entries (one line per `#print axioms`
           # command, regardless of wording); update when the certificate
           # grows. NOTE: `grep -c 'depends on axioms'` undercounts here —
           # a zero-axiom theorem (`regular_faithful`) prints "does not
           # depend on any axioms" instead, so line count is used.
-          test "$(wc -l < axioms.out)" -eq 16
+          test "$(wc -l < axioms.out)" -eq 18
           python3 - <<'EOF'
           import re, sys
           allowed = {"propext", "Classical.choice", "Quot.sound"}

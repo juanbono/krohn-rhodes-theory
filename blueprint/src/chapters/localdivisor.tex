@@ -60,3 +60,12 @@
   $M_c$. Surjectivity: $u = cm = m_2 c \in M_c$ gives $m \in N$ and
   $\psi(m) = u$.
 \end{proof}
+
+\begin{lemma}[Nonempty local states]\label{lem:localdiv-nonempty}
+  \lean{KRTheory.TransMon.localDivisor_X_nonempty}\leanok
+  \uses{def:localdiv-tm}
+  If $X \neq \emptyset$ then $X{\cdot}c \neq \emptyset$.
+\end{lemma}
+\begin{proof}
+  $x \cdot c$ witnesses, for any $x \in X$.
+\end{proof}
