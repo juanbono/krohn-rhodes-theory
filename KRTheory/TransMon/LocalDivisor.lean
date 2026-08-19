@@ -259,6 +259,13 @@ theorem localDivisor_faithful {T : TransMon} (hT : T.Faithful)
     _ = T.act (T.act x c) mv := localDivisor_act_spec T c ⟨T.act x c, x, rfl⟩ v hmv
     _ = T.act x v.val := by rw [hmv, ← T.act_mul]
 
+/-- Nonempty local states [blueprint `lem:localdiv-nonempty`]: any
+`x·c` witnesses. Milestone 8's induction needs this to recurse into
+the local divisor. -/
+theorem localDivisor_X_nonempty (T : TransMon) (c : T.M)
+    (hX : Nonempty T.X) : Nonempty (localDivisor T c).X :=
+  hX.elim fun x => ⟨⟨T.act x c, x, rfl⟩⟩
+
 -- Sanity (spec §6). Over `regular (ZMod 4)` at `c = 2`: the state
 -- space is the image `{0, 2}`, and acting by the reset-like element
 -- `0` of the local divisor sends every state to `0 · m`-form values.
