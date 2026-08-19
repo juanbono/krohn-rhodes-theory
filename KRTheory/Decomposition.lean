@@ -265,7 +265,7 @@ theorem coversAt_unique (hT : T.Faithful) (hc : ¬ IsUnit c)
 open scoped Classical in
 /-- The covering's value map: the unique tag-matching covered element;
 junk `1` off the covered set. Classical choice, quarantined — proofs
-use `decompMap_spec`/`decompMap_covers`, never the definition. -/
+use `decompMap_covers`, never the definition. -/
 noncomputable def decompMap
     (w : ((localDivisor T c).bar ≀ (rightFactor T N).bar).M) : (T.bar).M :=
   if h : ∃ s, CoversAt T N c w s ∧
