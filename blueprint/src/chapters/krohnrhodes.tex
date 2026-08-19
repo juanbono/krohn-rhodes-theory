@@ -6,7 +6,7 @@ theorem, [DKS] Theorem~4.1 --- from the decomposition theorem
 (Chapter~\ref{ch:groupcase}).
 
 \begin{definition}[Krohn--Rhodes primes]\label{def:krprime}
-  \lean{KRTheory.TransMon.KRPrime, KRTheory.TransMon.KRPrime.toTransMon}
+  \lean{KRTheory.TransMon.KRPrime, KRTheory.TransMon.KRPrime.toTransMon}\leanok
   \uses{def:flipflop,def:bundledfingroup,def:regular}
   A \emph{Krohn--Rhodes prime} is either the flip-flop symbol or a
   bundled finite group $G$; the associated transformation monoid is
@@ -16,7 +16,7 @@ theorem, [DKS] Theorem~4.1 --- from the decomposition theorem
 \end{definition}
 
 \begin{lemma}[Group branch]\label{lem:kr-group-branch}
-  \lean{KRTheory.TransMon.krohnRhodes_bar_of_units}
+  \lean{KRTheory.TransMon.krohnRhodes_bar_of_units}\leanok
   \uses{def:krprime,lem:group-bar,lem:reset-div-flipflops,lem:group-series,lem:wreath-mono,lem:wreathList-append,lem:sdiv-preorder}
   Let $T = (X, M)$ with $X \neq \emptyset$ and every element of $M$ a
   unit. Then there is a list $L$ of primes with
@@ -39,7 +39,7 @@ theorem, [DKS] Theorem~4.1 --- from the decomposition theorem
 \end{proof}
 
 \begin{theorem}[The induction]\label{thm:kr-bar}
-  \lean{KRTheory.TransMon.krohnRhodes_bar}
+  \lean{KRTheory.TransMon.krohnRhodes_bar}\leanok
   \uses{def:krprime,lem:kr-group-branch,lem:gen-split,lem:submonoid-card,thm:decomposition,lem:localdiv-faithful,lem:localdiv-card,lem:localdiv-divides,lem:localdiv-nonempty,lem:right-factor-faithful,lem:mdiv-of-submonoid,lem:mdiv-preorder,lem:sdiv-preorder,lem:wreath-mono,lem:wreathList-append}
   For every faithful finite $T = (X, M)$ with $X \neq \emptyset$
   there is a list $L$ of primes such that $\bar{T} \prec \wr L$, with
@@ -82,7 +82,7 @@ theorem, [DKS] Theorem~4.1 --- from the decomposition theorem
 \end{remark}
 
 \begin{theorem}[Krohn--Rhodes, transformation form]\label{thm:krohnrhodes}
-  \lean{KRTheory.TransMon.krohnRhodes}
+  \lean{KRTheory.TransMon.krohnRhodes}\leanok
   \uses{def:krprime,thm:kr-bar,lem:bar-divides,lem:sdiv-preorder}
   Every faithful finite transformation monoid $T = (X, M)$ with
   $X \neq \emptyset$ strongly divides an iterated wreath product of
@@ -98,7 +98,7 @@ theorem, [DKS] Theorem~4.1 --- from the decomposition theorem
 \end{proof}
 
 \begin{theorem}[Krohn--Rhodes, monoid form]\label{thm:krohnrhodes-monoid}
-  \lean{KRTheory.TransMon.krohnRhodes_monoid}
+  \lean{KRTheory.TransMon.krohnRhodes_monoid}\leanok
   \uses{def:krprime,thm:krohnrhodes,def:regular,lem:regular-faithful,lem:sdiv-mdiv}
   Every finite monoid $M$ divides (as a monoid) the wreath-product
   monoid of a list of Krohn--Rhodes primes whose group factors are
