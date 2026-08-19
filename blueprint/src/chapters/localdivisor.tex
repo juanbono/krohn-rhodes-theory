@@ -27,6 +27,7 @@
   If $(X, M)$ is faithful, so is $(X_c, M_c)$.
 \end{lemma}
 \begin{proof}
+  \leanok
   Let $u = cm_u$, $v = cm_v$ in $M_c$ act equally on all of $X_c$. For
   every $x \in X$: $x \cdot u = (x \cdot c) \cdot m_u =
   (x \cdot c) \circ u = (x \cdot c) \circ v = x \cdot v$, and
@@ -39,6 +40,7 @@
   If $c$ is not a unit, then $|M_c| < |M|$.
 \end{lemma}
 \begin{proof}
+  \leanok
   $1 \notin M_c$: from $1 = cm$ finiteness (Lemma~\ref{lem:finite-unit})
   makes $c$ a unit. So the carrier misses $1$ and
   Lemma~\ref{lem:card-subtype-lt} applies.
@@ -52,6 +54,7 @@
   hence divide $M$.
 \end{lemma}
 \begin{proof}
+  \leanok
   $N := \{\, m \mid cm \in Mc \,\}$ is a submonoid of $M$
   ($c1 = 1c$; if $cm = m_2 c$ and $cn = n_2 c$ then
   $c(mn) = m_2 c n = m_2 n_2 c$), and $\psi(m) := cm$ is a
@@ -67,5 +70,6 @@
   If $X \neq \emptyset$ then $X_c \neq \emptyset$.
 \end{lemma}
 \begin{proof}
+  \leanok
   $x \cdot c$ witnesses, for any $x \in X$.
 \end{proof}

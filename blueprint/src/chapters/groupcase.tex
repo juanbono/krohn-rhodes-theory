@@ -12,6 +12,7 @@
   among proper normal subgroups.
 \end{lemma}
 \begin{proof}
+  \leanok
   The set of proper normal subgroups contains $\bot$ and the subgroup
   lattice is finite; take a maximal element.
 \end{proof}
@@ -22,6 +23,7 @@
   If $N \trianglelefteq G$ is maximal proper normal, $G/N$ is simple.
 \end{lemma}
 \begin{proof}
+  \leanok
   A normal $\bar K \trianglelefteq G/N$ pulls back along the projection
   to a normal $K \supseteq N$; by maximality $K = N$ (so
   $\bar K = \bot$, since the projection kills $N$) or $K = \top$ (so
@@ -36,6 +38,7 @@
   $N \prec_m G$ for a subgroup, $G/N \prec_m G$ for a normal subgroup.
 \end{lemma}
 \begin{proof}
+  \leanok
   The identity correspondence on the underlying submonoid; the
   canonical projection is a surjective homomorphism.
 \end{proof}
@@ -47,6 +50,7 @@
   $(G,G) \prec (N,N) \wr (G/N,\, G/N)$.
 \end{lemma}
 \begin{proof}
+  \leanok
   Fix a set-section $s$ of $\pi : G \to G/N$ with $\pi(s(q)) = q$. The
   state map is $\varphi(n, q) := n\, s(q)$, surjective since
   $g = \big(g\, s(\pi g)^{-1}\big) s(\pi g)$ with the first factor in
@@ -73,6 +77,7 @@
   $(G,G) \prec \wr_{H \in L}\,(H,H)$.
 \end{lemma}
 \begin{proof}
+  \leanok
   Strong induction on $|G|$. Trivial $G$: the empty list ($(G,G)$
   covers onto the trivial transformation monoid). Otherwise take a
   maximal proper normal $N$ (Lemma~\ref{lem:max-normal}); $G/N$ is
@@ -90,6 +95,7 @@
   $\bar T \prec (X, U(X)) \wr (M, M)$.
 \end{lemma}
 \begin{proof}
+  \leanok
   States: $\varphi(x, g) := x \cdot g$; surjective via $g = 1$. The
   covering submonoid consists of the wreath elements whose front
   component is uniformly the identity (type A) or uniformly a reset

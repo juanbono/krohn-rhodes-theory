@@ -22,6 +22,7 @@ the composition operation of the Krohn--Rhodes theorem.
   $|W| = |M|^{|Y|}\cdot|N|$.
 \end{lemma}
 \begin{proof}
+  \leanok
   $W$ is (as a set) the product $M^Y \times N$.
 \end{proof}
 
@@ -42,6 +43,7 @@ the composition operation of the Krohn--Rhodes theorem.
   $\mathbf{1} \wr T \prec T$ and $S \prec S \wr \mathbf{1}$.
 \end{lemma}
 \begin{proof}
+  \leanok
   For the first: the monoid part of $\mathbf{1} \wr T$ is $N$ in
   disguise; cover with the identity data. For the second: project
   states by $\mathrm{fst}$ and evaluate the function component at the
@@ -56,6 +58,7 @@ the composition operation of the Krohn--Rhodes theorem.
   $S_1 \wr S_2 \prec T_1 \wr T_2$.
 \end{lemma}
 \begin{proof}
+  \leanok
   Let $(\varphi_i, N_i', \psi_i)$ witness $S_i \prec T_i$. Cover
   $S_1 \wr S_2$ by the submonoid of pairs $(F, n)$ with
   $n \in N_2'$, $F(y) \in N_1'$ for all $y$, and $F$
@@ -76,6 +79,7 @@ the composition operation of the Krohn--Rhodes theorem.
   $(P \wr Q) \wr R \;\prec\; P \wr (Q \wr R)$.
 \end{lemma}
 \begin{proof}
+  \leanok
   Currying: both monoids have carrier
   $M_P^{\,X_Q \times X_R} \times M_Q^{\,X_R} \times M_R$ up to the
   evident bijections, and the twisted multiplications agree under this
@@ -90,6 +94,7 @@ the composition operation of the Krohn--Rhodes theorem.
    \mathrm{wreathList}(L_1 \mathbin{+\!\!+} L_2)$.
 \end{lemma}
 \begin{proof}
+  \leanok
   Induction on $L_1$: the base case is trivial absorption; the cons
   case re-associates with Lemma~\ref{lem:wreath-assoc} and applies
   monotonicity and transitivity.

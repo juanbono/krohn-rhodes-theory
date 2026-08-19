@@ -6,3 +6,7 @@ blueprint/src/*.fdb_latexmk
 blueprint/src/*.out
 blueprint/src/*.toc
 blueprint/src/*.pdf
+blueprint/web/
+blueprint/print/
+blueprint/src/web.paux
+blueprint/lean_decls

@@ -7,6 +7,17 @@ chapter-by-chapter *before* the corresponding Lean (spec §6).
 - `src/chapters/` — one file per theory layer, mirroring `KRTheory/`.
 - `\lean{...}` names the Lean declaration; `\leanok` marks it formalized.
 
-TODO(post-v1 or when publishing): migrate preamble to the `leanblueprint`
-toolchain (plastex web build + dependency graph). Chapter sources are
-already written in its macro dialect, so migration is preamble-only.
+Two build paths:
+
+- `latexmk -pdf print.tex` (from `src/`) — the PDF, pdflatex.
+- `leanblueprint web` (from the repo root) — the web version with the
+  dependency graph. Needs `pip install -r blueprint/requirements.txt`
+  AND a TeX installation: plasTeX resolves `\input` via `kpsewhich`, so
+  without TeX every chapter silently fails to load.
+
+`leanblueprint checkdecls` verifies every `\lean{...}` name exists; it
+needs a built project (`lake build`) and a prior `leanblueprint web`.
+
+Publishing the web version to GitHub Pages is deliberately not wired up
+(a publication decision, not a correctness one); CI builds it and
+uploads it as an artifact.
