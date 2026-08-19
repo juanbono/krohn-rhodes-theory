@@ -9,3 +9,4 @@ import KRTheory.TransMon.LocalDivisor
 import KRTheory.GroupCase
 import KRTheory.Decomposition
 import KRTheory.KrohnRhodes
+import KRTheory.SemigroupVersion
