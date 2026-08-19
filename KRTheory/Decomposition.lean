@@ -286,8 +286,8 @@ def decompInv (w : ((localDivisor T c).bar ≀ (rightFactor T N).bar).M) : Prop 
     ((∃ m, s = .of m) ↔ (∃ q, w.left (.inr 1) = .of q))) ∧
   ShapeOK T N c w
 
-/-- The tag of a product, isolated from `decompInv_of_mem`'s mul case
-(item 2 there) so `decompMap_mul` can cite it without re-deriving the
+/-- The tag of a product, isolated so both `decompInv_of_mem`'s mul case
+and `decompMap_mul` can cite it without re-deriving the
 `ShapeOK` case split. Same three-branch structure: both tags true, only
 `w` true, or `w` false (which subsumes `w` false/`w'` anything by the
 reset-absorption laws). -/

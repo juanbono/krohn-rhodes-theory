@@ -24,3 +24,4 @@ Quot.sound} (spec §1 item 4). Extend this list as milestones land. -/
 #print axioms decomposition
 #print axioms krohnRhodes
 #print axioms krohnRhodes_monoid
+#print axioms krohnRhodes_semigroup

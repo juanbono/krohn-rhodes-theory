@@ -3,7 +3,6 @@
 Human-readable mathematical companion to the Lean formalization, written
 chapter-by-chapter *before* the corresponding Lean (spec §6).
 
-- `src/print.tex` — self-contained LaTeX entry point: `latexmk -pdf print.tex`.
 - `src/chapters/` — one file per theory layer, mirroring `KRTheory/`.
 - `\lean{...}` names the Lean declaration; `\leanok` marks it formalized.
 

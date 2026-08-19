@@ -5,7 +5,7 @@ semigroups. This chapter derives it from the monoid form
 (Theorem~\ref{thm:krohnrhodes-monoid}) by adjoining an identity.
 
 \begin{definition}[Semigroup division]\label{def:semdiv}
-  \lean{KRTheory.SemigroupDivides}
+  \lean{KRTheory.SemigroupDivides}\leanok
   \uses{def:mdiv}
   $S \prec_s T$ iff $S$ is the image of a subsemigroup of $T$ under a
   surjective semigroup homomorphism. Same shape as
@@ -14,12 +14,13 @@ semigroups. This chapter derives it from the monoid form
 \end{definition}
 
 \begin{lemma}[Reflexivity and transitivity]\label{lem:semdiv-preorder}
-  \lean{KRTheory.SemigroupDivides.refl, KRTheory.SemigroupDivides.of_subsemigroup, KRTheory.SemigroupDivides.trans}
+  \lean{KRTheory.SemigroupDivides.refl, KRTheory.SemigroupDivides.of_subsemigroup, KRTheory.SemigroupDivides.trans}\leanok
   \uses{def:semdiv}
   $\prec_s$ is reflexive and transitive, and every subsemigroup divides
   its ambient semigroup.
 \end{lemma}
 \begin{proof}
+  \leanok
   Reflexivity uses the top subsemigroup, and a subsemigroup $A \le T$
   divides $T$ via $A$ itself and the identity homomorphism. For
   transitivity, pull the subsemigroup witnessing $S \prec_s T$ back
@@ -31,21 +32,23 @@ semigroups. This chapter derives it from the monoid form
 \end{proof}
 
 \begin{lemma}[Monoid division is semigroup division]\label{lem:semdiv-of-mdiv}
-  \lean{KRTheory.monoidDivides_semigroupDivides}
+  \lean{KRTheory.monoidDivides_semigroupDivides}\leanok
   \uses{def:semdiv,def:mdiv}
   $M \prec_m N$ implies $M \prec_s N$.
 \end{lemma}
 \begin{proof}
+  \leanok
   A submonoid is a subsemigroup and a monoid homomorphism is a
   semigroup homomorphism; surjectivity is unchanged.
 \end{proof}
 
 \begin{lemma}[Adjoining an identity]\label{lem:withone-transfer}
-  \lean{KRTheory.withOne_transfer}
+  \lean{KRTheory.withOne_transfer}\leanok
   \uses{def:semdiv}
   $S \prec_s S^1$, where $S^1$ is $S$ with an identity adjoined.
 \end{lemma}
 \begin{proof}
+  \leanok
   The image of $S$ in $S^1$ is a subsemigroup (a product of two
   elements of the copy of $S$ inside $S^1$ is again one), and the
   inverse of the injection $S \hookrightarrow S^1$ is a surjective
@@ -53,12 +56,13 @@ semigroups. This chapter derives it from the monoid form
 \end{proof}
 
 \begin{lemma}[Factor transport]\label{lem:semdiv-group-withone}
-  \lean{KRTheory.semigroupDivides_of_monoidDivides_withOne}
+  \lean{KRTheory.semigroupDivides_of_monoidDivides_withOne}\leanok
   \uses{def:semdiv,def:mdiv}
   Let $G$ be a \emph{nontrivial} finite group and $S$ a semigroup. If
   $G \prec_m S^1$ then $G \prec_s S$.
 \end{lemma}
 \begin{proof}
+  \leanok
   Let $N \le S^1$ be a submonoid with a surjection $\psi : N \to G$,
   and let $T := \{\, x \in S \mid x \in N \,\}$, a subsemigroup of $S$
   (a product of two elements of the copy of $S$ inside $S^1$ is again
@@ -88,13 +92,14 @@ semigroups. This chapter derives it from the monoid form
 \end{remark}
 
 \begin{theorem}[Krohn--Rhodes, semigroup form]\label{thm:krohnrhodes-semigroup}
-  \lean{KRTheory.krohnRhodes_semigroup}
+  \lean{KRTheory.krohnRhodes_semigroup}\leanok
   \uses{def:krprime,thm:krohnrhodes-monoid,lem:withone-transfer,lem:semdiv-of-mdiv,lem:semdiv-preorder,lem:semdiv-group-withone}
   Every finite semigroup $S$ divides, as a semigroup, the wreath-product
   monoid of a list of Krohn--Rhodes primes whose group factors are
   nontrivial finite simple groups dividing $S$ (as semigroups).
 \end{theorem}
 \begin{proof}
+  \leanok
   Apply Theorem~\ref{thm:krohnrhodes-monoid} to the finite monoid
   $S^1$, giving $S^1 \prec_m W$ for the wreath monoid $W$ of some
   prime list, with each group factor dividing $S^1$. Then

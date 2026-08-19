@@ -20,12 +20,12 @@ jobs:
           set -o pipefail
           lake env lean scripts/AxiomCertificate.lean | tee axioms.out
           test -s axioms.out
-          # 18 = current certificate entries (one line per `#print axioms`
+          # 19 = current certificate entries (one line per `#print axioms`
           # command, regardless of wording); update when the certificate
           # grows. NOTE: `grep -c 'depends on axioms'` undercounts here —
           # a zero-axiom theorem (`regular_faithful`) prints "does not
           # depend on any axioms" instead, so line count is used.
-          test "$(wc -l < axioms.out)" -eq 18
+          test "$(wc -l < axioms.out)" -eq 19
           python3 - <<'EOF'
           import re, sys
           allowed = {"propext", "Classical.choice", "Quot.sound"}
@@ -39,6 +39,26 @@ jobs:
                       bad = True
           sys.exit(1 if bad else 0)
           EOF
+      - name: Install blueprint toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            texlive-latex-base texlive-latex-extra graphviz libgraphviz-dev
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r blueprint/requirements.txt
+      - name: Build blueprint web version
+        run: |
+          set -o pipefail
+          leanblueprint web 2>&1 | tee web.log
+          # plasTeX reports missing inputs as warnings, not failures
+          ! grep -q "File not found" web.log
+      - name: Check blueprint declarations exist
+        run: leanblueprint checkdecls
+      - name: Upload blueprint web
+        uses: actions/upload-artifact@v4
+        with:
+          name: blueprint-web
+          path: blueprint/web
 
   blueprint:
     runs-on: ubuntu-latest
