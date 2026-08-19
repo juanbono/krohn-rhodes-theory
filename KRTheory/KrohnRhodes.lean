@@ -58,5 +58,40 @@ example : Nat.card KRPrime.flipflop.toTransMon.X = 2 := by
   decide
 example (G : BundledFinGroup) : (KRPrime.grp G).toTransMon.M = G.carrier := rfl
 
+/-- The group branch of the induction [blueprint `lem:kr-group-branch`]:
+if every element of `T.M` is a unit and states are nonempty, Q(T) holds
+outright. Faithfulness is NOT needed — `group_bar_div` (M6,
+strengthened) does not use it. The group structure is Mathlib's
+`groupOfIsUnit`, which extends the bundled monoid instance in place, so
+`regular T.M` is the same transformation monoid on both sides of the
+glue (spec §8 risk row, resolved). -/
+theorem krohnRhodes_bar_of_units (T : TransMon) (hX : Nonempty T.X)
+    (hg : ∀ m : T.M, IsUnit m) :
+    ∃ L : List KRPrime,
+      T.bar ≺ wreathList (L.map KRPrime.toTransMon) ∧
+      ∀ p ∈ L, ∀ G, p = KRPrime.grp G →
+        IsSimpleGroup G.carrier ∧ G.carrier ≺ₘ T.M := by
+  have := hX
+  let _ : Group T.M := groupOfIsUnit hg
+  obtain ⟨n, hff⟩ := reset_div_flipFlops T.X
+  obtain ⟨Gs, hGs, hfac⟩ := transfGroup_div_wreath_simples T.M
+  refine ⟨List.replicate n .flipflop ++ Gs.map .grp, ?_, ?_⟩
+  · calc T.bar
+        ≺ resetMonoid T.X ≀ regular T.M := group_bar_div T hg
+      _ ≺ wreathList (List.replicate n flipFlop) ≀
+            wreathList (Gs.map fun H => regular H.carrier) :=
+          StrongDivides.wreath hff hGs
+      _ ≺ wreathList ((List.replicate n KRPrime.flipflop
+            ++ Gs.map KRPrime.grp).map KRPrime.toTransMon) := by
+          rw [List.map_append, List.map_replicate,
+            KRPrime.toTransMon_flipflop, List.map_map]
+          exact wreathList_append _ _
+  · intro p hp G hpG
+    rcases List.mem_append.mp hp with hp | hp
+    · exact absurd ((List.eq_of_mem_replicate hp).symm.trans hpG) (by simp)
+    · obtain ⟨H, hH, rfl⟩ := List.mem_map.mp hp
+      obtain rfl : H = G := by injection hpG
+      exact hfac H hH
+
 end TransMon
 end KRTheory
