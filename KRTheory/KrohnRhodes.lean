@@ -93,5 +93,85 @@ theorem krohnRhodes_bar_of_units (T : TransMon) (hX : Nonempty T.X)
       obtain rfl : H = G := by injection hpG
       exact hfac H hH
 
+/-- The main induction [blueprint `thm:kr-bar`] — predicate Q of spec
+§3.9: the barred `T` divides a wreath of primes whose group factors are
+simple and divide `T.M`. Plain strong induction on `Nat.card T.M`
+(blueprint `rem:kr-measure`: both recursive calls strictly shrink the
+monoid; the spec's lex second component is never exercised). -/
+theorem krohnRhodes_bar (T : TransMon) (hT : T.Faithful)
+    (hX : Nonempty T.X) :
+    ∃ L : List KRPrime,
+      T.bar ≺ wreathList (L.map KRPrime.toTransMon) ∧
+      ∀ p ∈ L, ∀ G, p = KRPrime.grp G →
+        IsSimpleGroup G.carrier ∧ G.carrier ≺ₘ T.M := by
+  revert hT hX
+  generalize hcard : Nat.card T.M = n
+  induction n using Nat.strong_induction_on generalizing T with
+  | _ n ih =>
+    intro hT hX
+    by_cases hg : ∀ m : T.M, IsUnit m
+    · exact krohnRhodes_bar_of_units T hX hg
+    · obtain ⟨N, c, hc, hNtop, hgen⟩ := exists_gen_nonunit hg
+      obtain ⟨L₁, hdiv₁, hfac₁⟩ :=
+        ih (Nat.card (localDivisor T c).M)
+          (hcard ▸ localDivisor_card_lt hc) (localDivisor T c) rfl
+          (localDivisor_faithful hT c) (localDivisor_X_nonempty T c hX)
+      obtain ⟨L₂, hdiv₂, hfac₂⟩ :=
+        ih (Nat.card (rightFactor T N).M)
+          (hcard ▸ card_submonoid_lt_of_ne_top N hNtop) (rightFactor T N)
+          rfl (rightFactor_faithful T N) ⟨Sum.inr 1⟩
+      refine ⟨L₁ ++ L₂, ?_, ?_⟩
+      · calc T.bar
+            ≺ (localDivisor T c).bar ≀ (rightFactor T N).bar :=
+              decomposition T hT N c hc hgen
+          _ ≺ wreathList (L₁.map KRPrime.toTransMon) ≀
+                wreathList (L₂.map KRPrime.toTransMon) :=
+              StrongDivides.wreath hdiv₁ hdiv₂
+          _ ≺ wreathList ((L₁ ++ L₂).map KRPrime.toTransMon) := by
+              rw [List.map_append]
+              exact wreathList_append _ _
+      · intro p hp G hpG
+        rcases List.mem_append.mp hp with hp | hp
+        · obtain ⟨hsimple, hdivM⟩ := hfac₁ p hp G hpG
+          exact ⟨hsimple, hdivM.trans (localDivisor_divides c)⟩
+        · obtain ⟨hsimple, hdivM⟩ := hfac₂ p hp G hpG
+          exact ⟨hsimple, hdivM.trans (MonoidDivides.of_submonoid N)⟩
+
+/-- **The Krohn–Rhodes theorem**, transformation form, strong version
+[DKS Thm 4.1; spec §3.9; blueprint `thm:krohnrhodes`]: a faithful
+finite transformation monoid with nonempty states strongly divides an
+iterated wreath product of flip-flops and simple-group regulars, every
+group factor dividing `T.M`. `[Nonempty T.X]` is necessary: an
+empty-state transformation monoid strongly divides no wreath of primes
+(their state spaces are nonempty). -/
+theorem krohnRhodes (T : TransMon) (hT : T.Faithful) [Nonempty T.X] :
+    ∃ L : List KRPrime,
+      T ≺ wreathList (L.map KRPrime.toTransMon) ∧
+      ∀ p ∈ L, ∀ G, p = KRPrime.grp G →
+        IsSimpleGroup G.carrier ∧ G.carrier ≺ₘ T.M := by
+  obtain ⟨L, hdiv, hfac⟩ := krohnRhodes_bar T hT ‹Nonempty T.X›
+  exact ⟨L, (bar_divides T).trans hdiv, hfac⟩
+
+/-- **The Krohn–Rhodes theorem**, abstract finite-monoid form [spec
+§3.9; blueprint `thm:krohnrhodes-monoid`]: via the regular
+representation. -/
+theorem krohnRhodes_monoid (M : Type) [Monoid M] [Finite M] :
+    ∃ L : List KRPrime,
+      M ≺ₘ (wreathList (L.map KRPrime.toTransMon)).M ∧
+      ∀ p ∈ L, ∀ G, p = KRPrime.grp G →
+        IsSimpleGroup G.carrier ∧ G.carrier ≺ₘ M := by
+  have : Nonempty (regular M).X := ⟨(1 : M)⟩
+  obtain ⟨L, hdiv, hfac⟩ := krohnRhodes (regular M) (regular_faithful M)
+  exact ⟨L, hdiv.monoidDivides, hfac⟩
+
+-- Sanity (spec §6): the main theorem instantiates on a concrete monoid
+-- (instances resolve; the `Nonempty` bridge works as documented).
+example : ∃ L : List KRPrime,
+    regular (ZMod 2) ≺ wreathList (L.map KRPrime.toTransMon) ∧
+    ∀ p ∈ L, ∀ G, p = KRPrime.grp G →
+      IsSimpleGroup G.carrier ∧ G.carrier ≺ₘ (regular (ZMod 2)).M := by
+  have : Nonempty (regular (ZMod 2)).X := ⟨(1 : ZMod 2)⟩
+  exact krohnRhodes (regular (ZMod 2)) (regular_faithful _)
+
 end TransMon
 end KRTheory
