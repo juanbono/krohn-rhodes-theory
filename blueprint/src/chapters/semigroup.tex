@@ -1,0 +1,96 @@
+\chapter{The semigroup form}\label{ch:semigroup}
+
+The classical Krohn--Rhodes theorem (Krohn--Rhodes 1965) speaks of finite
+semigroups. This chapter derives it from the monoid form
+(Theorem~\ref{thm:krohnrhodes-monoid}) by adjoining an identity.
+
+\begin{definition}[Semigroup division]\label{def:semdiv}
+  \lean{KRTheory.SemigroupDivides}
+  \uses{def:mdiv}
+  $S \prec_s T$ iff $S$ is the image of a subsemigroup of $T$ under a
+  surjective semigroup homomorphism. Same shape as
+  Definition~\ref{def:mdiv}, with submonoids and monoid homomorphisms
+  replaced by subsemigroups and semigroup homomorphisms.
+\end{definition}
+
+\begin{lemma}[Reflexivity and transitivity]\label{lem:semdiv-preorder}
+  \lean{KRTheory.SemigroupDivides.refl, KRTheory.SemigroupDivides.of_subsemigroup, KRTheory.SemigroupDivides.trans}
+  \uses{def:semdiv}
+  $\prec_s$ is reflexive and transitive, and every subsemigroup divides
+  its ambient semigroup.
+\end{lemma}
+\begin{proof}
+  Reflexivity uses the top subsemigroup. For transitivity, pull the
+  subsemigroup witnessing $T \prec_s U$ back along the second
+  homomorphism and push it into $U$, exactly as in the monoid case
+  (Lemma~\ref{lem:mdiv-preorder}). One step Mathlib supplies for
+  monoids but not for semigroups --- surjectivity of the comap
+  homomorphism --- is proved inline.
+\end{proof}
+
+\begin{lemma}[Monoid division is semigroup division]\label{lem:semdiv-of-mdiv}
+  \lean{KRTheory.monoidDivides_semigroupDivides}
+  \uses{def:semdiv,def:mdiv}
+  $M \prec_m N$ implies $M \prec_s N$.
+\end{lemma}
+\begin{proof}
+  A submonoid is a subsemigroup and a monoid homomorphism is a
+  semigroup homomorphism; surjectivity is unchanged.
+\end{proof}
+
+\begin{lemma}[Adjoining an identity]\label{lem:withone-transfer}
+  \lean{KRTheory.withOne_transfer}
+  \uses{def:semdiv}
+  $S \prec_s S^1$, where $S^1$ is $S$ with an identity adjoined.
+\end{lemma}
+\begin{proof}
+  The image of $S$ in $S^1$ is a subsemigroup (a product of two
+  non-identity elements is again one), and the inverse of the
+  injection $S \hookrightarrow S^1$ is a surjective homomorphism onto
+  $S$.
+\end{proof}
+
+\begin{lemma}[Factor transport]\label{lem:semdiv-group-withone}
+  \lean{KRTheory.semigroupDivides_of_monoidDivides_withOne}
+  \uses{def:semdiv,def:mdiv}
+  Let $G$ be a \emph{nontrivial} finite group and $S$ a semigroup. If
+  $G \prec_m S^1$ then $G \prec_s S$.
+\end{lemma}
+\begin{proof}
+  Let $N \le S^1$ be a submonoid with a surjection $\psi : N \to G$,
+  and let $T := \{\, x \in S \mid x \in N \,\}$, a subsemigroup of $S$
+  (again because products of non-identity elements are non-identity).
+  For $g \neq 1$ choose $n \in N$ with $\psi(n) = g$; then $n \neq 1$,
+  since $\psi(1) = 1 \neq g$, so $n$ lies in $T$. Thus $\psi(T)$
+  contains every $g \neq 1$. Nontriviality now supplies the identity
+  as well: pick $h \neq 1$, take preimages $x, y \in T$ of $h$ and
+  $h^{-1}$, and $xy \in T$ maps to $1$. Hence $\psi$ restricted to $T$
+  is onto $G$.
+\end{proof}
+
+\begin{remark}[Why nontriviality is needed]\label{rem:semdiv-nontrivial}
+  Without it the argument fails at exactly one point: the preimage of
+  the identity. A trivial group divides $S^1$ (via $\{1\}$) but need
+  not divide $S$ --- $S$ may be empty. In our application the factors
+  are simple groups, which are nontrivial by definition, so the
+  hypothesis is free.
+\end{remark}
+
+\begin{theorem}[Krohn--Rhodes, semigroup form]\label{thm:krohnrhodes-semigroup}
+  \lean{KRTheory.krohnRhodes_semigroup}
+  \uses{def:krprime,thm:krohnrhodes-monoid,lem:withone-transfer,lem:semdiv-of-mdiv,lem:semdiv-preorder,lem:semdiv-group-withone}
+  Every finite semigroup $S$ divides, as a semigroup, the wreath-product
+  monoid of a list of Krohn--Rhodes primes whose group factors are
+  nontrivial finite simple groups dividing $S$ (as semigroups).
+\end{theorem}
+\begin{proof}
+  Apply Theorem~\ref{thm:krohnrhodes-monoid} to the finite monoid
+  $S^1$, giving $S^1 \prec_m W$ for the wreath monoid $W$ of some
+  prime list, with each group factor dividing $S^1$. Then
+  $S \prec_s S^1$ (Lemma~\ref{lem:withone-transfer}),
+  $S^1 \prec_s W$ (Lemma~\ref{lem:semdiv-of-mdiv}), and transitivity
+  (Lemma~\ref{lem:semdiv-preorder}) gives $S \prec_s W$. Each group
+  factor is simple, hence nontrivial, so
+  Lemma~\ref{lem:semdiv-group-withone} converts $G \prec_m S^1$ into
+  $G \prec_s S$.
+\end{proof}
