@@ -52,6 +52,25 @@ jobs:
           leanblueprint web 2>&1 | tee web.log
           # plasTeX reports missing inputs as warnings, not failures
           ! grep -q "File not found" web.log
+      - name: Check dependency graph is fully green
+        run: |
+          set -o pipefail
+          # Definition-of-done #5 requires a fully green dependency graph.
+          # Every node must be filled with one of the two "done" shades:
+          # #B0ECA3 (definition, stated) or #1CAC78 (theorem/lemma, fully
+          # proved). A statement with `\lean{}` but no `\leanok` leaves its
+          # node unfilled (border goes can-state blue); a *proof* missing
+          # `\leanok` leaves the statement border green but drops its own
+          # fillcolor to can-prove blue (#A3D6FF) or proved-not-fully green
+          # (#9CEC8B) instead, so border color alone can't catch it and this
+          # checks fillcolor, requiring every node to have one.
+          DOT=blueprint/web/dep_graph_document.html
+          nodes=$(grep -oE 'shape=(box|ellipse)' "$DOT" | wc -l)
+          filled=$(grep -oE 'fillcolor="#[0-9A-Fa-f]{6}"' "$DOT" | wc -l)
+          echo "graph nodes: $nodes, filled: $filled"
+          test "$nodes" -gt 0
+          test "$nodes" -eq "$filled"
+          ! grep -oE 'fillcolor="#[0-9A-Fa-f]{6}"' "$DOT" | grep -qvE '"#(B0ECA3|1CAC78)"'
       - name: Check blueprint declarations exist
         run: leanblueprint checkdecls
       - name: Upload blueprint web

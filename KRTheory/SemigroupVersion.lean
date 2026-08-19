@@ -73,8 +73,8 @@ theorem monoidDivides_semigroupDivides {M N : Type} [Monoid M] [Monoid N]
 
 /-- Adjoining an identity is harmless [blueprint `lem:withone-transfer`]:
 `S ≺ₛ S¹`. The copy of `S` inside `WithOne S` is a subsemigroup (a
-product of two non-identity elements is non-identity), and the
-coercion's inverse is a surjective homomorphism onto `S`. -/
+product of two elements of the copy of `S` inside `S¹` is again one),
+and the coercion's inverse is a surjective homomorphism onto `S`. -/
 theorem withOne_transfer (S : Type) [Semigroup S] : S ≺ₛ WithOne S := by
   refine ⟨{ carrier := Set.range ((↑) : S → WithOne S)
             mul_mem' := ?_ },

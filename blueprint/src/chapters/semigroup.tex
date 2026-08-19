@@ -34,7 +34,7 @@ semigroups. This chapter derives it from the monoid form
 \begin{lemma}[Monoid division is semigroup division]\label{lem:semdiv-of-mdiv}
   \lean{KRTheory.monoidDivides_semigroupDivides}\leanok
   \uses{def:semdiv,def:mdiv}
-  $M \prec_m N$ implies $M \prec_s N$.
+  $M \prec_{\mathrm m} N$ implies $M \prec_s N$.
 \end{lemma}
 \begin{proof}
   \leanok
@@ -59,7 +59,7 @@ semigroups. This chapter derives it from the monoid form
   \lean{KRTheory.semigroupDivides_of_monoidDivides_withOne}\leanok
   \uses{def:semdiv,def:mdiv}
   Let $G$ be a \emph{nontrivial} finite group and $S$ a semigroup. If
-  $G \prec_m S^1$ then $G \prec_s S$.
+  $G \prec_{\mathrm m} S^1$ then $G \prec_s S$.
 \end{lemma}
 \begin{proof}
   \leanok
@@ -101,12 +101,12 @@ semigroups. This chapter derives it from the monoid form
 \begin{proof}
   \leanok
   Apply Theorem~\ref{thm:krohnrhodes-monoid} to the finite monoid
-  $S^1$, giving $S^1 \prec_m W$ for the wreath monoid $W$ of some
+  $S^1$, giving $S^1 \prec_{\mathrm m} W$ for the wreath monoid $W$ of some
   prime list, with each group factor dividing $S^1$. Then
   $S \prec_s S^1$ (Lemma~\ref{lem:withone-transfer}),
   $S^1 \prec_s W$ (Lemma~\ref{lem:semdiv-of-mdiv}), and transitivity
   (Lemma~\ref{lem:semdiv-preorder}) gives $S \prec_s W$. Each group
   factor is simple, hence nontrivial, so
-  Lemma~\ref{lem:semdiv-group-withone} converts $G \prec_m S^1$ into
+  Lemma~\ref{lem:semdiv-group-withone} converts $G \prec_{\mathrm m} S^1$ into
   $G \prec_s S$.
 \end{proof}
