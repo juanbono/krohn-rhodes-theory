@@ -743,6 +743,10 @@ git push
 
 **Interfaces:** consumes everything; produces the v1 acceptance state.
 
+- [ ] **Step 0: Stale docstring from Task 5's refactor**
+
+`KRTheory/Decomposition.lean`, the docstring of the relocated `tag_mul` (~line 289), still says it was *"isolated from `decompInv_of_mem`'s mul case (item 2 there) so `decompMap_mul` can cite it"*. Task 5 deleted that inline "item 2", and `decompInv_of_mem` is now a caller rather than the source. Reword that clause to *"isolated so both `decompInv_of_mem`'s mul case and `decompMap_mul` can cite it"*, changing nothing else in the docstring or the theorem. (Task 5 deliberately left this to preserve the byte-identity that made its refactor auditable.)
+
 - [ ] **Step 1: Axiom certificate**
 
 Append to `scripts/AxiomCertificate.lean`:
