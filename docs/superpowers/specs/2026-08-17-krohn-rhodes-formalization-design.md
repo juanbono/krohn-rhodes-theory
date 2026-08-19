@@ -123,7 +123,7 @@ Three lemmas, all load-bearing:
 2. `localDivisor_card_lt`: c **not a unit** → `|Mc| < |M|`. Proof: `Mc ⊆ cM ⊆ M`; if equality held then `1 ∈ cM`, making c right-invertible, hence (finite monoid, §3.0 prelims) a unit.
 3. `localDivisor_divides : Mc ≺ₘ M`. Proof: `N := {m | c*m ∈ Mc}` is a submonoid of M and `m ↦ c*m` is a surjective monoid hom N ↠ Mc. **This is what makes the strong form survive recursion** — simple groups produced inside Mc divide Mc, hence divide M by transitivity.
 
-Prelims needed (`FiniteMonoid.lean`): in a finite monoid, an element with a one-sided inverse is a unit; every element has an idempotent power (pigeonhole). (2026-08-18: the idempotent-power lemma turned out unused by [DKS] §3's proof — its consumer is the v2 aperiodic corollary (§9) unless M8 finds a use.)
+Prelims needed (`FiniteMonoid.lean`): in a finite monoid, an element with a one-sided inverse is a unit; every element has an idempotent power (pigeonhole). (2026-08-18: the idempotent-power lemma turned out unused by [DKS] §3's proof — its consumer is the v2 aperiodic corollary (§9); M8 planning confirmed the induction has no use for it.)
 
 ### 3.7 The group case
 
@@ -167,6 +167,8 @@ with `rightFactor T N` the transformation monoid on states `T.X ⊕ ↥N`, monoi
 > Q(T): there is a list L of factors, each either `flipFlop` or `regular G` with G a nontrivial finite simple group and `G ≺ₘ M`, such that `T̄ ≺ wreathList L`.
 
 **Claim: Q holds for all faithful finite T with nonempty states**, by strong induction on (|M|, |X|) lexicographically. (Nonemptiness is preserved by the recursion — X·c is nonempty when X is, and X ⊔ N always is — and is exactly what M8 needs: `krohnRhodes` carries `[Nonempty T.X]` per the note below; the empty-state faithful T has a trivial monoid and is excluded.)
+
+**Note (2026-08-18, M8 planning):** the formal induction is plain strong induction on |M| — both recursive calls strictly shrink |M| (3.6.2 for Mc; proper-submonoid counting for N) and the group case recurses no further (its induction was fused into §3.7's `transfGroup_div_wreath_simples` at M6), so the lex second component is never exercised. The state-set growth X ⊔ N remains the reason no |X|-leading measure could work.
 
 - **M a group**: §3.7 gives Q directly (groups produced are subquotients of G, dividing G; flip-flops from §3.5).
 - **M not a group**: pick a minimal generating set A of M; some c ∈ A is not a unit (otherwise the units form a submonoid containing A, forcing M to be a group — prelim lemma). Let N := ⟨A ∖ {c}⟩; minimality gives c ∉ N, so N is proper: |N| < |M|. Apply Thm 3.1:
@@ -239,17 +241,17 @@ structure TransMon : Type 1 where
 
 | File | Declarations |
 |---|---|
-| `FiniteMonoid.lean` | `exists_pow_idempotent`, `isUnit_of_mul_eq_one_right/left` (finite), `isUnit_of_generators_units` (units-only generating set ⇒ group) |
+| `FiniteMonoid.lean` | `exists_pow_idempotent`, `isUnit_of_mul_eq_one_right/left` (finite), `isUnit_of_generators_units` (units-only generating set ⇒ group), `card_submonoid_lt_of_ne_top`, `exists_gen_nonunit` (minimal-generating-set split) |
 | `TransMon/Basic.lean` | `TransMon`, action notation + lemma kit, `Faithful`, `trivialTM`, `regular`, `regular_faithful`, examples |
 | `TransMon/Division.lean` | `MonoidDivides` (`≺ₘ`), `StrongDivides` (`≺`), both preorders, `strongDivides.monoidDivides` (glue), submonoid/quotient feeders, `Covering.extMap` kit (added in M3) |
 | `TransMon/Wreath.lean` | `WreathMonoid` + monoid instance & simp kit, `wreath` (`≀`) + action, `WreathMonoid.natCard`, `wreathList` |
 | `TransMon/WreathDivision.lean` | `trivialTM` absorption (`trivial_wreath_div`, `div_wreath_trivial`), `Covering.wreath` / `StrongDivides.wreath` (monotonicity), `wreath_assoc_div`, `wreathList_append` |
 | `TransMon/Bar.lean` | `BarMonoid` (fresh inductive; `of`/`reset`), `bar`, `BarMonoid.ofHom`, `bar_divides : T ≺ T.bar` (`bar_mono` confirmed unneeded, not built) |
 | `TransMon/Reset.lean` | `Resets` (fresh inductive; `id`/`to`), `resetMonoid` (= `U(X)`), `flipFlop`, `reset_split`, `reset_div_flipFlops` ([DKS] 2.12) |
-| `TransMon/LocalDivisor.lean` | `localDivisor`, monoid/action instances, `localDivisor_faithful` (2.13), `localDivisor_card_lt`, `localDivisor_divides` |
+| `TransMon/LocalDivisor.lean` | `localDivisor`, monoid/action instances, `localDivisor_faithful` (2.13), `localDivisor_card_lt`, `localDivisor_divides`, `localDivisor_X_nonempty` |
 | `GroupCase.lean` | `BundledFinGroup`, `exists_maximal_normal_subgroup`, `isSimpleGroup_quotient`, `subgroup_monoidDivides`, `quotient_monoidDivides`, `card_subgroup_lt_of_ne_top`, `regular_div_trivialTM_of_subsingleton`, `kaloujnine_krasner_div`, `transfGroup_div_wreath_simples`, `group_bar_div` (2.11) |
 | `Decomposition.lean` | `rightFactor` + faithfulness, `nonempty_of_not_isUnit`, `barMonoid_closure`, `decompState`, `coverN`/`coverC`/`coverReset` (+ `cnc`), `CoversAt` kit, `decompSub`, `decompMap`, `coversAt_unique`, `decomposition` ([DKS] Thm 3.1) |
-| `KrohnRhodes.lean` | `KRPrime` (consuming `GroupCase.BundledFinGroup`), `KRPrime.toTransMon`, the induction, `krohnRhodes`, `krohnRhodes_monoid` |
+| `KrohnRhodes.lean` | `KRPrime` (consuming `GroupCase.BundledFinGroup`), `KRPrime.toTransMon` (+ simp equation lemmas), `krohnRhodes_bar_of_units` (group branch), `krohnRhodes_bar` (the induction), `krohnRhodes`, `krohnRhodes_monoid` |
 | `SemigroupVersion.lean` | `SemigroupDivides` (`≺ₛ`), `monoidDivides.semigroupDivides`, `withOne` transfer, `krohnRhodes_semigroup` |
 
 ## 5. Project layout
@@ -303,7 +305,7 @@ Milestones 4, 5, 6 are mutually independent and may be reordered. Estimated tota
 | Mathlib Jordan–Hölder framework may not fit our composition-series existence need | Survey first; fallback is a ~50-line direct induction (existence only, no uniqueness) |
 | Degenerate cases (`|X| ≤ 1`, trivial M) may break faithfulness side conditions | Dedicated audit task in milestone 4; keep bars on the left of ≺ |
 | Notation clashes (`≀`, `≺`) with Mathlib | All notation scoped; checked at milestone 1 |
-| M8's group branch needs `Group T.M` from `∀ m, IsUnit m` | Build it by EXTENDING the bundled instance (`{ ‹Monoid T.M› with inv := … }`) so `regular T.M` stays defeq-stable; adjacent to the deferred `isUnit_of_generators_units` |
+| M8's group branch needs `Group T.M` from `∀ m, IsUnit m` (RESOLVED 2026-08-18, M8 planning) | Mathlib's `groupOfIsUnit` already extends the ambient instance (`{ hM with … }`); `regular T.M` defeq-stability across it probe-verified |
 | Well-definedness plumbing in `localDivisor` (`Classical.choose`) may be brittle | Isolate in dedicated `choose`-independence lemmas; API never exposes the choice |
 | `StrongDivides.wreath` needs sections of surjections (choice) | Fine classically; noted so nobody expects computability there |
 | The `Fintype`→`Finite` swap (§4.1 amendment) may surface semireducible-projection elaboration surprises | Dedicated early M5 task with known adjustment sites enumerated in the plan; acceptance = green build + unchanged axiom certificate before any local-divisor work builds on it |
