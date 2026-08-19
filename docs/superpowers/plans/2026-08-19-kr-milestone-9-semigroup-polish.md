@@ -743,6 +743,15 @@ git push
 
 **Interfaces:** consumes everything; produces the v1 acceptance state.
 
+- [ ] **Step 0a: Stamp `semigroup.tex` (the last `\leanok` gap)**
+
+`blueprint/src/chapters/semigroup.tex` was written in Task 2, before its Lean existed, so it carries no `\leanok` at all — 6 `\lean{}` macros and 5 `proof` environments, all now formalized by Task 4. Task 6 correctly declined to stamp its proofs while the statements were unstamped. Close both halves here (the same move M7's close commit made):
+
+  1. Add `\leanok` after each of the SIX `\lean{...}` macros (`def:semdiv`, `lem:semdiv-preorder`, `lem:semdiv-of-mdiv`, `lem:withone-transfer`, `lem:semdiv-group-withone`, `thm:krohnrhodes-semigroup`), matching the placement style used in the other chapters.
+  2. Add `\leanok` as the first line inside each of the FIVE `\begin{proof}` environments in that file.
+
+The two remarks (`rem:semdiv-nontrivial`, `rem:semigroup-empty`) have no `\lean{}` and get nothing. Verify afterwards: `grep -c '\\leanok' blueprint/src/chapters/semigroup.tex` returns 11, and repo-wide the count rises from 94 to 105 with 41 proof environments all stamped.
+
 - [ ] **Step 0: Stale docstring from Task 5's refactor**
 
 `KRTheory/Decomposition.lean`, the docstring of the relocated `tag_mul` (~line 289), still says it was *"isolated from `decompInv_of_mem`'s mul case (item 2 there) so `decompMap_mul` can cite it"*. Task 5 deleted that inline "item 2", and `decompInv_of_mem` is now a caller rather than the source. Reword that clause to *"isolated so both `decompInv_of_mem`'s mul case and `decompMap_mul` can cite it"*, changing nothing else in the docstring or the theorem. (Task 5 deliberately left this to preserve the byte-identity that made its refactor auditable.)
