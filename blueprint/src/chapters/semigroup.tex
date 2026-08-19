@@ -20,9 +20,11 @@ semigroups. This chapter derives it from the monoid form
   its ambient semigroup.
 \end{lemma}
 \begin{proof}
-  Reflexivity uses the top subsemigroup. For transitivity, pull the
-  subsemigroup witnessing $T \prec_s U$ back along the second
-  homomorphism and push it into $U$, exactly as in the monoid case
+  Reflexivity uses the top subsemigroup, and a subsemigroup $A \le T$
+  divides $T$ via $A$ itself and the identity homomorphism. For
+  transitivity, pull the subsemigroup witnessing $S \prec_s T$ back
+  along the second homomorphism and push it into $U$, exactly as in the
+  monoid case
   (Lemma~\ref{lem:mdiv-preorder}). One step Mathlib supplies for
   monoids but not for semigroups --- surjectivity of the comap
   homomorphism --- is proved inline.
