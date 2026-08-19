@@ -7,3 +7,4 @@ import KRTheory.TransMon.Bar
 import KRTheory.TransMon.Reset
 import KRTheory.TransMon.LocalDivisor
 import KRTheory.GroupCase
+import KRTheory.Decomposition
