@@ -71,7 +71,6 @@ theorem krohnRhodes_bar_of_units (T : TransMon) (hX : Nonempty T.X)
       T.bar ≺ wreathList (L.map KRPrime.toTransMon) ∧
       ∀ p ∈ L, ∀ G, p = KRPrime.grp G →
         IsSimpleGroup G.carrier ∧ G.carrier ≺ₘ T.M := by
-  have := hX
   let _ : Group T.M := groupOfIsUnit hg
   obtain ⟨n, hff⟩ := reset_div_flipFlops T.X
   obtain ⟨Gs, hGs, hfac⟩ := transfGroup_div_wreath_simples T.M
