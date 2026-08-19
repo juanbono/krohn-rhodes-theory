@@ -202,13 +202,19 @@ theorem decompState_surjective (hT : T.Faithful) (hc : ¬ IsUnit c) :
   exact ⟨(⟨T.act x₀ c, x₀, rfl⟩, .inl x), rfl⟩
 
 -- Sanity (spec §6). `cnc` value guard over noncommutative
--- Perm (Fin 3): (cnc c m).val must be c*m*c — a transposed definition
--- (m*c*m or c*m alone) differs; certified by the ≠-decide below.
+-- Perm (Fin 3), with witness m a 3-cycle: (cnc c m).val must be
+-- c*m*c. Both transposed definitions (m*c*m, or c*m alone) differ
+-- from c*m*c — each certified distinct by a ≠-decide below.
 example : (cnc (regular (Equiv.Perm (Fin 3))) (Equiv.swap 0 1)
-    (Equiv.swap 1 2)).val =
-    Equiv.swap 0 1 * Equiv.swap 1 2 * Equiv.swap 0 1 := rfl
-example : (Equiv.swap 0 1 * Equiv.swap 1 2 * Equiv.swap 0 1 :
-    Equiv.Perm (Fin 3)) ≠ Equiv.swap 0 1 * Equiv.swap 1 2 := by decide
+    (Equiv.swap 0 1 * Equiv.swap 1 2)).val =
+    Equiv.swap 0 1 * (Equiv.swap 0 1 * Equiv.swap 1 2) * Equiv.swap 0 1 := rfl
+example : (Equiv.swap 0 1 * (Equiv.swap 0 1 * Equiv.swap 1 2) * Equiv.swap 0 1 :
+    Equiv.Perm (Fin 3)) ≠
+    (Equiv.swap 0 1 * Equiv.swap 1 2) * Equiv.swap 0 1 *
+      (Equiv.swap 0 1 * Equiv.swap 1 2) := by decide
+example : (Equiv.swap 0 1 * (Equiv.swap 0 1 * Equiv.swap 1 2) * Equiv.swap 0 1 :
+    Equiv.Perm (Fin 3)) ≠
+    Equiv.swap 0 1 * (Equiv.swap 0 1 * Equiv.swap 1 2) := by decide
 -- decompState chirality: at an inr-state the tracked part acts FIRST
 -- (p · n, not n-then-p); over regular (Equiv.Perm (Fin 3)) with the
 -- state pair (p, inr n) the value is p.val * n — transposed would be
