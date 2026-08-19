@@ -1,0 +1,112 @@
+\chapter{The Krohn--Rhodes theorem}\label{ch:krohnrhodes}
+
+This chapter assembles the main induction --- the Krohn--Rhodes
+theorem, [DKS] Theorem~4.1 --- from the decomposition theorem
+(Chapter~\ref{ch:decomposition}) and the group case
+(Chapter~\ref{ch:groupcase}).
+
+\begin{definition}[Krohn--Rhodes primes]\label{def:krprime}
+  \lean{KRTheory.TransMon.KRPrime, KRTheory.TransMon.KRPrime.toTransMon}
+  \uses{def:flipflop,def:bundledfingroup,def:regular}
+  A \emph{Krohn--Rhodes prime} is either the flip-flop symbol or a
+  bundled finite group $G$; the associated transformation monoid is
+  the flip-flop $U_2$, respectively the regular representation
+  $(G, G)$. Carrying canonical objects keeps the main statements free
+  of any isomorphism API (spec \S 3.9).
+\end{definition}
+
+\begin{lemma}[Group branch]\label{lem:kr-group-branch}
+  \lean{KRTheory.TransMon.krohnRhodes_bar_of_units}
+  \uses{def:krprime,lem:group-bar,lem:reset-div-flipflops,lem:group-series,lem:wreath-mono,lem:wreathList-append,lem:sdiv-preorder}
+  Let $T = (X, M)$ with $X \neq \emptyset$ and every element of $M$ a
+  unit. Then there is a list $L$ of primes with
+  $\bar{T} \prec \wr L$, every group factor being a nontrivial finite
+  simple group dividing $M$. Faithfulness is not required
+  (Lemma~\ref{lem:group-bar} does not need it).
+\end{lemma}
+\begin{proof}
+  $M$ carries a group structure (each element is a unit; the inverse
+  is read off the unit witness --- Mathlib's \texttt{groupOfIsUnit},
+  which extends the ambient monoid structure in place).
+  Lemma~\ref{lem:group-bar} gives
+  $\bar{T} \prec U(X) \wr (M, M)$.
+  Lemma~\ref{lem:reset-div-flipflops} resolves $U(X)$ into flip-flops
+  (this is where $X \neq \emptyset$ enters);
+  Lemma~\ref{lem:group-series} resolves $(M, M)$ into simple-group
+  regulars dividing $M$. Glue with wreath monotonicity
+  (Lemma~\ref{lem:wreath-mono}), list concatenation
+  (Lemma~\ref{lem:wreathList-append}), and transitivity.
+\end{proof}
+
+\begin{theorem}[The induction]\label{thm:kr-bar}
+  \lean{KRTheory.TransMon.krohnRhodes_bar}
+  \uses{def:krprime,lem:kr-group-branch,lem:gen-split,lem:submonoid-card,thm:decomposition,lem:localdiv-faithful,lem:localdiv-card,lem:localdiv-divides,lem:localdiv-nonempty,lem:right-factor-faithful,lem:mdiv-of-submonoid,lem:mdiv-preorder,lem:sdiv-preorder,lem:wreath-mono,lem:wreathList-append}
+  For every faithful finite $T = (X, M)$ with $X \neq \emptyset$
+  there is a list $L$ of primes such that $\bar{T} \prec \wr L$, with
+  every group factor a nontrivial finite simple group dividing $M$.
+  (This is the predicate $Q(T)$ of spec \S 3.9.)
+\end{theorem}
+\begin{proof}
+  Strong induction on $|M|$ (Remark~\ref{rem:kr-measure}). If every
+  element of $M$ is a unit, Lemma~\ref{lem:kr-group-branch} closes
+  the case directly. Otherwise the generator split
+  (Lemma~\ref{lem:gen-split}) yields a proper submonoid $N \lneq M$
+  and a non-unit $c$ with $\langle N \cup \{c\} \rangle = M$, and
+  Theorem~\ref{thm:decomposition} gives
+  \[
+    \bar{T} \;\prec\; \overline{(X{\cdot}c,\, M_c)} \,\wr\,
+      \overline{(X \sqcup N,\, N)} .
+  \]
+  The left factor is faithful (Lemma~\ref{lem:localdiv-faithful}),
+  has nonempty states (Lemma~\ref{lem:localdiv-nonempty}) and a
+  strictly smaller monoid (Lemma~\ref{lem:localdiv-card}), so the
+  induction hypothesis applies; its group factors divide $M_c$, hence
+  $M$ by Lemma~\ref{lem:localdiv-divides} and transitivity
+  (Lemma~\ref{lem:mdiv-preorder}). The right factor is faithful
+  (Lemma~\ref{lem:right-factor-faithful}), has nonempty states
+  ($1 \in N$) and a strictly smaller monoid
+  (Lemma~\ref{lem:submonoid-card}); its group factors divide
+  $N \le M$ (Lemma~\ref{lem:mdiv-of-submonoid}). Concatenate the two
+  lists and glue with Lemmas~\ref{lem:wreath-mono}
+  and~\ref{lem:wreathList-append}.
+\end{proof}
+
+\begin{remark}[The measure]\label{rem:kr-measure}
+  Spec \S 3.9 announces a lexicographic induction on $(|M|, |X|)$.
+  Both recursive calls strictly shrink $|M|$, and the group case
+  recurses no further --- its composition-series induction was fused
+  into Lemma~\ref{lem:group-series} at milestone 6. Plain strong
+  induction on $|M|$ therefore suffices; the second component is
+  never exercised. The state set still grows on the right factor
+  ($X \sqcup N$), which is why no measure led by $|X|$ could work.
+\end{remark}
+
+\begin{theorem}[Krohn--Rhodes, transformation form]\label{thm:krohnrhodes}
+  \lean{KRTheory.TransMon.krohnRhodes}
+  \uses{def:krprime,thm:kr-bar,lem:bar-divides}
+  Every faithful finite transformation monoid $T = (X, M)$ with
+  $X \neq \emptyset$ strongly divides an iterated wreath product of
+  Krohn--Rhodes primes whose group factors are nontrivial finite
+  simple groups dividing $M$ ([DKS] Theorem~4.1, strong form).
+  Nonemptiness is necessary: an empty-state transformation monoid
+  strongly divides no wreath of primes (their state sets are
+  nonempty).
+\end{theorem}
+\begin{proof}
+  $T \prec \bar{T}$ (Lemma~\ref{lem:bar-divides}), then
+  Theorem~\ref{thm:kr-bar}, then transitivity.
+\end{proof}
+
+\begin{theorem}[Krohn--Rhodes, monoid form]\label{thm:krohnrhodes-monoid}
+  \lean{KRTheory.TransMon.krohnRhodes_monoid}
+  \uses{def:krprime,thm:krohnrhodes,def:regular,lem:regular-faithful,lem:sdiv-mdiv}
+  Every finite monoid $M$ divides (as a monoid) the wreath-product
+  monoid of a list of Krohn--Rhodes primes whose group factors are
+  nontrivial finite simple groups dividing $M$.
+\end{theorem}
+\begin{proof}
+  Apply Theorem~\ref{thm:krohnrhodes} to the regular representation
+  $(M, M)$ --- faithful by Lemma~\ref{lem:regular-faithful}, states
+  nonempty since $1 \in M$ --- and extract the monoid division with
+  the glue lemma (Lemma~\ref{lem:sdiv-mdiv}).
+\end{proof}
