@@ -348,9 +348,10 @@ namespace SemigroupDivides
 variable {S T U : Type} [Semigroup S] [Semigroup T] [Semigroup U]
 
 /-- `≺ₛ` is reflexive, via the top subsemigroup [blueprint
-`lem:semdiv-preorder`]. -/
+`lem:semdiv-preorder`]. Mirrors `MonoidDivides.refl` exactly, down to
+using the `topEquiv` Mathlib provides for each. -/
 theorem refl (S : Type) [Semigroup S] : S ≺ₛ S :=
-  ⟨⊤, { toFun := fun x => x.1, map_mul' := fun _ _ => rfl }, fun s => ⟨⟨s, trivial⟩, rfl⟩⟩
+  ⟨⊤, Subsemigroup.topEquiv.toMulHom, Subsemigroup.topEquiv.surjective⟩
 
 /-- Subsemigroups divide their ambient semigroup [blueprint
 `lem:semdiv-preorder`]. -/
@@ -490,6 +491,33 @@ example : ∃ L : List KRPrime,
     ZMod 6 ≺ₛ (wreathList (L.map KRPrime.toTransMon)).M ∧
     ∀ p ∈ L, ∀ G, p = KRPrime.grp G →
       IsSimpleGroup G.carrier ∧ G.carrier ≺ₛ ZMod 6 :=
+  krohnRhodes_semigroup _
+
+/-- Sanity (spec §6), the case the semigroup form exists for: a genuine
+NON-monoid semigroup. `LeftZero` is the two-element left-zero semigroup
+`x * y = x`. A `def` rather than an `abbrev`, so its `Mul` never leaks
+onto `Bool`. -/
+private def LeftZero : Type := Bool
+
+private instance : Semigroup LeftZero where
+  mul x _ := x
+  mul_assoc _ _ _ := rfl
+
+private instance : Finite LeftZero := inferInstanceAs (Finite Bool)
+
+-- It really has no identity: `e * x = x` forces `e = x` for every `x`.
+example : ¬ ∃ e : LeftZero, ∀ x : LeftZero, e * x = x := by
+  rintro ⟨e, he⟩
+  have h1 : e = (show LeftZero from true) := he _
+  have h2 : e = (show LeftZero from false) := he _
+  have h3 : (show LeftZero from true) = (show LeftZero from false) := h1 ▸ h2
+  exact Bool.noConfusion h3
+
+open TransMon in
+example : ∃ L : List KRPrime,
+    LeftZero ≺ₛ (wreathList (L.map KRPrime.toTransMon)).M ∧
+    ∀ p ∈ L, ∀ G, p = KRPrime.grp G →
+      IsSimpleGroup G.carrier ∧ G.carrier ≺ₛ LeftZero :=
   krohnRhodes_semigroup _
 
 end KRTheory
