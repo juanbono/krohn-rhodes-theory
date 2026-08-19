@@ -102,7 +102,7 @@ Remark~\ref{rem:bar-gap}).
 
 \begin{lemma}[Tagged cover uniqueness]\label{lem:decomp-cover-unique}
   \lean{KRTheory.TransMon.coversAt_unique}\leanok
-  \uses{def:decomp-covers,def:faithful}
+  \uses{def:decomp-covers,def:faithful,lem:nonempty-of-nonunit}
   If $w$ covers $s$ and $s'$ over $\varphi$ and $s, s'$ have the same
   constructor class, then $s = s'$: $\varphi$ is onto, so $s$ and $s'$
   act equally on $X$; two equal-acting $\mathrm{of}$s coincide by
@@ -113,7 +113,7 @@ Remark~\ref{rem:bar-gap}).
 \begin{theorem}[{[DKS] Theorem 3.1}]\label{thm:decomposition}
   \lean{KRTheory.TransMon.decomposition}\leanok
   \uses{def:decomp-covers,lem:decomp-tag,lem:decomp-cover-unique,
-        lem:bar-generated,lem:right-factor-faithful,
+        lem:bar-generated,
         lem:nonempty-of-nonunit,def:sdiv,def:localdiv}
   If $(X, M)$ is faithful, $M = \langle N \cup \{c\}\rangle$ with
   $N \le M$ a submonoid and $c$ not a unit, then

@@ -47,9 +47,9 @@ semigroups. This chapter derives it from the monoid form
 \end{lemma}
 \begin{proof}
   The image of $S$ in $S^1$ is a subsemigroup (a product of two
-  non-identity elements is again one), and the inverse of the
-  injection $S \hookrightarrow S^1$ is a surjective homomorphism onto
-  $S$.
+  elements of the copy of $S$ inside $S^1$ is again one), and the
+  inverse of the injection $S \hookrightarrow S^1$ is a surjective
+  homomorphism onto $S$.
 \end{proof}
 
 \begin{lemma}[Factor transport]\label{lem:semdiv-group-withone}
@@ -61,7 +61,8 @@ semigroups. This chapter derives it from the monoid form
 \begin{proof}
   Let $N \le S^1$ be a submonoid with a surjection $\psi : N \to G$,
   and let $T := \{\, x \in S \mid x \in N \,\}$, a subsemigroup of $S$
-  (again because products of non-identity elements are non-identity).
+  (a product of two elements of the copy of $S$ inside $S^1$ is again
+  one).
   For $g \neq 1$ choose $n \in N$ with $\psi(n) = g$; then $n \neq 1$,
   since $\psi(1) = 1 \neq g$, so $n$ lies in $T$. Thus $\psi(T)$
   contains every $g \neq 1$. Nontriviality now supplies the identity
@@ -76,6 +77,14 @@ semigroups. This chapter derives it from the monoid form
   not divide $S$ --- $S$ may be empty. In our application the factors
   are simple groups, which are nontrivial by definition, so the
   hypothesis is free.
+\end{remark}
+
+\begin{remark}[No nonemptiness hypothesis]\label{rem:semigroup-empty}
+  Theorem~\ref{thm:krohnrhodes} must assume a nonempty state set, but
+  Theorem~\ref{thm:krohnrhodes-semigroup} needs no such hypothesis:
+  $S^1$ is nonempty even when $S$ is not, and for $S = \emptyset$ the
+  factor condition is vacuous, since no nontrivial group divides the
+  trivial monoid $\emptyset^1$.
 \end{remark}
 
 \begin{theorem}[Krohn--Rhodes, semigroup form]\label{thm:krohnrhodes-semigroup}
