@@ -132,9 +132,11 @@ semigroups. This chapter derives it from the monoid form
   its ambient semigroup.
 \end{lemma}
 \begin{proof}
-  Reflexivity uses the top subsemigroup. For transitivity, pull the
-  subsemigroup witnessing $T \prec_s U$ back along the second
-  homomorphism and push it into $U$, exactly as in the monoid case
+  Reflexivity uses the top subsemigroup, and a subsemigroup $A \le T$
+  divides $T$ via $A$ itself and the identity homomorphism. For
+  transitivity, pull the subsemigroup witnessing $S \prec_s T$ back
+  along the second homomorphism and push it into $U$, exactly as in the
+  monoid case
   (Lemma~\ref{lem:mdiv-preorder}). One step Mathlib supplies for
   monoids but not for semigroups --- surjectivity of the comap
   homomorphism --- is proved inline.
@@ -271,7 +273,26 @@ In `krohnrhodes.tex`, that lemma's proof currently opens with the `groupOfIsUnit
 
 adjusting the following sentence so it continues grammatically into the `lem:reset-div-flipflops` / `lem:group-series` citations (keep both citations and the existing `\uses` list unchanged).
 
-- [ ] **Step 5: Verify and commit**
+- [ ] **Step 5: Polish `semigroup.tex` (from Task 2's math-gate review)**
+
+  1. The phrase "non-identity element" is imprecise at exactly the two places where closure under multiplication is argued (`lem:withone-transfer`'s proof and `lem:semdiv-group-withone`'s proof): if `S` already has an identity `e`, then `e`'s image is a "non-identity element" of `S¹` under the literal reading. In both proofs replace the parenthetical
+     `(a product of two non-identity elements is again one)` / `(again because products of non-identity elements are non-identity)`
+     with `(a product of two elements of the copy of $S$ inside $S^1$ is again one)`.
+  2. After `rem:semdiv-nontrivial`, add a second remark recording that the semigroup form — unlike `thm:krohnrhodes` — needs no nonemptiness hypothesis:
+
+```latex
+\begin{remark}[No nonemptiness hypothesis]\label{rem:semigroup-empty}
+  Theorem~\ref{thm:krohnrhodes} must assume a nonempty state set, but
+  Theorem~\ref{thm:krohnrhodes-semigroup} needs no such hypothesis:
+  $S^1$ is nonempty even when $S$ is not, and for $S = \emptyset$ the
+  factor condition is vacuous, since no nontrivial group divides the
+  trivial monoid $\emptyset^1$.
+\end{remark}
+```
+
+  3. NOT changed, deliberately: `def:semdiv`'s `\uses{def:mdiv}` (an expository edge to a `\leanok`'d node — a reader expects the comparison, and a spurious edge here is harmless), the unused finiteness hypothesis on `G` in `lem:semdiv-group-withone` (kept for uniformity with the application), and the `\prec_s`/`\prec` symbol proximity (the labels already dodge the clash; renaming is post-v1).
+
+- [ ] **Step 6: Verify and commit**
 
 Re-run the Task 2 Step 2 cross-check over all chapters (`chapters/*.tex` instead of just `semigroup.tex`); expect no MISSING. Then:
 
