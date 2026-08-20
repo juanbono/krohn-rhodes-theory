@@ -70,7 +70,19 @@ jobs:
           echo "graph nodes: $nodes, filled: $filled"
           test "$nodes" -gt 0
           test "$nodes" -eq "$filled"
-          ! grep -oE 'fillcolor="#[0-9A-Fa-f]{6}"' "$DOT" | grep -qvE '"#(B0ECA3|1CAC78)"'
+          # Materialize the offending fills rather than testing a pipeline's
+          # exit status. The previous form was
+          #   ! grep -oE '...' "$DOT" | grep -qvE '"#(B0ECA3|1CAC78)"'
+          # which INVERTS under `set -o pipefail`: when a bad fill exists,
+          # `grep -q` exits on the first match, the upstream `grep -oE` dies
+          # of SIGPIPE (141) if it is still writing, pipefail promotes 141 to
+          # the pipeline status, and the leading `!` turns that into success.
+          # Harmless while the match stream fits in the pipe buffer (~64 KB),
+          # so it passed at 64 nodes — but it silently disables this gate once
+          # the blueprint grows past a few thousand nodes.
+          bad=$(grep -oE 'fillcolor="#[0-9A-Fa-f]{6}"' "$DOT" \
+            | grep -vE '"#(B0ECA3|1CAC78)"' || true)
+          test -z "$bad"
       - name: Check blueprint declarations exist
         run: leanblueprint checkdecls
       - name: Upload blueprint web
