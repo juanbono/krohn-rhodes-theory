@@ -155,8 +155,12 @@ design document §2 and §9:
 
 [`elan`](https://github.com/leanprover/elan) is the only prerequisite for the
 Lean side; it reads [`lean-toolchain`](lean-toolchain) and installs the right
-compiler automatically (currently `leanprover/lean4:v4.34.0-rc1`). Mathlib and
-the other dependencies are pinned in [`lake-manifest.json`](lake-manifest.json).
+compiler automatically (currently `leanprover/lean4:v4.33.0`). Mathlib is pinned
+to the `v4.33.0` release in [`lakefile.toml`](lakefile.toml), and every
+dependency's exact revision is locked in
+[`lake-manifest.json`](lake-manifest.json), so the build is reproducible.
+Bump `lakefile.toml` and `lean-toolchain` together — a Mathlib release requires
+its matching toolchain.
 
 ### The proof
 

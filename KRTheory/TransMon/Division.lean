@@ -216,7 +216,7 @@ noncomputable def Covering.extMap {S T : TransMon} (c : Covering S T) :
 submonoid — the defining case of the totalization. -/
 theorem Covering.extMap_of_mem {S T : TransMon} (c : Covering S T)
     {t : T.M} (h : t ∈ c.toSubmonoid) :
-    c.extMap t = c.monoidMap ⟨t, h⟩ := dite_eq_left h
+    c.extMap t = c.monoidMap ⟨t, h⟩ := dif_pos h
 
 /-- `extMap` recovers `c.monoidMap` exactly on (the coercion of) the
 covering submonoid. -/

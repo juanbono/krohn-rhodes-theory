@@ -1,10 +1,14 @@
 name = "krtheory"
 defaultTargets = ["KRTheory"]
 
+# Pinned to a Mathlib release rather than `master`: `lake-manifest.json`
+# fixes the concrete revision, but a floating `rev = "master"` means any
+# `lake update` jumps to whatever master happens to be — generally not
+# matching `lean-toolchain`. Bump this and `lean-toolchain` together.
 [[require]]
 name = "mathlib"
 git = "https://github.com/leanprover-community/mathlib4.git"
-rev = "master"
+rev = "v4.33.0"
 
 [[require]]
 name = "checkdecls"

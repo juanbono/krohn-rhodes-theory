@@ -528,7 +528,7 @@ private theorem decompMap_covers (hT : T.Faithful) (hc : ¬ IsUnit c) {w}
   have heq : decompMap T N c w = h.choose := by
     show (if h' : ∃ s, CoversAt T N c w s ∧
         ((∃ m, s = .of m) ↔ (∃ q, w.left (.inr 1) = .of q)) then h'.choose else 1) = h.choose
-    exact dite_eq_left h
+    exact dif_pos h
   rw [heq]
   exact h.choose_spec
 
