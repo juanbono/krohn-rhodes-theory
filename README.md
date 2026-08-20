@@ -441,3 +441,12 @@ for each. These correspond to the future-work ledger in the design document §9.
   made during implementation are recorded inline with dates.
 - [Implementation plans](docs/superpowers/plans/) — covering milestones 0 through 9.
 - [Blueprint](blueprint/) — the informal mathematics, chapter by chapter.
+
+---
+
+## License
+
+Apache License 2.0 — see [`LICENSE`](LICENSE). This matches Mathlib's own
+license, so the infrastructure earmarked for upstreaming (the finite-monoid
+lemmas, the monoid-level wreath product) can be contributed without a licensing
+obstacle.
