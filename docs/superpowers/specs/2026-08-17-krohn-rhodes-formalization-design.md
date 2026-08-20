@@ -18,7 +18,7 @@ The project deliberately serves a second purpose: **learning finite semigroup th
 2. `krohnRhodes_monoid` — abstract finite-monoid corollary.
 3. `krohnRhodes_semigroup` — classical 1965 finite-semigroup statement.
 4. `#print axioms` on all three shows at most `Classical.choice`, `propext`, `Quot.sound`.
-5. CI builds the project and the blueprint; blueprint dependency graph fully green.
+5. CI builds the project and the blueprint — including the `leanblueprint` web build — and the dependency graph is fully green. (Publishing that site to GitHub Pages is deliberately out of v1 scope: it is a publication decision, not a correctness one.)
 
 ## 2. Non-goals (v1)
 
@@ -48,7 +48,7 @@ T is **faithful** if `(∀ x, x·m = x·n) → m = n`. Faithfulness is a predica
 - **Strong division of transformation monoids** `(X,M) ≺ (Y,N)` ([DKS] §2.3): there exist a submonoid N′ ≤ N, a **surjective function** φ : Y ↠ X, and a surjective monoid hom ψ : N′ ↠ M with equivariance `φ(y) · ψ(n) = φ(y·n)` for all y ∈ Y, n ∈ N′.
 - **Glue lemma**: `(X,M) ≺ (Y,N) → M ≺ₘ N` (read ψ off the definition). This is how all abstract corollaries are extracted.
 - Strong division is a preorder. Transitivity composes the φ's and pulls back submonoids along the ψ's.
-- **Semigroup division** `S ≺ₛ T` (only in `SemigroupVersion.lean`): subsemigroup + surjective semigroup hom. Feeder: `M ≺ₘ N → M ≺ₛ N`.
+- **Semigroup division** `S ≺ₛ T` (only in `SemigroupVersion.lean`): subsemigroup + surjective semigroup hom. Feeder: `M ≺ₘ N → M ≺ₛ N`. (2026-08-19: transitivity must prove `MulHom`-level comap surjectivity inline — Mathlib has `submonoidComap_surjective_of_surjective` but no `Subsemigroup` analogue; upstreaming candidate, §9.)
 
 ### 3.3 Wreath product
 
@@ -199,7 +199,7 @@ theorem krohnRhodes_semigroup (S : Type) [Semigroup S] [Finite S] :
 
 **Note (2026-08-18, from the M6 final review):** `[Nonempty T.X]` is necessary — the empty-state faithful transformation monoid divides no `wreathList` of KRPrime factors (their state spaces are all nonempty); `krohnRhodes_monoid` is unaffected (regular states contain 1).
 
-(The factor condition is the same in all three; in the semigroup form the group divisors are semigroup divisors of S — the exact phrasing of that last conjunct is settled at milestone 9, since `G ≺ₛ S` vs `G ≺ₘ WithOne S` are interderivable there.)
+(The factor condition is the same in all three. **Resolved 2026-08-19 (M9):** the strong phrasing `G ≺ₛ S` is what we prove — the signature above stands unweakened. From `G ≺ₘ S¹` the `S`-elements of the covering submonoid form a subsemigroup that covers every `g ≠ 1`, and `1 = h · h⁻¹` for any `h ≠ 1`; nontriviality of the factor is load-bearing and comes free from `IsSimpleGroup`.)
 
 Here `KRPrime` is a small inductive — `flipflop | grp (G : BundledFinGroup)` — with `toTransMon` sending `flipflop` to the canonical flip-flop and `grp G` to `regular G`. Making the list contain *canonical objects* (rather than "some F isomorphic to a flip-flop") keeps the statement tight without needing a TransMon-isomorphism API in v1. `T ≺ T̄` (3.4) removes the bar from the final statements.
 
@@ -252,7 +252,7 @@ structure TransMon : Type 1 where
 | `GroupCase.lean` | `BundledFinGroup`, `exists_maximal_normal_subgroup`, `isSimpleGroup_quotient`, `subgroup_monoidDivides`, `quotient_monoidDivides`, `card_subgroup_lt_of_ne_top`, `regular_div_trivialTM_of_subsingleton`, `kaloujnine_krasner_div`, `transfGroup_div_wreath_simples`, `group_bar_div` (2.11) |
 | `Decomposition.lean` | `rightFactor` + faithfulness, `nonempty_of_not_isUnit`, `barMonoid_closure`, `decompState`, `coverN`/`coverC`/`coverReset` (+ `cnc`), `CoversAt` kit, `decompSub`, `decompMap`, `coversAt_unique`, `decomposition` ([DKS] Thm 3.1) |
 | `KrohnRhodes.lean` | `KRPrime` (consuming `GroupCase.BundledFinGroup`), `KRPrime.toTransMon` (+ simp equation lemmas), `krohnRhodes_bar_of_units` (group branch), `krohnRhodes_bar` (the induction), `krohnRhodes`, `krohnRhodes_monoid` |
-| `SemigroupVersion.lean` | `SemigroupDivides` (`≺ₛ`), `monoidDivides.semigroupDivides`, `withOne` transfer, `krohnRhodes_semigroup` |
+| `SemigroupVersion.lean` | `SemigroupDivides` (`≺ₛ`) + `refl`/`of_subsemigroup`/`trans`, `monoidDivides_semigroupDivides` (feeder), `withOne_transfer`, `semigroupDivides_of_monoidDivides_withOne` (factor transport), `krohnRhodes_semigroup` |
 
 ## 5. Project layout
 
@@ -318,7 +318,7 @@ Milestones 4, 5, 6 are mutually independent and may be reordered. Estimated tota
 - **Holonomy decomposition** (Eilenberg/Zeiger); computational flavor à la SgpDec.
 - **Size bounds**: [DKS] Cor. 4.3.
 - **Green's relations** as standalone Mathlib-grade infrastructure.
-- **Upstreaming plan**: `FiniteMonoid.lean` lemmas and a monoid-level wreath product are natural first Mathlib PRs; `TransMon` itself could follow Mathlib's automata section conventions.
+- **Upstreaming plan**: `FiniteMonoid.lean` lemmas and a monoid-level wreath product are natural first Mathlib PRs; `TransMon` itself could follow Mathlib's automata section conventions. Also: a `MulHom`/`Subsemigroup` analogue of `submonoidComap_surjective_of_surjective`, which M9 had to prove inline.
 - **Paper**: an ITP/CPP experience report if v1 completes (apparently first-ever formalization).
 
 ## 10. References

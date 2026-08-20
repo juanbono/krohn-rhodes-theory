@@ -286,213 +286,8 @@ def decompInv (w : ((localDivisor T c).bar ≀ (rightFactor T N).bar).M) : Prop 
     ((∃ m, s = .of m) ↔ (∃ q, w.left (.inr 1) = .of q))) ∧
   ShapeOK T N c w
 
-theorem decompInv_of_mem (_hT : T.Faithful) (_hc : ¬ IsUnit c)
-    {w} (hw : w ∈ decompSub T N c) : decompInv T N c w := by
-  induction hw using Submonoid.closure_induction with
-  | mem b hb =>
-    simp only [decompGens, Set.mem_union, Set.mem_range, Set.mem_singleton_iff] at hb
-    rcases hb with (⟨n, rfl⟩ | rfl) | ⟨x, rfl⟩
-    · -- coverN n
-      refine ⟨⟨.of ↑n, coversAt_coverN T N c n, ?_⟩, ?_⟩
-      · refine ⟨fun _ => ⟨1, rfl⟩, fun _ => ⟨(↑n : T.M), rfl⟩⟩
-      · refine Or.inl ⟨fun n' => ⟨1, rfl⟩, fun x hx => ?_⟩
-        have hx' : (BarMonoid.of n : BarMonoid (rightFactor T N)) =
-            BarMonoid.reset (Sum.inl x) := hx
-        exact absurd hx' (by simp)
-    · -- coverC
-      refine ⟨⟨.of c, coversAt_coverC T N c, ?_⟩, ?_⟩
-      · refine ⟨fun _ => ⟨cnc T c ↑(1 : ↥N), rfl⟩, fun _ => ⟨c, rfl⟩⟩
-      · refine Or.inl ⟨fun n' => ⟨cnc T c ↑n', rfl⟩, fun x hx => ?_⟩
-        have hx' : (@BarMonoid.reset (rightFactor T N) (Sum.inr 1) :
-            BarMonoid (rightFactor T N)) = BarMonoid.reset (Sum.inl x) := hx
-        injection hx' with hx''
-        injection hx''
-    · -- coverReset x
-      refine ⟨⟨.reset x, coversAt_coverReset T N c x, ?_⟩, ?_⟩
-      · constructor
-        · rintro ⟨m, hm⟩
-          exact absurd hm (by simp)
-        · rintro ⟨q, hq⟩
-          have hq' : (BarMonoid.reset ⟨T.act x c, x, rfl⟩ : BarMonoid (localDivisor T c)) =
-              BarMonoid.of q := hq
-          exact absurd hq' (by simp)
-      · exact Or.inr (fun y => ⟨⟨T.act x c, x, rfl⟩, rfl⟩)
-  | one =>
-    refine ⟨⟨1, coversAt_one T N c, ?_⟩, ?_⟩
-    · exact ⟨fun _ => ⟨1, rfl⟩, fun _ => ⟨1, rfl⟩⟩
-    · refine Or.inl ⟨fun n => ⟨1, rfl⟩, fun x hx => ?_⟩
-      have hx' : (1 : BarMonoid (rightFactor T N)) = BarMonoid.reset (Sum.inl x) := hx
-      exact absurd hx' (by simp)
-  | mul w w' hmemw hmemw' ihw ihw' =>
-    obtain ⟨⟨s, hs, htag⟩, hshape⟩ := ihw
-    obtain ⟨⟨s', hs', htag'⟩, hshape'⟩ := ihw'
-    have hcov : CoversAt T N c (w * w') (s * s') := CoversAt.mul T N c hs hs'
-    rcases hshape' with ⟨hL1', hL2'⟩ | hFalse'
-    · rcases hshape with ⟨hL1, hL2⟩ | hFalse
-      · -- both tag-true: the heart of the argument
-        have hev : ∀ n : ↥N, ∃ n₁ : ↥N,
-            (rightFactor T N).bar.act (Sum.inr n : (rightFactor T N).bar.X) w.right =
-              Sum.inr n₁ := by
-          intro n
-          rcases hr : w.right with n₀ | y₀
-          · let hn₀ : ↥N := n₀
-            exact ⟨n * hn₀, rfl⟩
-          · rcases y₀ with x | n₀
-            · exact absurd hr (hL2 x)
-            · exact ⟨n₀, rfl⟩
-        have hfrontall : ∀ n : ↥N, ∃ q, (w * w').left (Sum.inr n) = .of q := by
-          intro n
-          obtain ⟨n₁, hn₁⟩ := hev n
-          obtain ⟨q, hq⟩ := hL1 n
-          obtain ⟨q', hq'⟩ := hL1' n₁
-          refine ⟨q * q', ?_⟩
-          show w.left (Sum.inr n) * w'.left
-              ((rightFactor T N).bar.act (Sum.inr n) w.right) = .of (q * q')
-          rw [hn₁, hq, hq']
-          rfl
-        have hbackprod : ∀ x : T.X, (w * w').right ≠ .reset (.inl x) := by
-          intro x hcontra
-          rw [wreath_mul_right] at hcontra
-          rcases hr : w.right with n₀ | y₀
-          · rcases hr' : w'.right with n₀' | y₀'
-            · rw [hr, hr'] at hcontra
-              have hcontra' : (BarMonoid.of n₀ * BarMonoid.of n₀' :
-                  BarMonoid (rightFactor T N)) = BarMonoid.reset (Sum.inl x) := hcontra
-              exact absurd hcontra' (by simp)
-            · rcases y₀' with x' | n₀'
-              · exact absurd hr' (hL2' x')
-              · rw [hr, hr'] at hcontra
-                -- of n₀ * reset (inr n₀') reduces (of_mul_reset) to reset (inr n₀')
-                have hcontra' : (@BarMonoid.reset (rightFactor T N) (Sum.inr n₀') :
-                    BarMonoid (rightFactor T N)) = BarMonoid.reset (Sum.inl x) := hcontra
-                injection hcontra' with hcontra''
-                injection hcontra''
-          · rcases y₀ with x₀ | n₀
-            · exact absurd hr (hL2 x₀)
-            · rcases hr' : w'.right with n₀' | y₀'
-              · rw [hr, hr'] at hcontra
-                -- reset (inr n₀) * of n₀' reduces (reset_mul_of + rightFactor_act_inr)
-                -- to reset (inr (n₀ * n₀'))
-                let hn₀' : ↥N := n₀'
-                have hcontra' : (@BarMonoid.reset (rightFactor T N) (Sum.inr (n₀ * hn₀')) :
-                    BarMonoid (rightFactor T N)) = BarMonoid.reset (Sum.inl x) := hcontra
-                injection hcontra' with hcontra''
-                injection hcontra''
-              · rcases y₀' with x' | n₀'
-                · exact absurd hr' (hL2' x')
-                · rw [hr, hr'] at hcontra
-                  -- reset (inr n₀) * reset (inr n₀') reduces (reset_mul_reset)
-                  -- to reset (inr n₀')
-                  have hcontra' : (@BarMonoid.reset (rightFactor T N) (Sum.inr n₀') :
-                      BarMonoid (rightFactor T N)) = BarMonoid.reset (Sum.inl x) := hcontra
-                  injection hcontra' with hcontra''
-                  injection hcontra''
-        have hshapeprod : ShapeOK T N c (w * w') := Or.inl ⟨hfrontall, hbackprod⟩
-        have htagprod : (∃ m, s * s' = .of m) ↔
-            (∃ q, (w * w').left (.inr 1) = .of q) := by
-          obtain ⟨q1, hq1⟩ := hfrontall 1
-          obtain ⟨m1, hm1⟩ := htag.mpr (hL1 1)
-          obtain ⟨m1', hm1'⟩ := htag'.mpr (hL1' 1)
-          refine ⟨fun _ => ⟨q1, hq1⟩, fun _ => ⟨m1 * m1', ?_⟩⟩
-          rw [hm1, hm1']
-          rfl
-        exact ⟨⟨s * s', hcov, htagprod⟩, hshapeprod⟩
-      · -- w tag-false, w' tag-true: the product is tag-false via w's reset front
-        have hsreset : ∃ x₀, s = .reset x₀ := by
-          obtain ⟨ξ₁, hξ₁⟩ := hFalse (Sum.inr 1)
-          have hnof : ¬ ∃ m, s = .of m := by
-            rw [htag]
-            rintro ⟨q, hq⟩
-            rw [hξ₁] at hq
-            exact absurd hq (by simp)
-          cases s with
-          | of m => exact absurd ⟨m, rfl⟩ hnof
-          | reset x₀ => exact ⟨x₀, rfl⟩
-        obtain ⟨x₀, hx₀⟩ := hsreset
-        have hfrontall : ∀ y, ∃ ξ, (w * w').left y = .reset ξ := by
-          intro y
-          obtain ⟨ξ, hξ⟩ := hFalse y
-          show ∃ ξ', w.left y * w'.left
-              ((rightFactor T N).bar.act y w.right) = .reset ξ'
-          rw [hξ]
-          rcases w'.left ((rightFactor T N).bar.act y w.right) with m | ξ₂
-          · exact ⟨(localDivisor T c).act ξ m, rfl⟩
-          · exact ⟨ξ₂, rfl⟩
-        have hshapeprod : ShapeOK T N c (w * w') := Or.inr hfrontall
-        obtain ⟨ξ, hξ⟩ := hfrontall (Sum.inr 1)
-        have htagprod : (∃ m, s * s' = .of m) ↔
-            (∃ q, (w * w').left (.inr 1) = .of q) := by
-          constructor
-          · rintro ⟨m, hm⟩
-            rw [hx₀] at hm
-            cases s' with
-            | of m' =>
-              have hm' : (BarMonoid.reset (T.act x₀ m') : T.bar.M) = BarMonoid.of m := hm
-              exact absurd hm' (by simp)
-            | reset x₀' =>
-              have hm' : (BarMonoid.reset x₀' : T.bar.M) = BarMonoid.of m := hm
-              exact absurd hm' (by simp)
-          · rintro ⟨q, hq⟩
-            rw [hξ] at hq
-            exact absurd hq (by simp)
-        exact ⟨⟨s * s', hcov, htagprod⟩, hshapeprod⟩
-    · -- w' tag-false: the product is tag-false regardless of w
-      have hs'reset : ∃ x₀', s' = .reset x₀' := by
-        obtain ⟨ξ₁, hξ₁⟩ := hFalse' (Sum.inr 1)
-        have hnof : ¬ ∃ m, s' = .of m := by
-          rw [htag']
-          rintro ⟨q, hq⟩
-          rw [hξ₁] at hq
-          exact absurd hq (by simp)
-        cases s' with
-        | of m' => exact absurd ⟨m', rfl⟩ hnof
-        | reset x₀' => exact ⟨x₀', rfl⟩
-      obtain ⟨x₀', hx₀'⟩ := hs'reset
-      have hfrontall : ∀ y, ∃ ξ, (w * w').left y = .reset ξ := by
-        intro y
-        obtain ⟨ξ, hξ⟩ := hFalse' ((rightFactor T N).bar.act y w.right)
-        refine ⟨ξ, ?_⟩
-        show w.left y * w'.left ((rightFactor T N).bar.act y w.right) = .reset ξ
-        rw [hξ]
-        cases w.left y <;> rfl
-      have hshapeprod : ShapeOK T N c (w * w') := Or.inr hfrontall
-      obtain ⟨ξ, hξ⟩ := hfrontall (Sum.inr 1)
-      have htagprod : (∃ m, s * s' = .of m) ↔
-          (∃ q, (w * w').left (.inr 1) = .of q) := by
-        constructor
-        · rintro ⟨m, hm⟩
-          rw [hx₀'] at hm
-          cases s with
-          | of m₀ =>
-            have hm' : (BarMonoid.reset x₀' : T.bar.M) = BarMonoid.of m := hm
-            exact absurd hm' (by simp)
-          | reset x₀₀ =>
-            have hm' : (BarMonoid.reset x₀' : T.bar.M) = BarMonoid.of m := hm
-            exact absurd hm' (by simp)
-        · rintro ⟨q, hq⟩
-          rw [hξ] at hq
-          exact absurd hq (by simp)
-      exact ⟨⟨s * s', hcov, htagprod⟩, hshapeprod⟩
-
-/-- `decompMap`'s defining property, unquarantined: `w` covers
-`decompMap T N c w`, whose tag matches `w`'s front-shape at `inr 1`.
-Every downstream proof cites this (or `decompMap_mul`/`decompMap_one`
-below), never `decompMap`'s `Classical.choose` directly. -/
-private theorem decompMap_covers (hT : T.Faithful) (hc : ¬ IsUnit c) {w}
-    (hw : w ∈ decompSub T N c) :
-    CoversAt T N c w (decompMap T N c w) ∧
-    ((∃ m, decompMap T N c w = .of m) ↔ (∃ q, w.left (.inr 1) = .of q)) := by
-  classical
-  have h := (decompInv_of_mem T N c hT hc hw).1
-  have heq : decompMap T N c w = h.choose := by
-    show (if h' : ∃ s, CoversAt T N c w s ∧
-        ((∃ m, s = .of m) ↔ (∃ q, w.left (.inr 1) = .of q)) then h'.choose else 1) = h.choose
-    exact dite_eq_left h
-  rw [heq]
-  exact h.choose_spec
-
-/-- The tag of a product, isolated from `decompInv_of_mem`'s mul case
-(item 2 there) so `decompMap_mul` can cite it without re-deriving the
+/-- The tag of a product, isolated so both `decompInv_of_mem`'s mul case
+and `decompMap_mul` can cite it without re-deriving the
 `ShapeOK` case split. Same three-branch structure: both tags true, only
 `w` true, or `w` false (which subsumes `w` false/`w'` anything by the
 reset-absorption laws). -/
@@ -592,6 +387,150 @@ private theorem tag_mul {w w' : ((localDivisor T c).bar ≀ (rightFactor T N).ba
     · rintro ⟨q, hq⟩
       rw [hξ'] at hq
       exact absurd hq (by simp)
+
+theorem decompInv_of_mem (_hT : T.Faithful) (_hc : ¬ IsUnit c)
+    {w} (hw : w ∈ decompSub T N c) : decompInv T N c w := by
+  induction hw using Submonoid.closure_induction with
+  | mem b hb =>
+    simp only [decompGens, Set.mem_union, Set.mem_range, Set.mem_singleton_iff] at hb
+    rcases hb with (⟨n, rfl⟩ | rfl) | ⟨x, rfl⟩
+    · -- coverN n
+      refine ⟨⟨.of ↑n, coversAt_coverN T N c n, ?_⟩, ?_⟩
+      · refine ⟨fun _ => ⟨1, rfl⟩, fun _ => ⟨(↑n : T.M), rfl⟩⟩
+      · refine Or.inl ⟨fun n' => ⟨1, rfl⟩, fun x hx => ?_⟩
+        have hx' : (BarMonoid.of n : BarMonoid (rightFactor T N)) =
+            BarMonoid.reset (Sum.inl x) := hx
+        exact absurd hx' (by simp)
+    · -- coverC
+      refine ⟨⟨.of c, coversAt_coverC T N c, ?_⟩, ?_⟩
+      · refine ⟨fun _ => ⟨cnc T c ↑(1 : ↥N), rfl⟩, fun _ => ⟨c, rfl⟩⟩
+      · refine Or.inl ⟨fun n' => ⟨cnc T c ↑n', rfl⟩, fun x hx => ?_⟩
+        have hx' : (@BarMonoid.reset (rightFactor T N) (Sum.inr 1) :
+            BarMonoid (rightFactor T N)) = BarMonoid.reset (Sum.inl x) := hx
+        injection hx' with hx''
+        injection hx''
+    · -- coverReset x
+      refine ⟨⟨.reset x, coversAt_coverReset T N c x, ?_⟩, ?_⟩
+      · constructor
+        · rintro ⟨m, hm⟩
+          exact absurd hm (by simp)
+        · rintro ⟨q, hq⟩
+          have hq' : (BarMonoid.reset ⟨T.act x c, x, rfl⟩ : BarMonoid (localDivisor T c)) =
+              BarMonoid.of q := hq
+          exact absurd hq' (by simp)
+      · exact Or.inr (fun y => ⟨⟨T.act x c, x, rfl⟩, rfl⟩)
+  | one =>
+    refine ⟨⟨1, coversAt_one T N c, ?_⟩, ?_⟩
+    · exact ⟨fun _ => ⟨1, rfl⟩, fun _ => ⟨1, rfl⟩⟩
+    · refine Or.inl ⟨fun n => ⟨1, rfl⟩, fun x hx => ?_⟩
+      have hx' : (1 : BarMonoid (rightFactor T N)) = BarMonoid.reset (Sum.inl x) := hx
+      exact absurd hx' (by simp)
+  | mul w w' hmemw hmemw' ihw ihw' =>
+    obtain ⟨⟨s, hs, htag⟩, hshape⟩ := ihw
+    obtain ⟨⟨s', hs', htag'⟩, hshape'⟩ := ihw'
+    have hcov : CoversAt T N c (w * w') (s * s') := CoversAt.mul T N c hs hs'
+    have htagprod := tag_mul T N c htag htag' hshape hshape'
+    rcases hshape' with ⟨hL1', hL2'⟩ | hFalse'
+    · rcases hshape with ⟨hL1, hL2⟩ | hFalse
+      · -- both tag-true: the heart of the argument
+        have hev : ∀ n : ↥N, ∃ n₁ : ↥N,
+            (rightFactor T N).bar.act (Sum.inr n : (rightFactor T N).bar.X) w.right =
+              Sum.inr n₁ := by
+          intro n
+          rcases hr : w.right with n₀ | y₀
+          · let hn₀ : ↥N := n₀
+            exact ⟨n * hn₀, rfl⟩
+          · rcases y₀ with x | n₀
+            · exact absurd hr (hL2 x)
+            · exact ⟨n₀, rfl⟩
+        have hfrontall : ∀ n : ↥N, ∃ q, (w * w').left (Sum.inr n) = .of q := by
+          intro n
+          obtain ⟨n₁, hn₁⟩ := hev n
+          obtain ⟨q, hq⟩ := hL1 n
+          obtain ⟨q', hq'⟩ := hL1' n₁
+          refine ⟨q * q', ?_⟩
+          show w.left (Sum.inr n) * w'.left
+              ((rightFactor T N).bar.act (Sum.inr n) w.right) = .of (q * q')
+          rw [hn₁, hq, hq']
+          rfl
+        have hbackprod : ∀ x : T.X, (w * w').right ≠ .reset (.inl x) := by
+          intro x hcontra
+          rw [wreath_mul_right] at hcontra
+          rcases hr : w.right with n₀ | y₀
+          · rcases hr' : w'.right with n₀' | y₀'
+            · rw [hr, hr'] at hcontra
+              have hcontra' : (BarMonoid.of n₀ * BarMonoid.of n₀' :
+                  BarMonoid (rightFactor T N)) = BarMonoid.reset (Sum.inl x) := hcontra
+              exact absurd hcontra' (by simp)
+            · rcases y₀' with x' | n₀'
+              · exact absurd hr' (hL2' x')
+              · rw [hr, hr'] at hcontra
+                -- of n₀ * reset (inr n₀') reduces (of_mul_reset) to reset (inr n₀')
+                have hcontra' : (@BarMonoid.reset (rightFactor T N) (Sum.inr n₀') :
+                    BarMonoid (rightFactor T N)) = BarMonoid.reset (Sum.inl x) := hcontra
+                injection hcontra' with hcontra''
+                injection hcontra''
+          · rcases y₀ with x₀ | n₀
+            · exact absurd hr (hL2 x₀)
+            · rcases hr' : w'.right with n₀' | y₀'
+              · rw [hr, hr'] at hcontra
+                -- reset (inr n₀) * of n₀' reduces (reset_mul_of + rightFactor_act_inr)
+                -- to reset (inr (n₀ * n₀'))
+                let hn₀' : ↥N := n₀'
+                have hcontra' : (@BarMonoid.reset (rightFactor T N) (Sum.inr (n₀ * hn₀')) :
+                    BarMonoid (rightFactor T N)) = BarMonoid.reset (Sum.inl x) := hcontra
+                injection hcontra' with hcontra''
+                injection hcontra''
+              · rcases y₀' with x' | n₀'
+                · exact absurd hr' (hL2' x')
+                · rw [hr, hr'] at hcontra
+                  -- reset (inr n₀) * reset (inr n₀') reduces (reset_mul_reset)
+                  -- to reset (inr n₀')
+                  have hcontra' : (@BarMonoid.reset (rightFactor T N) (Sum.inr n₀') :
+                      BarMonoid (rightFactor T N)) = BarMonoid.reset (Sum.inl x) := hcontra
+                  injection hcontra' with hcontra''
+                  injection hcontra''
+        have hshapeprod : ShapeOK T N c (w * w') := Or.inl ⟨hfrontall, hbackprod⟩
+        exact ⟨⟨s * s', hcov, htagprod⟩, hshapeprod⟩
+      · -- w tag-false, w' tag-true: the product is tag-false via w's reset front
+        have hfrontall : ∀ y, ∃ ξ, (w * w').left y = .reset ξ := by
+          intro y
+          obtain ⟨ξ, hξ⟩ := hFalse y
+          show ∃ ξ', w.left y * w'.left
+              ((rightFactor T N).bar.act y w.right) = .reset ξ'
+          rw [hξ]
+          rcases w'.left ((rightFactor T N).bar.act y w.right) with m | ξ₂
+          · exact ⟨(localDivisor T c).act ξ m, rfl⟩
+          · exact ⟨ξ₂, rfl⟩
+        have hshapeprod : ShapeOK T N c (w * w') := Or.inr hfrontall
+        exact ⟨⟨s * s', hcov, htagprod⟩, hshapeprod⟩
+    · -- w' tag-false: the product is tag-false regardless of w
+      have hfrontall : ∀ y, ∃ ξ, (w * w').left y = .reset ξ := by
+        intro y
+        obtain ⟨ξ, hξ⟩ := hFalse' ((rightFactor T N).bar.act y w.right)
+        refine ⟨ξ, ?_⟩
+        show w.left y * w'.left ((rightFactor T N).bar.act y w.right) = .reset ξ
+        rw [hξ]
+        cases w.left y <;> rfl
+      have hshapeprod : ShapeOK T N c (w * w') := Or.inr hfrontall
+      exact ⟨⟨s * s', hcov, htagprod⟩, hshapeprod⟩
+
+/-- `decompMap`'s defining property, unquarantined: `w` covers
+`decompMap T N c w`, whose tag matches `w`'s front-shape at `inr 1`.
+Every downstream proof cites this (or `decompMap_mul`/`decompMap_one`
+below), never `decompMap`'s `Classical.choose` directly. -/
+private theorem decompMap_covers (hT : T.Faithful) (hc : ¬ IsUnit c) {w}
+    (hw : w ∈ decompSub T N c) :
+    CoversAt T N c w (decompMap T N c w) ∧
+    ((∃ m, decompMap T N c w = .of m) ↔ (∃ q, w.left (.inr 1) = .of q)) := by
+  classical
+  have h := (decompInv_of_mem T N c hT hc hw).1
+  have heq : decompMap T N c w = h.choose := by
+    show (if h' : ∃ s, CoversAt T N c w s ∧
+        ((∃ m, s = .of m) ↔ (∃ q, w.left (.inr 1) = .of q)) then h'.choose else 1) = h.choose
+    exact dif_pos h
+  rw [heq]
+  exact h.choose_spec
 
 /-- `decompMap` is multiplicative on `decompSub`: both sides cover
 `w * w'` (`CoversAt.mul` vs. the direct cover of the product), and

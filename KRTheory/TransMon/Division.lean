@@ -61,6 +61,17 @@ theorem trans (h₁ : M ≺ₘ N) (h₂ : N ≺ₘ P) : M ≺ₘ P := by
     ψ.comp ((χ.submonoidComap N').comp e.symm.toMonoidHom),
     hψ.comp ((χ.submonoidComap_surjective_of_surjective N' hχ).comp e.symm.surjective)⟩
 
+/-- Division cannot increase size: `M` is a surjective image of a
+submonoid of `N`, so `|M| ≤ |N'| ≤ |N|`. The point of this lemma is
+NEGATIVE evidence — it is what lets `≺ₘ` be *refuted* on concrete
+examples, and hence what rules out `≺ₘ` having accidentally been defined
+as an always-true relation. See the sanity checks at the foot of this
+file. -/
+theorem card_le [Finite N] (h : M ≺ₘ N) : Nat.card M ≤ Nat.card N := by
+  obtain ⟨N', ψ, hψ⟩ := h
+  exact le_trans (Nat.card_le_card_of_surjective ψ hψ)
+    (Nat.card_le_card_of_injective _ Subtype.val_injective)
+
 end MonoidDivides
 
 -- Sanity checks (spec §6).
@@ -122,6 +133,21 @@ lemma through which every abstract corollary is extracted. -/
 theorem monoidDivides {S T : TransMon} (h : S ≺ T) : S.M ≺ₘ T.M := by
   obtain ⟨c⟩ := h
   exact ⟨c.toSubmonoid, c.monoidMap, c.monoidMap_surj⟩
+
+/-- Strong division cannot increase the monoid: read off the covering's
+`ψ` and count. Finiteness comes from `T`'s bundled `finiteM`, so there is
+no side condition. -/
+theorem card_le {S T : TransMon} (h : S ≺ T) :
+    Nat.card S.M ≤ Nat.card T.M :=
+  MonoidDivides.card_le h.monoidDivides
+
+/-- Strong division cannot increase the state set either: `φ` is a
+surjection `T.X ↠ S.X`. Together with `card_le` this is what makes `≺`
+refutable — see the sanity checks at the foot of this file. -/
+theorem card_X_le {S T : TransMon} (h : S ≺ T) :
+    Nat.card S.X ≤ Nat.card T.X := by
+  obtain ⟨c⟩ := h
+  exact Nat.card_le_card_of_surjective c.stateMap c.stateMap_surj
 
 end StrongDivides
 
@@ -190,7 +216,7 @@ noncomputable def Covering.extMap {S T : TransMon} (c : Covering S T) :
 submonoid — the defining case of the totalization. -/
 theorem Covering.extMap_of_mem {S T : TransMon} (c : Covering S T)
     {t : T.M} (h : t ∈ c.toSubmonoid) :
-    c.extMap t = c.monoidMap ⟨t, h⟩ := dite_eq_left h
+    c.extMap t = c.monoidMap ⟨t, h⟩ := dif_pos h
 
 /-- `extMap` recovers `c.monoidMap` exactly on (the coercion of) the
 covering submonoid. -/
@@ -240,6 +266,30 @@ example (h : trivialTM ≺ regular (ZMod 2)) :
     trivialTM.M ≺ₘ (regular (ZMod 2)).M := h.monoidDivides
 example {S T U : TransMon} (h₁ : S ≺ T) (h₂ : T ≺ U) : S ≺ U :=
   h₁.trans h₂
+
+-- NEGATIVE sanity checks (spec §6, negative direction). Every check
+-- above is affirmative — they would all still pass if a surjectivity
+-- field were dropped from `Covering`, which would make `≺` near-trivial
+-- and the Krohn–Rhodes statement nearly content-free. These two witness
+-- that `≺` and `≺ₘ` are genuinely refutable relations.
+example : ¬ (regular (ZMod 3) ≺ trivialTM) := by
+  intro h
+  have h3 : Nat.card (regular (ZMod 3)).M = 3 := by
+    show Nat.card (ZMod 3) = 3
+    rw [Nat.card_eq_fintype_card, ZMod.card]
+  have h1 : Nat.card trivialTM.M = 1 := by
+    show Nat.card PUnit = 1
+    exact Nat.card_unique
+  have hle := StrongDivides.card_le h
+  rw [h3, h1] at hle
+  omega
+
+example : ¬ (ZMod 3 ≺ₘ PUnit) := by
+  intro h
+  have hle := MonoidDivides.card_le h
+  rw [show Nat.card (ZMod 3) = 3 by rw [Nat.card_eq_fintype_card, ZMod.card],
+    show Nat.card PUnit = 1 from Nat.card_unique] at hle
+  omega
 
 end TransMon
 

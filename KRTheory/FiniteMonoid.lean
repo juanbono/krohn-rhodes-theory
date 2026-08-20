@@ -132,17 +132,9 @@ theorem exists_gen_nonunit (hM : ¬ ∀ m : M, IsUnit m) :
       (fun a ha => hall a ha) m
   obtain ⟨c, hcA, hc⟩ := hex
   refine ⟨Submonoid.closure ((A.erase c : Finset M) : Set M), c, hc, ?_, ?_⟩
-  · -- proper: c ∈ closure (A.erase c) would beat A's minimality
+  · -- proper: if A.erase c already generated, it would beat A's minimality
     intro htop
-    have hcmem : c ∈ Submonoid.closure ((A.erase c : Finset M) : Set M) :=
-      htop ▸ Submonoid.mem_top c
-    have hgen' : Submonoid.closure ((A.erase c : Finset M) : Set M) = ⊤ := by
-      rw [eq_top_iff, ← hAgen]
-      refine Submonoid.closure_le.mpr fun a ha => ?_
-      by_cases hac : a = c
-      · exact hac ▸ hcmem
-      · exact Submonoid.subset_closure (Finset.mem_erase.mpr ⟨hac, ha⟩)
-    have h1 := hmin' (A.erase c) hgen'
+    have h1 := hmin' (A.erase c) htop
     have h2 : (A.erase c).card < A.card := Finset.card_erase_lt_of_mem hcA
     omega
   · -- ↑N ∪ {c} recovers A, which generates

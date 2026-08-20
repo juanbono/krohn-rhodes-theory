@@ -5,6 +5,10 @@ theorem, [DKS] Theorem~4.1 --- from the decomposition theorem
 (Chapter~\ref{ch:decomposition}) and the group case
 (Chapter~\ref{ch:groupcase}).
 
+Throughout this chapter, $\wr L$ abbreviates the iterated wreath product
+$\mathrm{wreathList}$ (Definition~\ref{def:wreathList}) of the
+transformation monoids of the primes in the list $L$.
+
 \begin{definition}[Krohn--Rhodes primes]\label{def:krprime}
   \lean{KRTheory.TransMon.KRPrime, KRTheory.TransMon.KRPrime.toTransMon}\leanok
   \uses{def:flipflop,def:bundledfingroup,def:regular}
@@ -25,15 +29,16 @@ theorem, [DKS] Theorem~4.1 --- from the decomposition theorem
   (Lemma~\ref{lem:group-bar} does not need it).
 \end{lemma}
 \begin{proof}
-  $M$ carries a group structure (each element is a unit; the inverse
-  is read off the unit witness --- Mathlib's \texttt{groupOfIsUnit},
-  which extends the ambient monoid structure in place).
+  \leanok
   Lemma~\ref{lem:group-bar} gives
-  $\bar{T} \prec U(X) \wr (M, M)$.
-  Lemma~\ref{lem:reset-div-flipflops} resolves $U(X)$ into flip-flops
-  (this is where $X \neq \emptyset$ enters);
-  Lemma~\ref{lem:group-series} resolves $(M, M)$ into simple-group
-  regulars dividing $M$. Glue with wreath monotonicity
+  $\bar{T} \prec U(X) \wr (M, M)$ directly from the hypothesis that
+  every element of $M$ is a unit. To resolve the right factor we need
+  $M$ as an actual group: its inverse is read off the unit witness
+  (Mathlib's \texttt{groupOfIsUnit}, which extends the ambient monoid
+  structure in place), and then Lemma~\ref{lem:reset-div-flipflops}
+  resolves $U(X)$ into flip-flops (this is where $X \neq \emptyset$
+  enters) and Lemma~\ref{lem:group-series} resolves $(M, M)$ into
+  simple-group regulars dividing $M$. Glue with wreath monotonicity
   (Lemma~\ref{lem:wreath-mono}), list concatenation
   (Lemma~\ref{lem:wreathList-append}), and transitivity.
 \end{proof}
@@ -47,6 +52,7 @@ theorem, [DKS] Theorem~4.1 --- from the decomposition theorem
   (This is the predicate $Q(T)$ of spec \S 3.9.)
 \end{theorem}
 \begin{proof}
+  \leanok
   Strong induction on $|M|$ (Remark~\ref{rem:kr-measure}). If every
   element of $M$ is a unit, Lemma~\ref{lem:kr-group-branch} closes
   the case directly. Otherwise the generator split
@@ -54,8 +60,8 @@ theorem, [DKS] Theorem~4.1 --- from the decomposition theorem
   and a non-unit $c$ with $\langle N \cup \{c\} \rangle = M$, and
   Theorem~\ref{thm:decomposition} gives
   \[
-    \bar{T} \;\prec\; \overline{(X{\cdot}c,\, M_c)} \,\wr\,
-      \overline{(X \sqcup N,\, N)} .
+    \bar{T} \;\prec\; \overline{(X_c,\, M_c)} \,\wr\,
+      \overline{(X \mathbin{\dot\cup} N,\, N)} .
   \]
   The left factor is faithful (Lemma~\ref{lem:localdiv-faithful}),
   has nonempty states (Lemma~\ref{lem:localdiv-nonempty}) and a
@@ -78,7 +84,7 @@ theorem, [DKS] Theorem~4.1 --- from the decomposition theorem
   into Lemma~\ref{lem:group-series} at milestone 6. Plain strong
   induction on $|M|$ therefore suffices; the second component is
   never exercised. The state set still grows on the right factor
-  ($X \sqcup N$), which is why no measure led by $|X|$ could work.
+  ($X \mathbin{\dot\cup} N$), which is why no measure led by $|X|$ could work.
 \end{remark}
 
 \begin{theorem}[Krohn--Rhodes, transformation form]\label{thm:krohnrhodes}
@@ -93,6 +99,7 @@ theorem, [DKS] Theorem~4.1 --- from the decomposition theorem
   nonempty).
 \end{theorem}
 \begin{proof}
+  \leanok
   $T \prec \bar{T}$ (Lemma~\ref{lem:bar-divides}), then
   Theorem~\ref{thm:kr-bar}, then transitivity.
 \end{proof}
@@ -105,6 +112,7 @@ theorem, [DKS] Theorem~4.1 --- from the decomposition theorem
   nontrivial finite simple groups dividing $M$.
 \end{theorem}
 \begin{proof}
+  \leanok
   Apply Theorem~\ref{thm:krohnrhodes} to the regular representation
   $(M, M)$ --- faithful by Lemma~\ref{lem:regular-faithful}, states
   nonempty since $1 \in M$ --- and extract the monoid division with

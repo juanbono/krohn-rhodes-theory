@@ -20,12 +20,12 @@ jobs:
           set -o pipefail
           lake env lean scripts/AxiomCertificate.lean | tee axioms.out
           test -s axioms.out
-          # 18 = current certificate entries (one line per `#print axioms`
+          # 22 = current certificate entries (one line per `#print axioms`
           # command, regardless of wording); update when the certificate
           # grows. NOTE: `grep -c 'depends on axioms'` undercounts here —
           # a zero-axiom theorem (`regular_faithful`) prints "does not
           # depend on any axioms" instead, so line count is used.
-          test "$(wc -l < axioms.out)" -eq 18
+          test "$(wc -l < axioms.out)" -eq 22
           python3 - <<'EOF'
           import re, sys
           allowed = {"propext", "Classical.choice", "Quot.sound"}
@@ -39,6 +39,57 @@ jobs:
                       bad = True
           sys.exit(1 if bad else 0)
           EOF
+      - name: Install blueprint toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            texlive-latex-base texlive-latex-extra graphviz libgraphviz-dev
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r blueprint/requirements.txt
+      - name: Build blueprint web version
+        run: |
+          set -o pipefail
+          leanblueprint web 2>&1 | tee web.log
+          # plasTeX reports missing inputs as warnings, not failures
+          ! grep -q "File not found" web.log
+      - name: Check dependency graph is fully green
+        run: |
+          set -o pipefail
+          # Definition-of-done #5 requires a fully green dependency graph.
+          # Every node must be filled with one of the two "done" shades:
+          # #B0ECA3 (definition, stated) or #1CAC78 (theorem/lemma, fully
+          # proved). A statement with `\lean{}` but no `\leanok` leaves its
+          # node unfilled (border goes can-state blue); a *proof* missing
+          # `\leanok` leaves the statement border green but drops its own
+          # fillcolor to can-prove blue (#A3D6FF) or proved-not-fully green
+          # (#9CEC8B) instead, so border color alone can't catch it and this
+          # checks fillcolor, requiring every node to have one.
+          DOT=blueprint/web/dep_graph_document.html
+          nodes=$(grep -oE 'shape=(box|ellipse)' "$DOT" | wc -l)
+          filled=$(grep -oE 'fillcolor="#[0-9A-Fa-f]{6}"' "$DOT" | wc -l)
+          echo "graph nodes: $nodes, filled: $filled"
+          test "$nodes" -gt 0
+          test "$nodes" -eq "$filled"
+          # Materialize the offending fills rather than testing a pipeline's
+          # exit status. The previous form was
+          #   ! grep -oE '...' "$DOT" | grep -qvE '"#(B0ECA3|1CAC78)"'
+          # which INVERTS under `set -o pipefail`: when a bad fill exists,
+          # `grep -q` exits on the first match, the upstream `grep -oE` dies
+          # of SIGPIPE (141) if it is still writing, pipefail promotes 141 to
+          # the pipeline status, and the leading `!` turns that into success.
+          # Harmless while the match stream fits in the pipe buffer (~64 KB),
+          # so it passed at 64 nodes — but it silently disables this gate once
+          # the blueprint grows past a few thousand nodes.
+          bad=$(grep -oE 'fillcolor="#[0-9A-Fa-f]{6}"' "$DOT" \
+            | grep -vE '"#(B0ECA3|1CAC78)"' || true)
+          test -z "$bad"
+      - name: Check blueprint declarations exist
+        run: leanblueprint checkdecls
+      - name: Upload blueprint web
+        uses: actions/upload-artifact@v4
+        with:
+          name: blueprint-web
+          path: blueprint/web
 
   blueprint:
     runs-on: ubuntu-latest

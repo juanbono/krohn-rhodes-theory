@@ -16,27 +16,37 @@ Remark~\ref{rem:bar-gap}).
 \begin{lemma}[Right factor faithfulness]\label{lem:right-factor-faithful}
   \lean{KRTheory.TransMon.rightFactor_faithful}\leanok
   \uses{def:right-factor,def:faithful}
-  $(X \mathbin{\dot\cup} N,\, N)$ is faithful: evaluate at the regular
-  point $1 \in N$.
+  $(X \mathbin{\dot\cup} N,\, N)$ is faithful.
 \end{lemma}
+\begin{proof}
+  \leanok
+  Evaluate at the regular point $1 \in N$.
+\end{proof}
 
 \begin{lemma}[Nonempty states]\label{lem:nonempty-of-nonunit}
   \lean{KRTheory.TransMon.nonempty_of_not_isUnit}\leanok
   \uses{def:faithful}
   A faithful transformation monoid whose monoid has a non-unit has a
-  nonempty state set: with no states, faithfulness makes every element
-  equal to $1$.
+  nonempty state set.
 \end{lemma}
+\begin{proof}
+  \leanok
+  With no states, faithfulness makes every element equal to $1$,
+  contradicting the existence of a non-unit.
+\end{proof}
 
 \begin{lemma}[Bar generation]\label{lem:bar-generated}
   \lean{KRTheory.TransMon.barMonoid_closure}\leanok
   \uses{def:bar}
   If $M = \langle s \rangle$ then
   $\bar M = \langle \{\,\mathrm{of}\ a \mid a \in s\,\} \cup
-  \{\,\mathrm{reset}\ x \mid x \in X\,\}\rangle$: `of` is a
-  homomorphism, so `of`-images of products decompose, and resets are
-  generators themselves.
+  \{\,\mathrm{reset}\ x \mid x \in X\,\}\rangle$.
 \end{lemma}
+\begin{proof}
+  \leanok
+  $\mathrm{of}$ is a homomorphism, so $\mathrm{of}$-images of products
+  decompose, and resets are generators themselves.
+\end{proof}
 
 \begin{remark}[The bar gap]\label{rem:bar-gap}
   \uses{def:bar}
@@ -92,28 +102,35 @@ Remark~\ref{rem:bar-gap}).
   \emph{ShapeOK}: either (tag true) the front of $w$ is
   $\mathrm{of}$-shaped at every $\mathrm{inr}$-state and the back of
   $w$ is not an $\mathrm{inl}$-reset, or (tag false) the front of $w$
-  is reset-shaped at every state. Generators: the $n$- and $c$-covers
-  are tag-true, the reset covers tag-false. Products: tags multiply
-  like the of/reset constructor classes of $\bar M$ (true·true = true,
-  anything·false = false, false·true = false), by the absorption laws
-  of resets and because tag-true backs keep evaluation states in the
-  $\mathrm{inr}$ summand.
+  is reset-shaped at every state.
 \end{lemma}
+\begin{proof}
+  \leanok
+  Generators: the $n$- and $c$-covers are tag-true, the reset covers
+  tag-false. Products: tags multiply like the of/reset constructor
+  classes of $\bar M$ (true·true = true, anything·false = false,
+  false·true = false), by the absorption laws of resets and because
+  tag-true backs keep evaluation states in the $\mathrm{inr}$ summand.
+\end{proof}
 
 \begin{lemma}[Tagged cover uniqueness]\label{lem:decomp-cover-unique}
   \lean{KRTheory.TransMon.coversAt_unique}\leanok
-  \uses{def:decomp-covers,def:faithful}
+  \uses{def:decomp-covers,def:faithful,lem:nonempty-of-nonunit}
   If $w$ covers $s$ and $s'$ over $\varphi$ and $s, s'$ have the same
-  constructor class, then $s = s'$: $\varphi$ is onto, so $s$ and $s'$
-  act equally on $X$; two equal-acting $\mathrm{of}$s coincide by
-  faithfulness of $(X,M)$, two equal-acting resets have equal targets
-  (states are nonempty by Lemma~\ref{lem:nonempty-of-nonunit}).
+  constructor class, then $s = s'$.
 \end{lemma}
+\begin{proof}
+  \leanok
+  $\varphi$ is onto, so $s$ and $s'$ act equally on $X$; two
+  equal-acting $\mathrm{of}$s coincide by faithfulness of $(X,M)$, two
+  equal-acting resets have equal targets (states are nonempty by
+  Lemma~\ref{lem:nonempty-of-nonunit}).
+\end{proof}
 
 \begin{theorem}[{[DKS] Theorem 3.1}]\label{thm:decomposition}
   \lean{KRTheory.TransMon.decomposition}\leanok
   \uses{def:decomp-covers,lem:decomp-tag,lem:decomp-cover-unique,
-        lem:bar-generated,lem:right-factor-faithful,
+        lem:bar-generated,
         lem:nonempty-of-nonunit,def:sdiv,def:localdiv}
   If $(X, M)$ is faithful, $M = \langle N \cup \{c\}\rangle$ with
   $N \le M$ a submonoid and $c$ not a unit, then
@@ -123,6 +140,7 @@ Remark~\ref{rem:bar-gap}).
   \]
 \end{theorem}
 \begin{proof}
+  \leanok
   The covering submonoid is the closure of the covers; the value map
   $\psi$ sends $w$ to the unique element covered by $w$ whose constructor class
   matches $w$'s tag (existence by induction over the closure — covers

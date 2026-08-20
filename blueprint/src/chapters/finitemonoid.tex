@@ -8,6 +8,7 @@
   Lemma~\ref{lem:localdiv-card} hinges on it.)
 \end{lemma}
 \begin{proof}
+  \leanok
   $x \mapsto bx$ is injective ($a$ retracts it: $a(bx) = (ab)x = x$),
   hence surjective by finiteness; a preimage $q$ of $1$ gives $bq = 1$,
   and $q = (ab)q = a(bq) = a$, so $ba = 1$.
@@ -19,6 +20,7 @@
   $n \ge 1$ and $a^n a^n = a^n$.
 \end{lemma}
 \begin{proof}
+  \leanok
   Pigeonhole on $n \mapsto a^n$ gives $i < j$ with $a^i = a^j$; put
   $p := j - i \ge 1$. Then $a^{i+t+p} = a^{i+p} a^t = a^i a^t =
   a^{i+t}$ for every $t$, hence by induction
@@ -34,6 +36,7 @@
   Lemma~\ref{lem:localdiv-card} hinges on it.)
 \end{lemma}
 \begin{proof}
+  \leanok
   Supplied by Mathlib.
 \end{proof}
 
@@ -43,6 +46,7 @@
   is a unit. (No finiteness needed.)
 \end{lemma}
 \begin{proof}
+  \leanok
   Induction over the submonoid closure: $1$ is a unit, and a product
   of units is a unit.
 \end{proof}
@@ -53,6 +57,7 @@
   A proper submonoid $N \lneq M$ of a finite monoid has $|N| < |M|$.
 \end{lemma}
 \begin{proof}
+  \leanok
   Properness produces a point outside the carrier and
   Lemma~\ref{lem:card-subtype-lt} counts. (The subgroup analogue in
   the group chapter went through the quotient's cardinality; this one
@@ -67,6 +72,7 @@
   $\langle N \cup \{c\} \rangle = M$.
 \end{lemma}
 \begin{proof}
+  \leanok
   Pick a generating set $A$ of minimal cardinality (one exists: $M$
   itself generates, and cardinalities are well-ordered). If every
   element of $A$ were a unit, Lemma~\ref{lem:units-generated} would
