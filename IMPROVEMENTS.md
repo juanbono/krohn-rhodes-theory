@@ -6,8 +6,9 @@
 **Build state at review:** `lake build` green (3,028 jobs), axiom certificate
 green (19/19).
 
-> **Status:** **P1 and P2 are DONE** — applied and verified; see the notes at
-> the head of each. P3–P9 remain open. Certificate is now 22/22.
+> **Status:** **P1–P4 are DONE** — applied and verified; see the notes at the
+> head of each. P5–P9 remain open. Certificate is now 22/22, and the project is
+> pinned to Mathlib `v4.33.0` on toolchain `leanprover/lean4:v4.33.0`.
 
 ---
 
@@ -235,7 +236,22 @@ test -z "$bad"
 
 *Credit: found by the `/code-review` pass; reproduced and confirmed here.*
 
-### P3 — Pin Mathlib to a release, not `master` *[proposed]*
+### P3 — Pin Mathlib to a release, not `master` — ✅ **DONE**
+
+> **Applied 2026-08-20.** Pinned to **`v4.33.0`**, the latest *stable* Mathlib
+> tag (`v4.34.0-rc1` exists but is a release candidate; there is no `v4.34.0`).
+> `lean-toolchain` moved to the matching `leanprover/lean4:v4.33.0` and
+> `lake-manifest.json` was regenerated (`mathlib` now `inputRev=v4.33.0`,
+> rev `db584cd6d46c`).
+>
+> This was a **downgrade** from the previous floating master pin (2026-08-17),
+> and it broke the build in exactly two places: `dite_eq_left` does not exist in
+> v4.33.0, so `Division.lean:219` and `Decomposition.lean:531` now use the
+> core lemma `dif_pos` instead. Nothing else required changing.
+>
+> Re-verified on v4.33.0: `lake build` green (3,025 jobs), every project file
+> elaborates with zero warnings, axiom certificate 22/22 with no disallowed
+> axioms, and all 68 blueprint `\lean{}` declarations resolve.
 
 `lakefile.toml` currently says:
 
@@ -255,7 +271,18 @@ For a repository whose value proposition is "this theorem is machine-checked",
 reproducibility is part of the claim. Pin to a released Mathlib tag compatible
 with the toolchain, and bump deliberately.
 
-### P4 — Add a `LICENSE` file *[proposed]*
+### P4 — Add a `LICENSE` file — ✅ **DONE**
+
+> **Applied 2026-08-20.** Apache License 2.0, canonical text (verified
+> byte-identical to Mathlib's own `LICENSE` except the appendix copyright line,
+> now `Copyright 2026 juanbono`). Matching Mathlib's license removes the
+> licensing obstacle to the P8 upstreaming plan. README gained a License
+> section pointing at it.
+>
+> Two follow-ups left open deliberately: the copyright line uses the git author
+> name rather than a legal name, and the Lean sources do not carry Mathlib-style
+> per-file `Copyright (c) … Released under Apache 2.0 …` headers, which
+> upstreaming would eventually want.
 
 There is no `LICENSE`, `COPYING`, or license header anywhere. With no license,
 default copyright applies and nobody may legally reuse the work — which
