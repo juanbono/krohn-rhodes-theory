@@ -107,6 +107,23 @@ any current state. -/
 [DKS §2.5] -/
 def flipFlop : TransMon := resetMonoid Bool
 
+/-- The flip-flop is genuinely NOT a group: `to true` has no inverse,
+since `to true * v` is `to true` or `to y` but never `id = 1`. This is
+the *non-group* half of the docstring claim above, and it is what makes
+the flip-flop an irreducible second prime rather than something the
+group branch could absorb. `∀ m, IsUnit m` is exactly the predicate the
+milestone-8 induction (`krohnRhodes_bar`) branches on, so this also
+witnesses that both branches are reachable. -/
+theorem flipFlop_not_group : ¬ (∀ m : Resets Bool, IsUnit m) := by
+  intro h
+  obtain ⟨u, hu⟩ := h (Resets.to true)
+  have h1 : (u : Resets Bool) * (↑u⁻¹ : Resets Bool) = 1 := u.mul_inv
+  rw [hu] at h1
+  generalize (↑u⁻¹ : Resets Bool) = v at h1
+  rcases v with _ | y
+  · simp [Resets.one_def] at h1
+  · simp [Resets.one_def] at h1
+
 /-!
 ### The one-point splitting
 

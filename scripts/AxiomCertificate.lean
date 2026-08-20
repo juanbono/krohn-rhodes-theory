@@ -25,3 +25,11 @@ Quot.sound} (spec §1 item 4). Extend this list as milestones land. -/
 #print axioms krohnRhodes
 #print axioms krohnRhodes_monoid
 #print axioms krohnRhodes_semigroup
+
+/-! Non-vacuity witnesses: these are what make the division relations
+refutable, and hence what rules out the main theorems being true-but-empty
+(see `IMPROVEMENTS.md` P1). -/
+
+#print axioms MonoidDivides.card_le
+#print axioms StrongDivides.card_le
+#print axioms flipFlop_not_group

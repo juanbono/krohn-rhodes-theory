@@ -172,5 +172,26 @@ example : ∃ L : List KRPrime,
   have : Nonempty (regular (ZMod 2)).X := ⟨(1 : ZMod 2)⟩
   exact krohnRhodes (regular (ZMod 2)) (regular_faithful _)
 
+-- NON-VACUITY of the existential (spec §6, negative direction). The
+-- theorem above asserts `∃ L, …`; on its own that would be cheap if
+-- `L = []` could ever work. It cannot: `wreathList [] = trivialTM`, a
+-- one-element monoid, so any `T` with `|T.M| > 1` forces a genuine
+-- factor list. This is what gives the main statement its content.
+example : ∀ L : List KRPrime,
+    regular (ZMod 3) ≺ wreathList (L.map KRPrime.toTransMon) → L ≠ [] := by
+  intro L h hL
+  rw [hL] at h
+  simp only [List.map_nil] at h
+  rw [show wreathList ([] : List TransMon) = trivialTM from rfl] at h
+  have h3 : Nat.card (regular (ZMod 3)).M = 3 := by
+    show Nat.card (ZMod 3) = 3
+    rw [Nat.card_eq_fintype_card, ZMod.card]
+  have h1 : Nat.card trivialTM.M = 1 := by
+    show Nat.card PUnit = 1
+    exact Nat.card_unique
+  have hle := StrongDivides.card_le h
+  rw [h3, h1] at hle
+  omega
+
 end TransMon
 end KRTheory
